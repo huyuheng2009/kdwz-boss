@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ProOrder">  
+
+	<resultMap type="ProOrder" id="ProOrder">
+		<id property="id" column="id" jdbcType="INTEGER"/> 
+		<result property="orderNo"  column="order_no" />
+		<result property="lgcOrderNo"  column="lgc_order_no" />
+		<result property="dealStatus"  column="deal_status" />
+		<result property="proReason"  column="pro_reason" />
+		<result property="descb"  column="descb" />
+		<result property="lastDesc"  column="last_desc"/>
+		<result property="comoperator"  column="comoperator"/>
+		<result property="checkName"  column="check_name"/>
+		<result property="createTime"  column="create_time" />
+		<result property="curSubstationNo"  column="cur_substation_no" />
+		
+	</resultMap>
+
+   <insert id="save" parameterType="ProOrder"  useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+    	insert into pro_order(order_no,lgc_order_no,deal_status,pro_reason,descb,check_name,create_time,cur_substation_no) values (
+    		#{orderNo},#{lgcOrderNo},#{dealStatus},#{proReason},#{descb},#{checkName},#{createTime},#{curSubstationNo})
+    </insert>
+
+    <select id="list" resultType="java.util.HashMap">  
+           select p.*,o.create_time otime,o.send_phone,o.month_settle_no,o.status s from pro_order p,order_info o  where 1=1 and p.order_no=o.order_no
+         <if test="orderNos != null and orderNos !=''"> and p.lgc_order_no in (${orderNos}) </if> 
+         <if test="orderNos == null or orderNos ==''"> 
+         <if test="createTimeBegin != null and createTimeBegin !=''"> and o.create_time&gt;=#{createTimeBegin}</if>
+         <if test="createTimeEnd != null and createTimeEnd !=''"> and o.create_time&lt;#{createTimeEnd}</if>
+         <if test="dealStatus != null and dealStatus !=''"> and p.deal_status =#{dealStatus} </if> 
+         <if test="proReason != null and proReason !=''"> and p.pro_reason =#{proReason} </if> 
+         <if test="sendPhone != null and sendPhone !=''"> and o.send_phone =#{sendPhone} </if> 
+         <if test="monthSettleNo != null and monthSettleNo !=''"> and o.month_settle_no =#{monthSettleNo} </if> 
+         <if test="curSubstationNo != null and curSubstationNo !=''"> and p.cur_substation_no =#{curSubstationNo} </if> 
+         <if test="checkName != null and checkName !=''"> and p.check_name like  CONCAT(CONCAT('%', #{checkName}),'%') </if> 
+          </if> 
+        
+         order by p.id desc
+    </select> 
+    
+    <select id="getByOrderNo" resultMap="ProOrder">  
+           select * from pro_order where order_no =#{orderNo} 
+    </select> 
+
+    <update id="update" parameterType="ProOrder">
+		update pro_order set pro_reason=#{proReason},descb=#{descb},deal_status=#{dealStatus},cur_substation_no=#{curSubstationNo},last_desc=#{lastDesc},comoperator=#{comoperator}
+		<where>
+			order_no=#{orderNo}
+		</where>
+	</update>
+
+</mapper>

@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ScanEx">
+
+	<select id="allCourierBySub" resultType="java.util.HashMap" >
+	select courier_no ,real_name,inner_no from courier 
+	</select>
+	<select id="allManager" resultType="java.util.HashMap" >
+	select * from boss_user where user_name != 'root'
+	</select>
+	<select id="allSubNo" resultType="java.util.HashMap" >
+	select substation_no,substation_name,inner_no from substation
+	</select>
+	<select id="allErrorReason" resultType="java.util.HashMap" >
+		select id,reason_no,context from pro_order_reason
+	</select>
+	<select id="allErrorProStatus" resultType="java.util.HashMap" >
+	select id,content from pro_deal_status
+	</select>
+	<select id="getTakeDetailList"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+	select o.take_order_time takeOrderTime ,o.lgc_order_no lgcOrderNo,
+o.sub_station_no  subSationNo ,s.substation_name substationName,
+o.take_courier_no takeCourierNo,c.real_name realName
+ from order_info o ,substation s ,courier c
+ where o.sub_station_no = s.substation_no and o.take_courier_no = c.courier_no	
+			<if test="subNo!=null and subNo!=''">
+				AND sub_station_no = #{subNo}
+			</if>
+			<if test="scanTime!=null and scanTime!=''">
+				AND o.take_order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=o.take_order_time
+			</if>
+			<if test="courierNo!=null and courierNo!=''">
+				AND take_courier_no= #{courierNo}
+			</if>	
+	</select>
+	<select id="getSendDetailList"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+ 
+select a.* ,c.real_name realName from  (select o.send_order_time takeOrderTime ,o.lgc_order_no lgcOrderNo,
+o.send_substation_no  subSationNo ,s.substation_name substationName,
+o.send_courier_no sendCourierNo from order_info o  left join substation s
+on o.send_substation_no = s.substation_no where  o.status = 3
+<if test="subNo!=null and subNo!=''">
+				AND send_substation_no = #{subNo}
+			</if>
+			<if test="scanTime!=null and scanTime!=''">
+			AND o.send_order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=o.send_order_time
+			</if>
+			<if test="courierNo!=null and courierNo!=''">
+				AND send_courier_no= #{courierNo}
+			</if>	
+ ) a left join
+ courier c on a.sendCourierNo =c.courier_no 		
+	</select>
+	<select id="getInCount"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			select ot.order_time orderTime ,oi.lgc_order_no lgcOrderNo,
+			ot.scan_ino scanIno, ot.scan_iname scanIname,ot.pre_no preNo,
+			s.substation_name substationName
+   	    	 from order_track ot ,order_info oi ,substation  s where 
+ 			ot.order_no= oi.order_no AND ot.pre_no = s.substation_no AND 	 ot.pre_type='S'		
+			<if test="subNo!=null and subNo!=''">
+				AND  ot.cur_no= #{subNo}
+			</if>
+			<if test="scanTime!=null and scanTime!=''">
+			AND ot.order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=ot.order_time
+			</if>
+			<if test="courierNo!=null and courierNo!=''">
+				AND ot.scan_ino = #{courierNo} 
+			</if>
+			<if test="substationNo!=null and substationNo!=''">
+				AND ot.pre_no= #{substationNo}
+			</if>	
+			group by oi.lgc_order_no
+	</select>
+	<select id="getOutCount"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select ot.order_time orderTime,
+		oi.lgc_order_no lgcOrderNo,ot.scan_ono scanono,
+		ot.scan_oname scanOname,ot.next_no nextNo,st.substation_name substationName
+		from order_track ot,substation st ,order_info oi
+		where ot.order_no  = oi.order_no AND ot.next_no = st.substation_no
+		and  ot.next_type='S'
+			<if test="subNo!=null and subNo!=''">
+				AND  ot.cur_no= #{subNo}
+			</if>
+			<if test="scanTime!=null and scanTime!=''">
+			AND ot.order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=ot.order_time
+			</if>
+			<if test="courierNo!=null and courierNo!=''">
+				AND ot.scan_ono = #{courierNo} 
+			</if>
+			<if test="substationNo!=null and substationNo!=''">
+				AND ot.next_no= #{substationNo}
+			</if>	
+			  group by oi.lgc_order_no
+	</select>
+	<select id="getErrorCount"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	select e.*,bu.real_name realName from(
+		select  a.lgc_order_no lgcOrderNo,
+		b.create_time createTime,b.check_name checkName,a.month_settle_no monthNo,
+		c.content ,d.context,b.descb
+		from order_info a,pro_order b,pro_deal_status c,pro_order_reason d
+		where a.order_no = b.order_no and b.deal_status = c.id and d.id = b.pro_reason
+		<if test="subNo!=null and subNo!=''">
+				AND     (a.sub_station_no= #{subNo}  OR a.send_substation_no= #{subNo})                 
+			</if>
+			<if test="scanTime!=null and scanTime!=''">
+			AND b.create_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=b.create_time
+			</if>
+			<if test="courierNo!=null and courierNo!=''">
+				AND b.check_name = #{courierNo} 
+			</if>
+			<if test="reasonNo!=null and reasonNo!=''">
+				AND d.context= #{reasonNo}
+			</if>				
+			<if test="statusNo!=null and statusNo!=''">
+				AND c.content= #{statusNo}
+			</if>				
+		 )
+		e left join boss_user bu on e.checkName = bu.user_name			
+	</select>
+	<select id="getComplateOrderCount"  resultType="java.util.HashMap" parameterType="java.util.HashMap"> 		
+    			select c.*,bu.real_name sinputorEx from 
+       ( select a.*,b.sinputor  from (select o.order_no orderNo, o.send_order_time sendOrderTime,
+		o.lgc_order_no lgcOrderNo,c.inner_no innerNo,c.real_name realName	
+	   from order_info o ,courier c		  
+		where  o.send_courier_no = c.courier_no
+		and o.status = 3      
+		<if test="subNo!=null and subNo!=''">
+			AND     o.send_substation_no= #{subNo}                
+			</if>
+            <if test="scanTime!=null and scanTime!=''">
+            AND o.send_order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=o.send_order_time
+			</if>
+			<if test="courierNo!=null and courierNo!=''">
+				AND o.send_courier_no = #{courierNo} 
+			</if>
+		 ) a left join sinput_info b on  a.orderNo= b.order_no) c left join boss_user bu on c.sinputor = bu.user_name 	
+	</select>
+	
+	<select id="noInhaveOutSend"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+	select b.*,	c.real_name realName from    
+	(select     
+	o.lgc_order_no lgcOrderNo,o.send_order_time sendOrderTime,
+	o.send_substation_no sendSubNo,o.send_courier_no  sendCourierNo				 
+	from order_info o where  o.send_courier_no is not null 
+		and o.send_substation_no =#{subNo} 
+		AND o.send_order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=o.send_order_time
+		<if test="courierNo!=null and courierNo!=''">
+			AND o.send_courier_no = #{courierNo} 
+		</if>
+		and o.order_no not in (
+		select ot.order_no orderNo from order_track ot where ot.pre_type = 'S'
+	and 	ot.cur_no =#{subNo}  
+		group by ot.order_no
+		) 
+		) b
+		left join courier c on b.sendCourierNo = c.courier_no 
+
+	</select>
+	<select id="getInAndOutCount"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+     		         select   
+			  b.*,st2.substation_name preSubstationName
+			  from
+			 ( select a.outTime,a.lgcOrderNo,a.scanIno,a.scanIname,a.scanOno,a.scanOname,
+			 nextNo ,st.substation_name substationName,a.preNo  from(
+			    select ot.id,ot.order_no orderNo,       ot.order_time outTime,oi.lgc_order_no lgcOrderNo,
+			  ot.scan_ino scanIno,ot.scan_iname scanIname,ot.scan_ono scanOno,
+			  ot.scan_oname scanOname,ot.next_no nextNo,ot.pre_no preNo 					  
+			   from order_track ot,order_info oi where ot.order_no = oi.order_no
+			   and ot.next_type='S' and ot.pre_type='S' 
+			  	<if test="subNo!=null and subNo!=''">
+			AND    ot.cur_no= #{subNo}                
+			</if>
+            <if test="scanTime!=null and scanTime!=''">
+            AND ot.order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=ot.order_time
+			</if>
+			<if test="inCourierNo!=null and inCourierNo!=''">
+				AND ot.scan_ino = #{inCourierNo} 
+			</if>
+			<if test="outCourierNo!=null and outCourierNo!=''">
+				AND ot.scan_ono = #{outCourierNo} 
+			</if>	 	   
+			   and ot.id in(
+	           select max(ot.id) id				  
+			   from order_track ot,order_info oi where ot.order_no = oi.order_no
+			   and ot.next_type='S' and ot.pre_type='S' 
+			   	<if test="subNo!=null and subNo!=''">
+			AND    ot.cur_no= #{subNo}                
+			</if>
+            <if test="scanTime!=null and scanTime!=''">
+				AND ot.order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=ot.order_time
+			</if>
+			<if test="inCourierNo!=null and inCourierNo!=''">
+				AND ot.scan_ino = #{inCourierNo} 
+			</if>
+			<if test="outCourierNo!=null and outCourierNo!=''">
+				AND ot.scan_ono = #{outCourierNo} 
+			</if> 			   					   
+				group by ot.order_no )		
+			   ) a left join substation st  on a.nextNo = st.substation_no) b left join 
+			   substation st2 on b.preNo = st2.substation_no 
+		
+	</select>
+	<select id="getInNotOutCount"  resultType="java.util.HashMap" parameterType="java.util.HashMap">
+     select oi.lgc_order_no lgcOrderNo,o.order_time inTime,
+  o.scan_ino scanIno,o.scan_iname  scanIname
+  from order_track o ,order_info oi
+ 	    where o.order_no = oi.order_no
+		and o.pre_type='S' and oi.status !=3  
+ 	    <if test="subNo!=null and subNo!=''">
+			AND     o.cur_no= #{subNo}                
+			</if>
+            <if test="scanTime!=null and scanTime!=''">
+				AND o.order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=o.order_time
+			</if>
+			<if test="inCourierNo!=null and inCourierNo!=''">
+				AND o.scan_ino = #{inCourierNo} 
+			</if>			
+     	AND	   	
+     	 o.order_no not in (
+        select  ot.order_no  from order_track ot 
+	  	where
+ 		ot.next_type='S' and ot.pre_type='S' 
+		<if test="subNo!=null and subNo!=''">
+			AND     ot.cur_no= #{subNo}                
+			</if>
+            <if test="scanTime!=null and scanTime!=''">
+				AND ot.order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=ot.order_time
+			</if>
+			<if test="inCourierNo!=null and inCourierNo!=''">
+				AND ot.scan_ino = #{inCourierNo} 
+			</if>		
+     	 )		
+			AND 
+			 o.order_no not in (
+   	 		 select  ot.order_no  from order_track ot 
+	 		 where
+    		ot.next_type='C' 
+    	<if test="subNo!=null and subNo!=''">
+			AND    ot.cur_no= #{subNo}                
+			</if>
+            <if test="scanTime!=null and scanTime!=''">
+				AND ot.order_time>=#{scanTime} and concat(#{scanTime},' 23:59:59')>=ot.order_time
+			</if>
+			<if test="inCourierNo!=null and inCourierNo!=''">
+				AND ot.scan_ino = #{inCourierNo} 
+			</if>			
+ 	) 		
+	</select>
+	<select id="getStatusNoContent" resultType="java.lang.String" parameterType="java.lang.String">
+	  select   content  from pro_deal_status where id = #{statusNo}
+	</select>
+	<select id="getReasonNoContent" resultType="java.lang.String" parameterType="java.lang.String">
+	  select   context from   pro_order_reason where reason_no = #{reasonNo}
+	</select>
+<select id="orderScan" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select o.order_time orderTime,oi.lgc_order_no lgcOrderNo,o.context,
+		o.order_status orderStatus,o.cur_no curNo,o.cur_type curType,
+		o.pre_no preNo,o.pre_type preType,o.next_no nextNo,o.next_type nextType,
+		o.scan_iname scanIname,o.scan_oname scanOname,o.opname opname
+ 		from order_track o,order_info oi
+		where o.order_no = oi.order_no AND order_status in( 'REV','SEND' ,'PRO','SIGNING','SIGNED','TAKEING' ) 
+	<if test="beginTime!=null and beginTime!=''">
+			AND  o.order_time >=#{beginTime} 
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			AND  concat(#{endTime},' 23:59:59')>= o.order_time            
+		</if>	
+		<if test="orderNo!=null and orderNo!=''">
+			AND    oi.lgc_order_no in ( ${orderNo} )                
+		</if>
+		<if test="curSubstationNo!=null and curSubstationNo!=''">
+			AND   o.cur_no  =   #{curSubstationNo}             
+		</if>	
+		<if test="status!=null  and status!=''">
+			AND   o.order_status  =   #{status}             
+		</if>
+		<if test="preSubstationNo!=null and preSubstationNo!=''">
+			AND   o.pre_no  =   #{preSubstationNo}             
+		</if>
+		<if test="nextSubstationNo!=null  and nextSubstationNo!=''">
+			AND   (o.next_no=#{nextSubstationNo} or  o.pre_no=#{nextSubstationNo})        
+		</if>
+		<if test="opname!=null  and opname!=''">
+			AND   o.opname  like  CONCAT(CONCAT('%', #{opname}),'%')        
+		</if>
+          order by o.id desc
+</select>
+<select id="getSubName" resultType="java.lang.String" parameterType="java.lang.String">
+		select substation_name from substation where substation_no=#{name}
+</select>
+<select id="getCourierName" resultType="java.lang.String" parameterType="java.lang.String">
+		select real_Name from courier where courier_no =#{name}
+</select>
+<select id="getEmail" parameterType="java.util.HashMap" resultType="java.lang.String">
+select o.month_settle_no  monthSettleNo from order_info o 
+where o.lgc_order_no in
+ (${lgcOrderNo})
+group by o.month_settle_no
+</select>
+<select id="getMonthDetail" parameterType="java.util.HashMap" resultType="java.util.Map">
+select (@rowNO := @rowNo+1) AS rowno,
+a.*
+from(select o.lgc_order_no lgcOrderNo,
+date_format(o.take_order_time,'%Y-%m-%d') takeOrderTime,
+o.item_weight itemWeight,
+IF(ISNULL(o.rev_area),'',o.rev_area) revArea,
+date_format(o.send_order_time,'%Y-%m-%d') sendOrderTime,
+o.sign_type signType,
+if(o.freight_type=1,o.freight+o.vpay,0) takeMoney,
+if(o.freight_type=2,o.freight+o.vpay,0) sendMoney,
+if(isnull(o.freight+o.vpay),0.00,o.freight+o.vpay) mpay,
+	c.real_name takeCourierName,
+	co.real_name  sendCourierName,
+	IF(ISNULL(o.month_note),'',o.month_note) monthNote,
+	IF(ISNULL(o.send_name),'',o.send_name) sendName,
+	o.take_plane take_plane,
+	o.send_plane send_plane 
+ from order_info o left join courier c  on o.take_courier_no = c.courier_no
+ left join courier co on o.send_courier_no = co.courier_no
+ 
+ where o.month_settle_no = #{monthNo}
+ and o.lgc_order_no IN (${lgcOrderNo})
+ 
+) a,(select @rowNO :=0) b  
+
+</select>
+<select id="getMonthInfo" parameterType="java.util.Map" resultType="java.util.Map">
+ select m.month_settle_no monthSettleNo,
+m.month_sname monthSname,
+m.contact_name contactName,
+m.contact_addr contactAddr,
+m.email,
+mt.discount  from month_settle_user m ,month_settle_type mt
+where m.mstype = mt.id and m.month_settle_no =#{monthNo}
+</select>
+<update id="updateEmailStatus" parameterType="java.lang.String">
+update order_info set is_email = '1' where lgc_order_no =#{value}
+</update>
+
+</mapper>
+ 

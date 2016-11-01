@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>广达通下单</title>
+<meta name="keywords" content="广达通下单" />
+<meta name="description" content="广达通下单" />
+<link rel="stylesheet" href="../css/main.css"/>
+</head>
+<body>
+<div class="header">
+  <div class="header_l"><img src="../images/logo.png" width="130" height="50"></div>
+  <div class="header_r">欢迎您来到广达通同城快递！<a href="#">登录</a></div>
+</div>
+<div class="header_nav">
+  <ul>
+    <li class="header_navli li_on"><a href="#">我要寄件<span></span></a></li>
+    <li class="header_navli"><a href="#">批量下单<span></span></a></li>
+    <li class="header_navli"><a href="#">订单历史<span></span></a></li>
+    <li class="header_navli"><a href="#">运单追踪<span></span></a></li>
+  </ul>
+</div>
+<div class="gdt">
+  <div class="cont_li">
+    <div class="cont_tit"> <img src="../images/xia_icon.png" width="40" height="36"> <strong>寄件人信息</strong> </div>
+    <div class="cont_cont">
+      <div class="input_li">
+        <div class="input_name"><b>*</b>姓名</div>
+        <div class="input_wri">
+        <span>请输入寄件人姓名</span>
+          <input type="text" placeholder="">
+          <!--<div class="ti_p">请输入寄件人姓名</div>-->
+        </div>
+        <a href="#" class="input_span">从地址簿中选择</a> </div>
+      <div class="input_li">
+        <div class="input_name"><b>*</b>手机号码</div>
+        <div class="input_wri">
+          <span>请输手机号</span>
+          <input type="text" placeholder="">
+        </div>
+      </div>
+      <div class="input_li">
+        <div class="input_name"><b>*</b>省市区</div>
+        <div class="input_wri pos">
+          <span>请选择省/市/区</span>
+          <input class="bg_arr" type="text" placeholder="">
+          <div class="down_addr"><!--下拉地区-->
+            <div class="addr_tit">
+              <ul>
+                <li><a href="#" class="addr_tit_li li_on">省份</a></li>
+                <li><a href="#" class="addr_tit_li">城市</a></li>
+                <li><a href="#" class="addr_tit_li">区县</a></li>
+              </ul>
+              <a href="#" class="off">×</a>
+            </div>
+            <div class="addr_cont">
+              <div class="addr_cli"><strong>A-G</strong>
+                <div class="addr_point">
+                  <button>安徽</button>
+                  <button>北京</button>
+                  <button>福建</button>
+                  <button>广东</button>
+                  <button>甘肃</button>
+                  <button>广西</button>
+                  <button>贵州</button>
+                </div>
+              </div>
+              <div class="addr_cli"><strong>H-K</strong>
+                <button>湖北</button>
+                <button>河北</button>
+                <button>黑龙江</button>
+                <button>海南</button>
+                <button>湖南</button>
+                <button>河南</button>
+                <button>吉林</button>
+                <button>江苏</button>
+                <button>江西</button>
+              </div>
+              <div class="addr_cli"><strong>L-S</strong>
+                <button>辽宁</button>
+                <button>内蒙古</button>
+                <button>宁夏</button>
+                <button>青海</button>
+                <button>四川</button>
+                <button>山东</button>
+                <button>上海</button>
+                <button>陕西</button>
+                <button>山西</button>
+              </div>
+              <div class="addr_cli"><strong>O-Z</strong>
+                <div class="addr_point">
+                  <button>天津</button>
+                  <button>新疆</button>
+                  <button>西藏</button>
+                  <button>云南</button>
+                  <button>浙江</button>
+                  <button>重庆</button>
+                  <button>天津</button>
+                  <button>新疆</button>
+                  <button>西藏</button>
+                  <button>云南</button>
+                  <button>浙江</button>
+                  <button>重庆</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="input_li">
+        <div class="input_name"><b>*</b>详细地址</div>
+        <div class="input_wri">
+          <input type="text" placeholder="请填写详细地址（精确到门牌号）">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cont_li">
+    <div class="cont_tit"> <img src="../images/shou_icon.png" width="40" height="36"> <strong>收件人信息</strong> </div>
+    <div class="cont_cont">
+      <div class="input_li">
+        <div class="input_name"><b>*</b>姓名</div>
+        <div class="input_wri">
+          <input type="text" placeholder="请输入寄件人姓名">
+        </div>
+        <a href="#" class="input_span">从地址簿中选择</a> </div>
+      <div class="input_li">
+        <div class="input_name"><b>*</b>手机号码</div>
+        <div class="input_wri">
+          <input type="text" placeholder="请输手机号">
+        </div>
+      </div>
+      <div class="input_li">
+        <div class="input_name"><b>*</b>省市区</div>
+        <div class="input_wri">
+          <select onblur="change(this);return false;">
+            <option value ="请选择省/市/区">请选择省/市/区</option>
+            <option value ="请选择省/市/区">请选择省/市/区</option>
+          </select>
+        </div>
+      </div>
+      <div class="input_li">
+        <div class="input_name"><b>*</b>详细地址</div>
+        <div class="input_wri">
+          <input type="text" placeholder="请填写详细地址（精确到门牌号）">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cont_li">
+    <div class="cont_tit"> <img src="../images/other_icon.png" width="40" height="36"> <strong>其他信息</strong> </div>
+    <div class="cont_cont">
+      <div class="input_li">
+        <div class="input_name">物品类别</div>
+        <div class="input_wri input_wri02">
+          <select>
+            <option value ="请选择物品类别">请选择物品类别</option>
+            <option value ="请选择物品类别">请选择物品类别</option>
+          </select>
+        </div>
+      </div>
+      <div class="input_li">
+        <div class="input_name">物品重量</div>
+        <div class="input_wri input_wri02">
+          <input type="text" placeholder="请输入物品重量">
+          
+        </div><div class="input_span02">（单位:kg）</div>
+      </div>
+      <div class="input_li">
+        <div class="input_name">付款人</div>
+        <div class="input_wri input_wri02">
+          <input type="text" placeholder="请输入付款人">
+        </div>
+      </div>
+      <div class="input_li">
+        <div class="input_name">付款方式</div>
+        <div class="input_wri input_wri02">
+          <select>
+            <option value ="请选择付款方式">请选择付款方式</option>
+            <option value ="请选择付款方式">请选择付款方式</option>
+          </select>
+        </div>
+      </div>
+      <!--<div class="input_li">
+        <div class="input_name">月结卡号</div>
+        <div class="input_wri input_wri02">
+          <input type="text" placeholder="请输入月结卡号">
+        </div>
+      </div>-->
+      <div class="input_li">
+        <div class="input_name">报价金额</div>
+        <div class="input_wri input_wri02 pos">
+          <input type="text" placeholder="">
+          <i>元</i>
+        </div>
+        <div class="input_span02">保价手续费5‰（保费15元）</div>
+      </div>
+      <div class="input_li">
+        <div class="input_name">备注</div>
+        <div class="input_wri input_wri03">
+          <input type="text" placeholder="请填写备注信息">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="reser">
+    <div class="re_check">
+      <input name="" type="checkbox" value="" id="checkboxInput">
+      <label  for="checkboxInput"></label>
+    </div>
+    <div class="input_name02">预约取件时间</div>
+    <div class="input_wri input_wri04">
+      <input class="bg_arr" type="text" placeholder="请选择时间">
+      <div class="down_addr down_addr02">
+      	<table class="time_table" cellpadding="0" cellspacing="0" border="0" width="100%">
+         <tr>
+           <th width="140">日期</th>
+           <th>时分</th>
+         </tr>
+         <tr>
+           <td><a class="time_day li_on">今天（10月20日）</a></td>
+           <td><a class="time_li li_on">10:00</a><a class="time_li">12:00</a><a class="time_li">14:00</a><a class="time_li">16:00</a><a class="time_li">18:00</a></td>
+         </tr>
+         <tr>
+           <td><a class="time_day">明天（10月20日）</a></td>
+           <td><a class="time_li">10:00</a><a class="time_li">12:00</a><a class="time_li">14:00</a><a class="time_li">16:00</a><a class="time_li">18:00</a><a class="time_li">10:00</a><a class="time_li">12:00</a><a class="time_li">14:00</a></td>
+         </tr>
+         <tr>
+           <td><a class="time_day">后天（10月20日）</a></td>
+           <td><a class="time_li">10:00</a><a class="time_li">12:00</a><a class="time_li">14:00</a><a class="time_li">16:00</a><a class="time_li">18:00</a></td>
+         </tr>         
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="cont_button">
+    <input class="button" type="submit" value="提交">
+  </div>
+</div>
+<div class="footer">
+  <div class="footer_cont">
+    <div class="footer_l">
+      <ul>
+        <li class="font_blue">QQ咨询：2815508942</li>
+        <li>服务时间：周一至周五9：00-18：00</li>
+        <li>客服热线：0755-27832300</li>
+        <li>©版权所有 深圳市广达通同城快递服务有限公司</li>
+      </ul>
+    </div>
+    <div class="footer_r">
+      <p>扫一扫微信下单</p>
+      <div class="erweima"><img src="../images/erweima.jpg" width="238" height="238"></div>
+    </div>
+  </div>
+</div>
+<!--<div class="out">
+  <table class="out_ta">
+    <tr>
+      <td><div class="out_outnew">
+          <div class="out_new">
+            
+            <div class="out_contect">
+              <div class="ta_header">
+                <div class="ta_h_search">
+                  <input class="put_cont" type="text" placeholder="请输入姓名/电话/地址">
+                  <input class="button_2" type="submit" value="查询">
+                </div>
+              </div>
+              <div class="ta_table">
+                <table class="ta_ta" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <th class="num_all">序号</th>
+                    <th width="10%">姓名</th>
+                    <th>联系方式</th>
+                    <th>详细地址</th>
+                  </tr>
+                  <tr>
+                    <td class="num_all"><div class="re_check">
+                        <input name="2" type="checkbox" value="" id="checkboxInput">
+                        <label  for="checkboxInput"></label>
+                      </div>
+                      <strong>1</strong></td>
+                    <td>立威廉</td>
+                    <td>15012345678</td>
+                    <td>广东省深圳市南山区西丽大学城学苑大道1068号云计算中心13层</td>
+                  </tr>
+                  <tr>
+                    <td class="num_all"><div class="re_check">
+                        <input name="2" type="checkbox" value="" id="checkboxInput">
+                        <label  for="checkboxInput"></label>
+                      </div>
+                      <strong>1</strong></td>
+                    <td>立威廉</td>
+                    <td>15012345678</td>
+                    <td>广东省深圳市南山区西丽大学城学苑大道1068号云计算中心13层</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <div class=" contect_butt"><input class="button_2" type="submit" value="确定">
+            </div>
+          </div>
+        </div></td>
+    </tr>
+  </table>
+</div>-->
+</body>
+</html>

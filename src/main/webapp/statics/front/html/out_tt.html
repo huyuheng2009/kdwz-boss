@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>广达通批量下单</title>
+<meta name="keywords" content="广达通批量下单" />
+<meta name="description" content="广达通批量下单" />
+<link rel="stylesheet" href="../css/main.css"/>
+</head>
+<body>
+
+<!--弹出框-->
+<div class="out">
+<table class="out_ta">
+	<tr>
+	  <td>
+  <div class="out_outnew">
+  <div class="out_new">
+    <div class="out_tit">修改信息<a href="#">×</a></div>
+    <div class="out_new_li">
+      <div class="outnew_tit"> <img src="../images/shou_icon.png" width="40" height="36"> <strong>收件人信息</strong> </div>
+      <div class="outnew_cont">
+        <div class="input_li">
+          <div class="input_name"><b>*</b>姓名</div>
+          <div class="input_wri">
+            <input type="text" placeholder="请输入寄件人姓名">
+          </div>
+        </div>
+        <div class="input_li">
+          <div class="input_name"><b>*</b>手机号码</div>
+          <div class="input_wri">
+            <input type="text" placeholder="请输手机号">
+          </div>
+        </div>
+        <div class="input_li">
+          <div class="input_name"><b>*</b>省市区</div>
+          <div class="input_wri">
+            <select onblur="change(this);return false;">
+              <option value ="请选择省/市/区">请选择省/市/区</option>
+              <option value ="请选择省/市/区">请选择省/市/区</option>
+            </select>
+          </div>
+        </div>
+        <div class="input_li">
+          <div class="input_name"><b>*</b>详细地址</div>
+          <div class="input_wri">
+            <input type="text" placeholder="请填写详细地址（精确到门牌号）">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="out_new_li">
+      <div class="outnew_tit"> <img src="../images/other_icon.png" width="40" height="36"> <strong>其他信息</strong> </div>
+      <div class="cont_cont">
+        <div class="input_li">
+          <div class="input_name">物品类别</div>
+          <div class="input_wri  input_wri06">
+            <select  onblur="change(this);return false;">
+              <option value ="请选择物品类别">请选择物品类别</option>
+              <option value ="请选择物品类别">请选择物品类别</option>
+            </select>
+          </div>
+        </div>
+        <div class="input_li">
+          <div class="input_name">付款人</div>
+          <div class="input_wri input_wri06">
+            <input type="text" placeholder="请选择付款人">
+          </div>
+        </div>
+        <div class="input_li">
+          <div class="input_name">付款方式</div>
+          <div class="input_wri input_wri06">
+            <select  onblur="change(this);return false;">
+              <option value ="请选择付款方式">请选择付款方式</option>
+              <option value ="请选择付款方式">请选择付款方式</option>
+            </select>
+          </div>
+        </div>
+        <div class="input_li">
+          <div class="input_name">月结卡号</div>
+          <div class="input_wri input_wri06">
+            <input type="text" placeholder="请选择付款方式">
+          </div>
+        </div>
+        <div class="input_li">
+          <div class="input_name">报价金额</div>
+          <div class="input_wri input_wri06">
+            <input type="text" placeholder="">
+            <span>保价手续费5‰（保费15元）</span><i>元</i></div>
+        </div>
+        <div class="input_li">
+          <div class="input_name">备注</div>
+          <div class="input_wri">
+            <input type="text" placeholder="请填写备注信息">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="out_button">
+    	<a href="#" class="button">保存</a>
+        <a href="#" class=" button_2">取消</a>
+    </div>
+  </div>
+  </div>
+  </td>
+	</tr>
+  </table>
+</div>
+<div class="out">
+  <table class="out_ta">
+	<tr>
+	  <td>
+        <div class="out_cont">
+        	<div class="out_new out_dele">
+            	<div class="out_tit">删除信息<a href="#">×</a></div>
+                <div class="out_del">您确定要删除这5条收件地址信息吗？</div>
+                <div class="out_button">
+    				<a href="#" class="button">确定</a>
+        			<a href="#" class=" button_2">取消</a>
+    			</div>
+            </div>
+        </div>
+	  </td>
+	</tr>
+  </table>
+</div>
+
+<div class="out">
+  <table class="out_ta">
+	<tr>
+	  <td>
+        <div class="out_cont">
+        	<div class="out_new out_dele">
+            	<div class="out_tit">从Excel导入<a href="#">×</a></div>
+                <div class="out_del"><img src="../images/out.png" width="60" height="60"></div>
+                <div class="out_button">
+    				<a href="#" class="button">选择Excel文件</a>
+        			<a href="#" class=" button_3">导入</a>
+    			</div>
+            </div>
+        </div>
+	  </td>
+	</tr>
+  </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Map">  
+	
+	<select id="list" resultType="java.util.HashMap">  
+       select * from (select c.courier_no,c.real_name,c.substation_no,l.*,s.substation_name,s.location,if(ISNULL(lid),'N','Y') online
+ from courier c left join (select * from (select l.id lid,l.user_no,l.track_longitude,l.track_latitude
+   from courier_track_location l left join courier c on l.user_no=c.courier_no
+      where l.create_time>DATE_SUB(now(),INTERVAL 1 MINUTE)  order by l.id desc) tmp group by tmp.user_no) l
+       on c.courier_no=l.user_no left join substation s on c.substation_no=s.substation_no) tt
+         where 1=1 
+       <if test="online!=null and online!=''">and tt.online=#{online}</if>
+        <!--  <if test="cno!=null and cno!=''">and tt.courier_no=#{cno}</if> -->
+       	<if test="realName!=null and realName!=''">
+			and tt.real_name like  CONCAT(CONCAT('%', #{realName}),'%')
+		</if>
+	 order by online desc	
+    </select>
+   
+   
+   <select id="pointList" resultType="java.util.HashMap">  
+     select * from courier_track_location where 1=1 
+         <if test="cno!=null and cno!=''">and user_no=#{cno}</if>
+       <if test="createTimeBegin != null and createTimeBegin !=''"> and create_time&gt;=#{createTimeBegin}</if>
+           <if test="createTimeEnd != null and createTimeEnd !=''"> and create_time&lt;#{createTimeEnd}</if>
+    </select> 
+  
+ 
+</mapper>

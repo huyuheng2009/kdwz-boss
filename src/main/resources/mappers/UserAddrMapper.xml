@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UserAddr">
+	<select id="queryUserAddr" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select name ,area,addr ,phone from user_addrs
+		<where>
+			user_no = #{userNo} and addr_type = #{addrType} and addr_type = 1
+			<if test="message != null and message !=''">
+				AND (name LIKE '%${message}%' OR area LIKE '%${message}%'
+				OR addr LIKE
+				'%${message}%' OR phone LIKE '%${message}%')
+			</if>
+		</where>
+
+	</select>
+
+	<select id="queryPayType" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select pt.pay_code payCode ,pt.pay_name payName from
+		lgc_pay_type lpt ,pay_type pt where lpt.pay_id=pt.id AND lpt.lgc_no
+		=#{lgcNo} AND
+		pt.`status`=1
+	</select>
+
+	<insert id="addOrderAddr" parameterType="java.util.Map">
+		insert into
+		orderAddr(revName,revAddr,revPhone,revArea,itemName,itemStatus,freightType,payType,goodValuation,orderNote,userName,uid,itemWeight,lgcOrderNo,freight)
+		values(#{revName},#{revAddr},#{revPhone},#{revArea},#{itemName},#{itemStatus},#{freightType},#{payType},#{goodValuation},#{orderNote},#{userName},#{uid},#{itemWeight},#{lgcOrderNo},#{freight})
+	</insert>
+
+	<delete id="delByUserName" parameterType="java.lang.String">
+		delete from orderAddr
+		where userName=#{userName}
+	</delete>
+
+	<delete id="delAll">
+		delete from orderAddr
+	</delete>
+	<select id="findCourierNo" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select courier_no courierNo from courier where real_name =
+		#{realName}
+	</select>
+	<select id="findCourierNoByInnerNo" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select courier_no courierNo from courier where inner_no =
+		#{innerNo}
+	</select>
+	<select id="findCpayRate" resultType="java.util.Map">
+		select v.rate_type
+		rateType,v.rate rate,v.latter,v.top,v.minv,v.maxv from
+		valuation_rule v
+		where status = 1 order by id desc
+	</select>
+	<insert id="addOrder" parameterType="com.yogapay.boss.domain.OrderAddr">
+		insert into
+		orderAddr(
+		sendOrderTime,
+		monthNo,
+		takeCourierNo,
+		sendCourierNo,
+		sendArea,
+		sendPhone,
+		sendName,
+		sendAddr,
+		revArea,
+		revName,
+		revAddr,
+		revPhone,
+		itemName,
+		itemStatus,
+		freightType,
+		goodValuation,
+		vpay,
+		payType,
+		orderNote,
+		userName,
+		itemWeight,
+		lgcOrderNo,
+		freight,
+		source,
+		goodPrice
+		)values(
+		#{sendOrderTime},
+		#{monthNo},
+		#{takeCourierNo},
+		#{ sendCourierNo},
+		#{sendArea},
+		#{ sendPhone},
+		#{sendName},
+		#{sendAddr},
+		#{revArea},
+		#{
+		revName},
+		#{ revAddr},
+		#{ revPhone},
+		#{ itemName},
+		#{ itemStatus},
+		#{
+		freightType},
+		#{ goodValuation},
+		#{ vpay},
+		#{ payType},
+		#{ orderNote},
+		#{userName},
+		#{ itemWeight},
+		#{ lgcOrderNo},
+		#{ freight},
+		#{ source},
+		#{
+		goodPrice}
+		)
+	</insert>
+	<select id="selectOrder" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select * from orderAddr where userName = #{userName}
+		<if test="commonName!=null and commonName!=''">
+			AND (sendPhone LIKE
+			'%${commonName}%' OR sendName LIKE
+			'%${commonName}%'
+			OR sendName LIKE '%${commonName}%' OR revName LIKE
+			'%${commonName}%'
+			OR revAddr LIKE '%${commonName}%' OR revPhone LIKE
+			'%${commonName}%')
+		</if>
+	</select>
+	<select id="selectLgcOrder" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select * from orderAddr where userName = #{userName} AND
+		lgcOrderNo = #{lgcOrderNo}
+
+	</select>
+	<delete id="deleteById" parameterType="java.util.Map">
+		delete from orderAddr
+		where id in ( ${ids} )
+	</delete>
+
+
+	<select id="selectALLUserOrderList" parameterType="java.lang.String"
+		resultType="java.util.Map">
+
+		select * from orderAddr
+		where userName=#{userName}
+
+	</select>
+	<select id="selectALLUserOrder" parameterType="java.lang.String"
+		resultType="com.yogapay.boss.domain.OrderAddr">
+
+		select * from orderAddr
+		where userName=#{userName}
+
+	</select>
+	<insert id="savaSendAddr" parameterType="java.util.Map">
+		insert into
+		user_addrs(user_no,addr_type,area,addr,name,phone)
+		values(#{userNo},#{addrType},#{area},#{addr},#{name},#{phone})
+	</insert>
+
+	<insert id="batchOrderInfo" parameterType="com.yogapay.boss.domain.OrderInfo">
+		insert into
+		order_info(
+		create_time,
+		last_update_time,
+		take_order_time,
+		send_order_time,
+		order_no,
+		user_no,
+		take_courier_no,
+		send_courier_no,
+		send_area,
+		send_addr,
+		send_name,
+		send_phone,
+		rev_addr,
+		rev_name,
+		rev_phone,
+		item_status,
+		item_weight,
+		freight_type,
+		freight,
+		vpay,
+		cpay,
+		month_settle_no,
+		cod,
+		good_price,
+		good_valuation,
+		good_valuation_rate,
+		pay_type,
+		lgc_order_no,
+		lgc_no,
+		status,
+		tnpay,
+		snpay,
+		mpay,
+		source ,
+		order_note,
+		pay_acount,
+		examine_status
+		)values
+		(#{createTime},
+		#{lastUpdateTime},
+		#{takeOrderTime},
+		#{sendOrderTime},
+		#{orderNo},
+		#{userNo}
+		,#{takeCourierNo},
+		#{sendCourierNo},
+		#{sendArea},
+		#{sendAddr},
+		#{sendName},
+		#{sendPhone},
+		#{revAddr} ,
+		#{revName} ,
+		#{revPhone},
+		#{itemStatus},
+		#{itemWeight} ,
+		#{freightType},
+		#{freight},
+		#{vpay},
+		#{cpay},
+		#{monthSettleNo} ,
+		#{cod},
+		#{goodPrice},
+		#{goodValuation},
+		#{goodValuationRate},
+		#{payType},
+		#{lgcOrderNo},
+		#{lgcNo},
+		#{status},
+		#{tnpay},
+		#{snpay},
+		#{mpay},
+		#{source},
+		#{orderNote},
+		#{payAcount},
+		#{examineStatus}
+		)
+
+	</insert>
+	<insert id="batchSignInput" parameterType="com.yogapay.boss.domain.OrderInfo">
+		insert into
+		sinput_info(
+		order_no,
+		lgc_order_no,
+		si_freight_type,
+		si_freight,
+		si_pay_type,
+		si_month_settle_no,
+		si_dis_user_no,
+		si_cod_name,
+		si_good_price,
+		si_good_valuation,
+		si_cpay,
+		si_vpay,
+		si_snpay,
+		si_pay_acount,
+		create_time,
+		op_type,
+		erred
+		)values(
+		#{orderNo},
+		#{lgcOrderNo},
+		#{freightType},
+		#{freight},
+		#{payType},
+		#{monthSettleNo} ,
+		'',
+		'',
+		#{goodPrice},
+		#{goodValuation},
+		#{cpay},
+		#{vpay},
+		#{snpay},
+		#{payAcount},
+		#{createTime},
+		'SIGN',
+		'N')
+	</insert>
+	<select id="selectOrderLgcOrderNo" resultType="java.util.Map"
+		parameterType="com.yogapay.boss.domain.OrderAddr">
+		select * from order_info o where o.lgc_order_no =
+		#{lgcOrderNo} and o.lgc_no = #{lgcNo}
+	</select>
+	<select id="selectOrderLgcOrderNo2" resultType="java.util.Map"
+		parameterType="com.yogapay.boss.domain.OrderInfo">
+		select * from order_info o where o.lgc_order_no =
+		#{lgcOrderNo} and o.lgc_no = #{lgcNo}
+	</select>
+	<select id="getSequence" resultType="java.util.Map">
+		select nextval('order_no')
+		as t
+	</select>
+	<select id="getOrderBean" resultType="com.yogapay.boss.domain.OrderAddr"
+		parameterType="java.lang.String">
+		select * from orderAddr where id = #{id}
+	</select>
+	<select id="getItmeType" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select id,item_text itemText from item_type
+	</select>
+
+	<update id="upOrderInfo" parameterType="com.yogapay.boss.domain.OrderAddr">
+		update orderAddr set
+		sendOrderTime = #{sendOrderTime},
+		monthNo = #{monthNo},
+		takeCourierNo =
+		#{takeCourierNo},
+		sendCourierNo = #{sendCourierNo},
+		sendPhone =
+		#{sendPhone},
+		sendName = #{sendName},
+		sendAddr = #{sendAddr},
+		revPhone =
+		#{revPhone},
+		revAddr = #{revAddr},
+		revName = #{revName},
+		itemStatus =
+		#{itemStatus},
+		freightType = #{freightType},
+		freight = #{freight},
+		goodValuation = #{goodValuation},
+		goodPrice = #{goodPrice},
+		payType =
+		#{payType},
+		orderNote = #{orderNote},
+		itemWeight = #{itemWeight},
+		lgcOrderNo = #{lgcOrderNo},
+		userName = #{userName}
+		where id = #{id}
+	</update>
+	<select id="selectTakeFile" resultType="java.util.Map"
+		parameterType="java.lang.String">
+		select * from
+		take_input_file where userNo=#{userNo}
+	</select>
+	<select id="selectSendFile" resultType="java.util.Map"
+		parameterType="java.lang.String">
+		select * from
+		send_input_file where userNo=#{userNo}
+	</select>
+	<insert id="addTakeFileInput" parameterType="java.util.Map">
+		insert into
+		take_input_file(userNo,orderNo,takeCompany,takeAddr,takeName,takePhone,
+		takeCount,weight,payAcount,goodPrice,backNumber,orderNote,sendSubtation)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.userNo},#{item.orderNo},#{item.takeCompany},#{item.takeAddr},#{item.takeName},
+			#{item.takePhone},#{item.takeCount},#{item.weight},#{item.payAcount},
+			#{item.goodPrice},#{item.backNumber},#{item.orderNote},#{item.sendSubtation})
+		</foreach>
+	</insert>
+	<insert id="addSendFileInput" parameterType="java.util.Map">
+		insert into
+		send_input_file(userNo,orderNo,sendTime,sendName,sendCourierNo,sendSubNo)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.userNo},#{item.orderNo},#{item.sendTime},#{item.sendName},#{item.sendCourierNo},#{item.sendSubNo})
+		</foreach>
+
+
+	</insert>
+	<delete id="deleteAllTakeInfo" parameterType="java.lang.String">
+		delete from
+		take_input_file where userNo = #{userNo}
+	</delete>
+	<delete id="deleteAllSendInfo" parameterType="java.lang.String">
+		delete from
+		send_input_file where userNo = #{userNo}
+	</delete>
+	<select id="takeNoCheck" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select id from take_input_file where userNo = #{userNo} AND orderNo =
+		#{orderNo}
+	</select>
+	<select id="sendNoCheck" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select id from send_input_file where userNo = #{userNo} AND orderNo =
+		#{orderNo}
+	</select>
+
+	<select id="getAllTakeUserOrderList" parameterType="java.lang.String"
+		resultType="com.yogapay.boss.domain.TakeInputFile">
+		select * from take_input_file
+		where userNo=#{userName}
+	</select>
+	<select id="getAllSendUserOrderList" parameterType="java.lang.String"
+		resultType="com.yogapay.boss.domain.SendFileInput">
+		select * from send_input_file
+		where userNo=#{userName}
+	</select>
+	<select id="getBeanOrderInfo" parameterType="com.yogapay.boss.domain.SendFileInput"
+		resultType="com.yogapay.boss.domain.OrderInfo">
+		select  
+		take_mark takeMark,
+		user_no userNo,
+		input_time inputTime,
+		sub_station_no subStationNo,
+		create_time createTime,
+		rev_kehu revKehu,
+		send_kehu sendKehu,
+		last_update_time lastUpdateTime,
+		take_order_time takeOrderTime,
+		send_order_time sendOrderTime ,
+		order_no orderNo,
+		user_no userNo,
+		take_courier_no takeCourierNo,
+		send_courier_no sendCourierNo,
+		send_area sendArea,
+		send_addr sendAddr,
+		send_name sendName,
+		send_phone sendPhone,
+		rev_addr revAddr,
+		rev_name revName,
+		rev_phone revPhone,
+		item_status itemStatus,
+		item_weight itemWeight,
+		freight_type freightType,
+		freight freight, 
+		vpay,
+		cpay,
+		month_settle_no monthSettleNo,
+		cod,
+		good_price goodPrice,
+		good_valuation goodValuation, 
+		good_valuation_rate goodValuationRate,
+		pay_type payType,
+		lgc_order_no lgcOrderNo,
+		lgc_no lgcNo, 
+		status,
+		tnpay,
+		snpay,
+		mpay,
+		source ,
+		order_note orderNote,
+		pay_acount payAcount,
+		dis_reality_freight disRealityFreight,
+		dis_discount disDiscount,
+		fpay_status fpayStatus,
+		inputer
+		  from order_info 
+		where lgc_order_no = #{orderNo}
+	</select>
+	<insert id="takeBatchOrderInfo" parameterType="java.util.Map">
+		insert into
+		order_info(
+		rece_no,
+		fpay_status,
+		input_time,
+		sub_station_no,
+		create_time,
+		rev_kehu,
+		send_kehu,
+		last_update_time,
+		take_order_time,
+		send_order_time,
+		order_no,
+		user_no,
+		take_courier_no,
+		send_courier_no,
+		send_area,
+		send_addr,
+		send_name,
+		send_phone,
+		rev_addr,
+		rev_name,
+		rev_phone,
+		item_status,
+		item_weight,
+		freight_type,
+		freight,
+		vpay,
+		cpay,
+		month_settle_no,
+		cod,
+		good_price,
+		good_valuation,
+		good_valuation_rate,
+		pay_type,
+		lgc_order_no,
+		lgc_no,
+		status,
+		tnpay,
+		snpay,
+		mpay,
+		source ,
+		order_note,
+		pay_acount,
+		inputer
+		)values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.receNo},
+			#{item.fpayStatus},
+			#{item.inputTime},
+			#{item.subStationNo},
+			#{item.createTime},
+			#{item.revKehu},
+			#{item.sendKehu},
+			#{item.lastUpdateTime},
+			#{item.takeOrderTime},
+			#{item.sendOrderTime},
+			#{item.orderNo},
+			#{item.userNo}
+			,#{item.takeCourierNo},
+			#{item.sendCourierNo},
+			#{item.sendArea},
+			#{item.sendAddr},
+			#{item.sendName},
+			#{item.sendPhone},
+			#{item.revAddr} ,
+			#{item.revName} ,
+			#{item.revPhone},
+			#{item.itemStatus},
+			#{item.itemWeight} ,
+			#{item.freightType},
+			#{item.freight},
+			#{item.vpay},
+			#{item.cpay},
+			#{item.monthSettleNo} ,
+			#{item.cod},
+			#{item.goodPrice},
+			#{item.goodValuation},
+			#{item.goodValuationRate},
+			#{item.payType},
+			#{item.lgcOrderNo},
+			#{item.lgcNo},
+			#{item.status},
+			#{item.tnpay},
+			#{item.snpay},
+			#{item.mpay},
+			#{item.source},
+			#{item.orderNote},
+			#{item.payAcount},
+			#{item.userNo}
+			)
+
+		</foreach>
+	</insert>
+	<insert id="insertInputOrder" parameterType="java.util.Map">
+		insert into
+		sinput_info(
+	    order_no,
+	 lgc_order_no,
+	 si_freight_type,
+	 si_freight,
+	 si_pay_type,
+	 si_month_settle_no,
+	 si_dis_user_no,
+	 si_cod_name,
+	 si_good_price,
+	 si_good_valuation,
+	 si_cpay,
+	 si_vpay,
+	 si_snpay,
+	 si_pay_acount,
+	 create_time,
+	 operator,
+	 op_type,
+	 sign_name,
+	 sign_time,
+	 sn_good_price,
+	 sn_freight,
+	 si_weight,
+	 si_subname,
+	 sinput_time,
+	 sinputor,
+	 note
+		)values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.orderNo},
+			#{item.lgcOrderNo},
+			#{item.freightType},
+			#{item.freight},
+			#{item.payType},
+			#{item.monthSettleNo},		
+			#{item.disUserNo},
+			#{item.codName},
+			#{item.goodPrice},
+			#{item.goodValuation},
+			#{item.cpay},
+			#{item.vpay},
+			#{item.snpay},
+			#{item.payAcount},
+			#{item.createTime},
+			'',
+			'SIGN',
+			#{item.sign},
+			#{item.sendOrderTime},
+			#{item.goodPrice},
+			#{item.freight},
+			#{item.itemWeight},
+			#{item.sendSubstationNo},
+			#{item.inputTime},
+			#{item.userNo},
+			#{item.orderNote}		
+			)
+		</foreach>
+	</insert>
+	<select id="findSubNo" parameterType="java.lang.String" resultType="java.util.Map">
+	select substation_no from substation where substation_name = #{subName}	
+	</select>
+	<update id="updateOrderInfo" parameterType="com.yogapay.boss.domain.OrderInfo">		
+                update order_info  
+                set       
+                  sign= #{sign},
+                  last_update_time=#{lastUpdateTime},
+                  send_order_time=#{sendOrderTime},
+                  send_substation_no=#{sendSubstationNo},
+                  send_courier_no=#{sendCourierNo}, 
+                  sign_name=#{signName},
+                  	status=#{status}            
+                where lgc_order_no = #{lgcOrderNo}
+ 
+	</update>
+	<insert id="insertBatchTrack" parameterType="java.util.Map">
+	  insert into order_track(order_no,order_time,context,completed)
+	  values 
+	  <foreach collection="list"  item="items" index="index" separator=",">
+	  (#{items.orderNo},
+	  #{items.createTime},
+	  '订单被创建',
+	  'N'	  
+	  ) 
+	  </foreach>
+	</insert>
+	
+	
+	 <insert id="insertTrackOrder" parameterType="java.util.List">  
+        insert into order_track (order_no,order_time,context,completed) values   
+        <foreach item="t" collection="list" separator=",">(#{t.orderNo},#{t.orderTime},#{t.context},#{t.completed})</foreach>
+    </insert> 
+    
+      <insert id="insertOrder" parameterType="java.util.List">  
+        insert into order_info(order_no,user_no,send_area,send_addr,send_name,send_phone,rev_area,rev_addr,rev_name,rev_phone,item_Status,`status`,source,
+        take_mark,freight_type,freight,pay_type,order_note,create_time,last_update_time,lgc_no,lgc_order_no,good_valuation,good_valuation_rate,vpay,take_time_begin,take_time_end,item_weight,batch_number,tnpay,snpay,pay_acount) values
+        <foreach item="t" collection="list" separator=",">(#{t.orderNo},#{t.userNo},#{t.sendArea},#{t.sendAddr},#{t.sendName},#{t.sendPhone},#{t.revArea},#{t.revAddr},#{t.revName},#{t.revPhone},#{t.itemStatus},#{t.status},#{t.source},#{t.takeMark},#{t.freightType},#{t.freight},#{t.payType},#{t.orderNote},#{t.createTime},#{t.lastUpdateTime},#{t.lgcNo},#{t.lgcOrderNo},#{t.goodValuation},#{t.goodValuationRate},#{t.vpay},#{t.takeTimeBegin},#{t.takeTimeEnd},#{t.itemWeight},#{t.batchNumber},#{t.tnpay},#{t.snpay},#{t.payAcount})</foreach>  
+           
+    </insert> 
+    
+	 <select id="getBatchOrderByNumer" parameterType="java.lang.String"   resultType="java.util.Map">
+    select id,order_note orderNote from order_info where batch_number = #{value} and length(order_note)>1    
+    </select>
+    
+      <insert id="insertBatchNote" parameterType="java.util.List">  
+        insert into order_note (order_id,
+      										  note,
+       										 op_src,
+     									   create_time) values   
+        <foreach item="t" collection="list" separator=",">(#{t.id},#{t.orderNote},'批量导入备注', now() )</foreach>
+    </insert>
+	
+		<insert id="insertOrderImport" parameterType="java.util.List">  
+        insert into order_info(order_no,user_no,send_area,send_addr,send_name,send_phone,rev_area,rev_addr,rev_name,rev_phone,item_Status,`status`,source,
+        take_mark,freight_type,freight,pay_type,order_note,create_time,last_update_time,lgc_no,lgc_order_no,good_valuation,good_valuation_rate,vpay,take_time_begin,take_time_end,
+		sub_station_no,take_courier_no,send_courier_no,send_substation_no,examine_status) values
+        <foreach item="t" collection="list" separator=",">(#{t.orderNo},#{t.userNo},#{t.sendArea},#{t.sendAddr},#{t.sendName},#{t.sendPhone},#{t.revArea},#{t.revAddr},#{t.revName},#{t.revPhone},#{t.itemStatus},#{t.status},#{t.source},#{t.takeMark},#{t.freightType},#{t.freight},#{t.payType},#{t.orderNote},#{t.createTime},#{t.lastUpdateTime},#{t.lgcNo},#{t.lgcOrderNo},#{t.goodValuation},#{t.goodValuationRate},#{t.vpay},#{t.takeTimeBegin},#{t.takeTimeEnd},#{t.subStationNo},#{t.takeCourierNo},#{t.sendCourierNo},#{t.sendSubstationNo},#{t.examineStatus})</foreach>  
+           
+    </insert>
+	
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="System">  
+      
+    <select id="getLoginLog" resultType="java.util.HashMap">
+	select * from sys_login_log l where 1=1 and l.user_name!='root' 
+	  <if test="userName != null and userName !=''"> and l.user_name=#{userName}</if>
+	  <if test="operation != null and operation !=''"> and l.operation like CONCAT(CONCAT('%', #{operation}),'%')</if>
+	  <if test="last_login_time_begin != null and last_login_time_begin !=''"> and l.last_login_time&gt;=#{last_login_time_begin}</if>
+	  <if test="last_login_time_end != null and last_login_time_end !=''"> and l.last_login_time&lt;=#{last_login_time_end}</if>
+       order by l.id desc
+    </select>  
+    
+<!--  
+   CONCAT(CONCAT('%', #{auth_name}),'%')
+   <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyColumn="id">  
+       insert into t_user(name, age) values(#{name}, #{age})  
+    </insert>  
+     
+    <update id="updateUser" parameterType="User">  
+       update t_user set name=#{name}, age=#{age} where id=#{id}  
+    </update>  
+    
+    <select id="findById" parameterType="int" resultType="User">  
+       select * from t_user where id=#{id}  
+    </select>  
+     
+    <delete id="deleteUser" parameterType="int">  
+       delete from t_user where id=#{id}  
+    </delete>  --> 
+      
+</mapper>  

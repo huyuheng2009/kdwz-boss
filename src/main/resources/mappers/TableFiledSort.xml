@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TableFiledSort">
+	<select id="queryByTab" resultType="TableFiledSort">
+		select id,tab,tab_name as tabName,col,col_name as colName,sort,is_show isShow,user_no userNo from table_field_sort where tab =#{tab} 
+		<if test="userNo!=null and userNo !=''">
+		   and user_no =#{userNo} 
+		</if>
+		<if test="userNo==null or userNo ==''">
+		   and user_no ='0'
+		</if>
+		order by sort asc
+	</select>
+	
+	<update id="updateByTabAndCol" parameterType="TableFiledSort">
+		
+			update table_field_sort set sort=#{sort},is_show =#{isShow} where tab =#{tab} and col=#{col} and user_no =#{userNo}  
+			<if test=" id!=null and id !=''">
+				and id =#{id}  
+			</if>
+		
+	</update>
+	
+	<delete id="delete">
+	   delete from table_field_sort where user_no =#{userNo} and tab =#{tab} 
+	</delete>
+	
+	<insert id="insert" parameterType="java.util.List">
+		insert into table_field_sort(tab,tab_name,col,col_name,sort,is_show,user_no)
+		values
+		<foreach collection="list" item="item" separator=",">
+		(#{item.tab},#{item.tabName},#{item.col},#{item.colName},#{item.sort},#{item.isShow},#{item.userNo})
+		</foreach>
+	</insert>
+
+</mapper>

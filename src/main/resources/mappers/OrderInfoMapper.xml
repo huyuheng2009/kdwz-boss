@@ -1,0 +1,1539 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="OrderInfo">  
+    <select id="list" resultType="java.util.HashMap">  
+          select  o.*,c.real_name take_courier_name,c1.real_name send_courier_name,m.month_sname monthSname,s.substation_name takeSubstationName,
+          s1.substation_name sendSubstationName,c2.cod_sname
+              from order_info o left join courier c on (o.take_courier_no=c.courier_no)  
+                left join courier c1 on (o.send_courier_no=c1.courier_no)
+                left join month_settle_user  m on (o.month_settle_no = m.month_settle_no)
+              left join substation s on (o.sub_station_no = s.substation_no) 
+              left join substation s1 on (o.send_substation_no = s1.substation_no)       
+              left join cod_settle_user c2 on(o.cod_name=c2.cod_name)
+              where 1=1 
+          <if test="orderNos != null and orderNos !=''"> and (o.lgc_order_no in (${orderNos}) or o.order_no in (${orderNos}))</if>
+          <if test="sendName != null and sendName !=''"> and o.send_name=#{sendName}</if>
+          
+          
+          <if test="untake == null or untake ==''"> 
+          <if test="createTimeBegin != null and createTimeBegin !=''"> and o.create_time&gt;=#{createTimeBegin}</if>
+          <if test="createTimeEnd != null and createTimeEnd !=''"> and o.create_time&lt;#{createTimeEnd}</if>
+           <if test="sendTimeBegin != null and sendTimeBegin !=''"> and o.send_order_time&gt;=#{sendTimeBegin}</if>
+          <if test="sendTimeEnd != null and sendTimeEnd !=''"> and o.send_order_time&lt;#{sendTimeEnd}</if>
+           <if test="takeTimeBegin != null and takeTimeBegin !=''"> and o.take_order_time&gt;=#{takeTimeBegin}</if>
+          <if test="takeTimeEnd != null and takeTimeEnd !=''"> and o.take_order_time&lt;#{takeTimeEnd}</if>
+          </if>
+           <if test="untake != null and untake !=''"> 
+                <if test="takeTimeBegin != null and takeTimeBegin !=''"> and o.create_time&gt;=#{takeTimeBegin}</if>
+                <if test="takeTimeEnd != null and takeTimeEnd !=''"> and o.create_time&lt;#{takeTimeEnd}</if>
+               and o.take_order_time is null
+            </if>
+          
+          <if test="status != null and status !=''"> and o.`status`=#{status}</if>
+          <if test="payStatus != null and payStatus !=''"> and o.pay_status=#{payStatus}</if>
+          <if test="revName != null and revName !=''"> and o.rev_name=#{revName}</if>
+          <if test="sendPhone != null and sendPhone !=''"> and (o.send_phone=#{sendPhone} or o.rev_phone=#{sendPhone})</if>
+          
+        <if test="substationNo != null and substationNo != ''"> and (o.sub_station_no in (0,${substationNo})
+            <if test="orderAssign != null and orderAssign !=''"> or o.sub_station_no is null </if>)
+        </if>
+        
+          <if test="take_or_send_no != null and take_or_send_no != ''"> and (o.sub_station_no in (0,${take_or_send_no}) or o.send_substation_no in (0,${take_or_send_no})
+            <if test="orderAssign != null and orderAssign !=''"> or o.sub_station_no is null </if>)
+        </if>
+        
+        <!-- <if test="substationNo == null or substationNo == ''">and 1=2</if> -->
+         <if test="srcourier != null and srcourier !=''"> and (c.real_name=#{srcourier} or c1.real_name =#{srcourier})</if>  
+      <if test="courier != null and courier !=''"> and c.real_name=#{courier}</if>  
+           <if test="asignName != null and asignName !=''"> and o.asign_name like  CONCAT(CONCAT('%', #{asignName}),'%')</if> 
+        <if test="assignTos != null and assignTos !=''"> and o.asign_status='S'</if>
+       <!--  <if test="assignToc != null and assignToc !=''"> and (o.asign_status='C' or o.status in (2,3,7,8))</if> -->
+        <if test="assignToc != null and assignToc !=''"> and (o.asign_status is not null or o.status in (2,3,7,8))</if>
+        <if test="zid != null and zid !=''"> and o.zid=0</if>  <!--  去除子单 -->
+        <if test="noneAssign != null and noneAssign !=''"> and o.asign_status is null and o.status=1</if>
+        <if test="examineStatus != null and examineStatus =='PASS'"> and o.examine_status='PASS'</if>
+        <if test="examineStatus != null and examineStatus =='NONE'"> and (o.examine_status!='PASS' OR o.examine_status is null)</if>
+        <if test="reqRece != null and reqRece !=''"> and o.req_rece=#{reqRece}</if>
+        <if test="freightType != null and freightType !=''"> and o.freight_type=#{freightType}</if>
+        <if test="payType != null and payType !=''"> and o.pay_type=#{payType}</if>
+        <if test="monthSettleNo != null and monthSettleNo !=''"> and o.month_settle_no=#{monthSettleNo}</if>
+        <if test="proOrder != null and proOrder !=''"> and o.pro_order=#{proOrder}</if>
+         <if test="goodPrice != null and goodPrice !=''"> and o.good_price&gt;0.001</if>
+         <if test="vpay != null and vpay !=''"> and o.vpay&gt;0.001</if>
+         <if test="deled != null and deled !=''"> and o.deled=1</if>  <!--  无效单查询 -->
+        <if test="deled == null or deled ==''"> and o.deled=0
+              <if test="el != null and el !=''"> and o.status in (2,3,6,7,8,9)</if>
+             <if test="nel != null and nel !=''"> and o.status=1</if>
+        </if>  
+         <if test="forOrder != null and forOrder !=''"> and LENGTH(o.for_no)>0 AND o.for_no IS NOT NULL</if>
+         <if test="zidan != null and zidan !=''"> and LENGTH(o.zidan_order)>0 AND o.zidan_order IS NOT NULL</if>
+         <if test="orderBy != null and orderBy ==1"> order by o.freight desc</if> 	
+		 <if test="orderBy != null and orderBy ==2"> order by o.freight asc</if> 	 
+		 <if test="orderBy != null and orderBy ==3"> order by o.good_price desc</if> 
+		 <if test="orderBy != null and orderBy ==4"> order by o.good_price asc</if>
+		 <if test="orderBy == null or orderBy == ''">  order by o.id desc </if> 	
+        <if test="limit != null and limit != ''"> limit 0,${limit}</if>
+    </select>  
+    <select id="getList" resultType="java.util.HashMap">  
+          select  o.*,c.real_name takeCourierName,m.month_sname monthSname,s.substation_name takeSubstationName,
+          s1.substation_name sendSubstationName,c1.real_name sendCourierName  ,p.descb 
+              from order_info o left join courier c on (o.take_courier_no=c.courier_no) 
+              left join month_settle_user  m on (o.month_settle_no = m.month_settle_no)
+              left join substation s on (o.sub_station_no = s.substation_no) 
+              left join substation s1 on (o.send_substation_no = s1.substation_no)
+              left join courier c1 on (o.send_courier_no=c1.courier_no)
+              left join pro_order p on (o.order_no = p.order_no)
+              where 1=1 
+          <if test="orderNos != null and orderNos !=''"> and (o.lgc_order_no in (${orderNos}) or o.order_no in (${orderNos}))</if>
+          <if test="sendName != null and sendName !=''"> and o.send_name=#{sendName}</if>
+            <if test="untake == null or untake ==''"> 
+          <if test="createTimeBegin != null and createTimeBegin !=''"> and o.create_time&gt;=#{createTimeBegin}</if>
+          <if test="createTimeEnd != null and createTimeEnd !=''"> and o.create_time&lt;#{createTimeEnd}</if>
+           <if test="takeTimeBegin != null and takeTimeBegin !=''"> and o.take_order_time&gt;=#{takeTimeBegin}</if>
+          <if test="takeTimeEnd != null and takeTimeEnd !=''"> and o.take_order_time&lt;#{takeTimeEnd}</if>
+          </if>
+           <if test="untake != null and untake !=''"> 
+                <if test="takeTimeBegin != null and takeTimeBegin !=''"> and o.create_time&gt;=#{takeTimeBegin}</if>
+                <if test="takeTimeEnd != null and takeTimeEnd !=''"> and o.create_time&lt;#{takeTimeEnd}</if>
+               and o.take_order_time is null
+            </if>
+          <if test="status != null and status !=''"> and o.`status`=#{status}</if>
+          <if test="payStatus != null and payStatus !=''"> and o.pay_status=#{payStatus}</if>
+          <if test="revName != null and revName !=''"> and o.rev_name=#{revName}</if>
+           <if test="sendPhone != null and sendPhone !=''"> and (o.send_phone=#{sendPhone} or o.rev_phone=#{sendPhone})</if>
+        <if test="substationNo != null and substationNo != ''"> and (o.sub_station_no in (0,${substationNo})
+            <if test="orderAssign != null and orderAssign !=''"> or o.sub_station_no is null </if>)
+        </if>
+        <if test="substationNo == null or substationNo == ''">and 1=2</if>
+      <!--   <if test="courier != null and courier !=''"> and (c.real_name like  CONCAT(CONCAT('%', #{courier}),'%') or c1.real_name like  CONCAT(CONCAT('%', #{courier}),'%'))</if>  -->
+         <if test="courier != null and courier !=''"> and c.real_name=#{courier}</if> 
+           <if test="asignName != null and asignName !=''"> and o.asign_name like  CONCAT(CONCAT('%', #{asignName}),'%')</if> 
+        <if test="assignTos != null and assignTos !=''"> and o.asign_status='S'</if>
+           <if test="assignToc != null and assignToc !=''"> and ( o.asign_status is not null  or o.status in (2,3,7,8))</if>
+        <if test="zid != null and zid !=''"> and o.zid=0</if>  <!--  去除子单 -->
+        <if test="noneAssign != null and noneAssign !=''"> and o.asign_status is null and o.status=1</if>
+        <if test="examineStatus != null and examineStatus =='PASS'"> and o.examine_status='PASS'</if>
+        <if test="examineStatus != null and examineStatus =='NONE'"> and (o.examine_status!='PASS' OR o.examine_status is null)</if>
+        <if test="reqRece != null and reqRece !=''"> and o.req_rece=#{reqRece}</if>
+        <if test="freightType != null and freightType !=''"> and o.freight_type=#{freightType}</if>
+        <if test="payType != null and payType !=''"> and o.pay_type=#{payType}</if>
+        <if test="monthSettleNo != null and monthSettleNo !=''"> and o.month_settle_no=#{monthSettleNo}</if>
+        <if test="proOrder != null and proOrder !=''"> and o.pro_order=#{proOrder}</if>
+         <if test="goodPrice != null and goodPrice !=''"> and o.good_price&gt;0.001</if>
+         <if test="vpay != null and vpay !=''"> and o.vpay&gt;0.001</if>
+        <if test="deled != null and deled !=''"> and o.deled=1</if>  <!--  无效单查询 -->
+        <if test="deled == null or deled ==''"> and o.deled=0
+              <if test="el != null and el !=''"> and o.status in (2,3,6,7,8,9)</if>
+             <if test="nel != null and nel !=''"> and o.status=1</if>
+        </if>  
+          <if test="forOrder != null and forOrder !=''"> and LENGTH(o.for_no)>0 AND o.for_no IS NOT NULL</if>
+         <if test="zidan != null and zidan !=''"> and LENGTH(o.zidan_order)>0 AND o.zidan_order IS NOT NULL</if>
+         <if test="orderBy != null and orderBy ==1"> order by o.freight desc</if> 	
+		 <if test="orderBy != null and orderBy ==2"> order by o.freight asc</if> 	 
+		 <if test="orderBy != null and orderBy ==3"> order by o.good_price desc</if> 
+		 <if test="orderBy != null and orderBy ==4"> order by o.good_price asc</if>
+		 <if test="orderBy == null or orderBy == ''"> order by o.id desc </if> 	
+        <if test="limit != null and limit != ''"> limit 0,${limit}</if>
+    </select>  
+    
+    <select id="findByOrderNoId" resultType="java.util.HashMap">  
+        select o.*,c.real_name,l.name lgc_name  
+        from order_info o left join courier c on (o.take_courier_no=c.courier_no) left join lgc l on (o.lgc_no=l.lgc_no)
+        where o.order_no=#{orderNo}
+    </select> 
+    
+    
+    <select id="findByOrderNo" resultType="java.util.HashMap">  
+        select o.* from order_info o  where o.order_no=#{orderNo}
+    </select> 
+    
+       <select id="findSignByOrderNo" resultType="java.util.HashMap">  
+        select o.* from sinput_info o  where o.order_no=#{orderNo}
+    </select> 
+    
+    <select id="findByIds" resultType="java.util.HashMap">  
+        select o.* from order_info o  where o.id in (${ids})
+    </select> 
+    
+    <select id="findSignByIds" resultType="java.util.HashMap">  
+        select o.*,s.si_freight_type,s.si_pay_type,s.si_month_settle_no from order_info o left join sinput_info s on o.order_no=s.order_no where o.id in (${ids})
+        order by s.id desc 
+    </select>
+    
+    
+    <select id="findByLgcOrderNo" resultType="java.util.HashMap">  
+        select o.* from order_info o  where 1=1 
+        <if test="lgcOrderNos != null and lgcOrderNos != ''">and o.lgc_order_no in (${lgcOrderNos})</if>
+        <if test="lgcNo != null and lgcNo != ''">and o.lgc_no=#{lgcNo}</if>
+        <if test="phone != null and phone != ''">and (o.send_phone=#{phone} or o.rev_phone=#{phone})</if>
+        <if test="createTimeBegin != null and createTimeBegin !=''"> and o.create_time&gt;=#{createTimeBegin}</if>
+        <if test="createTimeEnd != null and createTimeEnd !=''"> and o.create_time&lt;#{createTimeEnd}</if>
+         <if test="sendTimeBegin != null and sendTimeBegin !=''"> and o.send_order_time&gt;=#{sendTimeBegin}</if>
+        <if test="sendTimeEnd != null and sendTimeEnd !=''"> and o.send_order_time&lt;#{sendTimeEnd}</if>
+    </select> 
+    
+      <select id="findTrack" resultType="java.util.HashMap">  
+        select o.* from order_info o  where 1=1 
+        
+        <if test="lgcOrderNos != null and lgcOrderNos != ''">
+           <if test="noType != null and noType ==1"> and o.lgc_order_no in (${lgcOrderNos})</if> 	
+           <if test="noType != null and noType ==2"> and o.rece_no in (${lgcOrderNos})</if> 	
+           <if test="noType != null and noType ==3"> and o.for_no in (${lgcOrderNos})</if> 	
+        </if>
+        <if test="lgcNo != null and lgcNo != ''">and o.lgc_no=#{lgcNo}</if>
+        <if test="phone != null and phone != ''">and (o.send_phone=#{phone} or o.rev_phone=#{phone})</if>
+        <if test="createTimeBegin != null and createTimeBegin !=''"> and o.take_order_time&gt;=#{createTimeBegin}</if>
+        <if test="createTimeEnd != null and createTimeEnd !=''"> and o.take_order_time&lt;#{createTimeEnd}</if>
+         <if test="sendTimeBegin != null and sendTimeBegin !=''"> and o.send_order_time&gt;=#{sendTimeBegin}</if>
+        <if test="sendTimeEnd != null and sendTimeEnd !=''"> and o.send_order_time&lt;#{sendTimeEnd}</if>
+    </select> 
+    
+    <select id="getLgcInfo" resultType="java.util.HashMap">  
+        select l.lgc_no lgcNo ,l.name lgcName,l.pingyin pingyin,o.lgc_order_no lgcOrderNo,l.track_src
+        from order_info o,lgc l 
+        where o.lgc_no=l.lgc_no and o.order_no=#{0}
+    </select>   
+    
+    <select id="getPrintOrder" resultType="java.util.HashMap">  
+        select * from order_info where id in (${ids})
+    </select>  
+    
+     <select id="getOrderIdBySid" resultType="java.util.HashMap">  
+     select o.id  from order_info o left join sinput_info s on o.order_no=s.order_no
+        <where>
+            s.id in (${ids})
+        </where>
+    </select>  
+
+    <select id="getOrderImages" resultType="java.util.HashMap">  
+        select id,file_uri,file_path from order_pic where order_no=#{0}
+    </select>  
+      
+    <update id="asign"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set sub_station_no=#{substationNo},take_courier_no=#{courierNo}
+        <if test="lgcNo != null and lgcNo !=''">,lgc_no=#{lgcNo}</if>
+         <if test="asignName != null and asignName !=''">,asign_name=#{asignName}</if>
+        <if test="asignStatus != null and asignStatus !=''">,asign_status=#{asignStatus}</if>
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+ 
+     <update id="updateAddrId"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set addr_id=#{addrId}
+        <where>
+            id=#{orderId}
+        </where>
+    </update>
+    
+    <update id="deled"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set deled=1,status=9,lgc_order_no=NULL
+        <where>
+            id=#{id}
+        </where>
+    </update>
+    
+    <update id="asignTos"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set sub_station_no=#{substationNo},take_courier_no=null
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="takeUpdateFirst"  parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id">
+        update order_info set send_area=#{sendArea},send_addr=#{sendAddr},send_name=#{sendName},send_phone=#{sendPhone},send_kehu=#{sendKehu},rev_kehu=#{revKehu},
+        message=#{message},message_phone=#{messagePhone},for_no=#{forNo},input_time=now(),inputer=#{inputer},vweight=#{vweight},
+        rev_area=#{revArea},rev_addr=#{revAddr},rev_name=#{revName},rev_phone=#{revPhone},item_name=#{itemName},
+        item_Status=#{itemStatus},freight_type=#{freightType},order_note=#{orderNote},month_settle_no=#{monthSettleNo},dis_user_no=#{disUserNo},take_order_time=#{takeOrderTime},
+        freight=#{freight},pay_acount=#{payAcount},rece_no=#{receNo},sub_station_no=#{subStationNo},send_substation_no=#{sendSubstationNo},take_courier_no=#{takeCourierNo},
+        send_courier_no=#{sendCourierNo},item_count=#{itemCount},item_weight=#{itemWeight},good_price=#{goodPrice},return_type=#{returnType},fpay_status=#{fpayStatus},mpay=#{mpay},
+        cod_name=#{codName},pay_status=#{payStatus},status=#{status},cpay=#{cpay},vpay=#{vpay},good_valuation=#{goodValuation},cod=#{cod},tnpay=#{tnpay},snpay=#{snpay},pay_type=#{payType},
+        month_discount=#{monthDiscount},cod_rate=#{codRate},asign_status='C',req_rece=#{reqRece},cod=#{cod},input_time=now(),inputer=#{inputer},
+         zidan_number=#{zidanNumber},zidan_order=#{zidanOrder},time_type=#{timeType},id_card=#{idCard}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+        <update id="takeScanUpdate"  parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id">
+        update order_info set freight_type=#{freightType},month_settle_no=#{monthSettleNo},dis_user_no=#{disUserNo},take_order_time=#{takeOrderTime},
+        freight=#{freight},pay_acount=#{payAcount},sub_station_no=#{subStationNo},take_courier_no=#{takeCourierNo},good_price=#{goodPrice},fpay_status=#{fpayStatus},mpay=#{mpay},
+        pay_status=#{payStatus},status=#{status},cpay=#{cpay},vpay=#{vpay},good_valuation=#{goodValuation},cod=#{cod},tnpay=#{tnpay},snpay=#{snpay},pay_type=#{payType}, asign_status='C',item_weight=#{itemWeight}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+      
+    <update id="editUpdate"  parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id">
+        update order_info set send_addr=#{sendAddr},send_name=#{sendName},send_phone=#{sendPhone},send_kehu=#{sendKehu},rev_kehu=#{revKehu},
+        for_no=#{forNo},vweight=#{vweight},create_time=#{createTime},
+        rev_addr=#{revAddr},rev_name=#{revName},rev_phone=#{revPhone},item_name=#{itemName},time_type=#{timeType},
+        item_Status=#{itemStatus},freight_type=#{freightType},order_note=#{orderNote},month_settle_no=#{monthSettleNo},dis_user_no=#{disUserNo},take_order_time=#{takeOrderTime},send_order_time=#{sendOrderTime},
+        freight=#{freight},pay_acount=#{payAcount},rece_no=#{receNo},sub_station_no=#{subStationNo},send_substation_no=#{sendSubstationNo},take_courier_no=#{takeCourierNo},send_courier_no=#{sendCourierNo},
+        item_count=#{itemCount},item_weight=#{itemWeight},good_price=#{goodPrice},return_type=#{returnType},fpay_status=#{fpayStatus},mpay=#{mpay},
+        cod_name=#{codName},pay_status=#{payStatus},cpay=#{cpay},vpay=#{vpay},good_valuation=#{goodValuation},cod=#{cod},tnpay=#{tnpay},snpay=#{snpay},pay_type=#{payType},
+        month_discount=#{monthDiscount},cod_rate=#{codRate},asign_status='C',req_rece=#{reqRece},cod=#{cod}, zidan_number=#{zidanNumber},zidan_order=#{zidanOrder}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+       
+        <update id="orderEditSave"  parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id">
+        update order_info set send_area=#{sendArea},send_addr=#{sendAddr},send_name=#{sendName},send_phone=#{sendPhone},send_kehu=#{sendKehu},rev_kehu=#{revKehu},
+        for_no=#{forNo},create_time=#{createTime},rev_area=#{revArea},rev_addr=#{revAddr},rev_name=#{revName},rev_phone=#{revPhone},item_name=#{itemName},
+        item_Status=#{itemStatus},freight_type=#{freightType},order_note=#{orderNote},month_settle_no=#{monthSettleNo},take_order_time=#{takeOrderTime},send_order_time=#{sendOrderTime},
+        freight=#{freight},pay_acount=#{payAcount},rece_no=#{receNo},sub_station_no=#{subStationNo},send_substation_no=#{sendSubstationNo},take_courier_no=#{takeCourierNo},send_courier_no=#{sendCourierNo},
+        item_count=#{itemCount},item_weight=#{itemWeight},good_price=#{goodPrice},return_type=#{returnType},mpay=#{mpay},
+        cod_name=#{codName},vpay=#{vpay},good_valuation=#{goodValuation},cod=#{cod},tnpay=#{tnpay},snpay=#{snpay},pay_type=#{payType},
+        month_discount=#{monthDiscount},cod_rate=#{codRate},req_rece=#{reqRece}, zidan_number=#{zidanNumber},zidan_order=#{zidanOrder},
+        time_type=#{timeType},id_card=#{idCard}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+       <update id="editSignUpdate"  parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id">
+        update sinput_info set si_freight_type=#{freightType},si_pay_type=#{payType},si_month_settle_no=#{monthSettleNo}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="takeUpdate"  parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id">
+        update order_info set send_area=#{sendArea},send_addr=#{sendAddr},send_name=#{sendName},send_phone=#{sendPhone},
+        rev_area=#{revArea},rev_addr=#{revAddr},rev_name=#{revName},rev_phone=#{revPhone},item_name=#{itemName},month_discount=#{monthDiscount},
+        item_Status=#{itemStatus},order_note=#{orderNote},rece_no=#{receNo},item_count=#{itemCount},item_weight=#{itemWeight},req_rece=#{reqRece},
+        zidan_number=#{zidanNumber},zidan_order=#{zidanOrder},time_type=#{timeType},id_card=#{idCard}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    
+    <update id="signUpdate"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set order_note=#{orderNote},month_settle_no=#{monthSettleNo},fpay_status=#{fpayStatus},pay_type=#{payType},dis_user_no=#{disUserNo},
+        <if test="sendOrderTime not in {null,''}">
+        send_order_time=#{sendOrderTime},
+        </if>
+        <if test="completeTime not in {null,''}">
+        complete_time=#{completeTime},
+        </if>
+        snpay=#{snpay},cod=#{cod},
+        send_courier_no=#{sendCourierNo},sign_name=#{signName},send_substation_no=#{sendSubstationNo},status=#{status},erred=#{erred},sign_input=#{signInput},mpay=#{mpay},cpay_type='CASH',cpay_status='SUCCESS',sign_input_time=now(),sign_inputer=#{inputer}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    
+    <delete id="sinputInfoDel" parameterType="java.util.Map">
+        delete from sinput_info where order_no=#{orderNo}
+    </delete>
+    
+    <insert id="sinputInfo" parameterType="SinputInfo" useGeneratedKeys="true" keyColumn="id" keyProperty="id">  
+        insert into sinput_info(order_no,si_freight_type,si_freight,create_time,si_pay_type,si_month_settle_no,
+        si_dis_user_no,si_cod_name,si_good_price,si_good_valuation,si_cpay,si_vpay,si_snpay,si_pay_acount,
+        lgc_order_no,operator,op_type,erred) 
+        values (#{orderNo},#{siFreightType},#{siFreight},#{createTime},#{siPayType},#{siMonthSettleNo},
+        #{siDisUserNo},#{siCodName},#{siGoodPrice},#{siGoodValuation},#{siCpay},#{siVpay},#{siSnpay},#{siPayAcount},
+        #{lgcOrderNo},#{operator},#{opType},#{erred})  
+    </insert> 
+    
+    
+    <insert id="sinputInfoSend"  useGeneratedKeys="true" keyColumn="id">  
+        insert into edit_record(order_no,si_freight_type,si_freight,create_time,si_pay_type,si_month_settle_no,
+        si_dis_user_no,si_cod_name,si_good_price,si_good_valuation,si_cpay,si_vpay,si_snpay,si_pay_acount,
+        lgc_order_no,operator,op_type,erred,sinputor,sinput_time) 
+        values (#{orderNo},#{freight_type},#{freight},now(),#{payType},#{monthSettleNo},
+        #{disUserNo},#{cod_name},#{good_price},#{goodValuation},#{cpay},#{vpay},#{tnpay},#{payAcount},
+        #{lgcOrderNo},#{operator},'SEND',#{erred},#{operator},now())  
+    </insert> 
+    
+    <insert id="sinputInfoSign"  useGeneratedKeys="true" keyColumn="id">  
+        insert into sinput_info(order_no,si_freight_type,si_freight,create_time,si_pay_type,si_month_settle_no,
+        si_dis_user_no,si_cod_name,si_good_price,si_good_valuation,si_cpay,si_vpay,si_snpay,si_pay_acount,
+        lgc_order_no,operator,op_type,erred,sinputor,sinput_time) 
+        values (#{orderNo},#{si_freight_type},#{si_freight},now(),#{si_payType},#{si_monthSettleNo},
+        #{si_disUserNo},#{si_cod_name},#{si_good_price},#{si_goodValuation},#{si_cpay},#{si_vpay},#{si_snpay},#{si_payAcount},
+        #{lgcOrderNo},#{operator},'SIGN',#{erred},#{operator},now())  
+    </insert> 
+    
+     <insert id="editRecord"  useGeneratedKeys="true" keyColumn="id">  
+        insert into edit_record(order_no,si_freight_type,si_freight,create_time,si_pay_type,si_month_settle_no,
+        si_dis_user_no,si_cod_name,si_good_price,si_good_valuation,si_cpay,si_vpay,si_snpay,si_pay_acount,
+        lgc_order_no,operator,op_type,erred,sinputor,sinput_time) 
+        values (#{orderNo},#{si_freight_type},#{si_freight},now(),#{si_payType},#{si_monthSettleNo},
+        #{si_disUserNo},#{si_cod_name},#{si_good_price},#{si_goodValuation},#{si_cpay},#{si_vpay},#{si_snpay},#{si_payAcount},
+        #{lgcOrderNo},#{operator},'SIGN',#{erred},#{operator},now())  
+    </insert> 
+    
+       <insert id="editOrderRecord"   parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id">  
+        insert into edit_record(order_no,si_freight_type,si_freight,create_time,si_pay_type,si_month_settle_no,
+        take_courier_no,send_courier_no,take_order_time,send_order_time,
+        si_cod_name,si_good_price,si_good_valuation,si_vpay,si_snpay,si_pay_acount,
+        lgc_order_no,operator,op_type,sinputor,sinput_time) 
+        values (#{orderNo},#{freightType},#{freight},now(),#{payType},#{monthSettleNo},
+        #{takeCourierNo},#{sendCourierNo},#{takeOrderTime},#{sendOrderTime},
+        #{codName}, #{goodPrice},#{goodValuation},#{vpay},#{snpay},#{payAcount}, #{lgcOrderNo},#{inputer},'EDIT',#{inputer},now())  
+    </insert> 
+    
+    <update id="proOrder"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set pro_order='Y',pro_id=#{proId}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="forNo"  parameterType="java.util.Map">
+        update order_info set for_no=#{forNo}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="bind"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set lgc_order_no=#{lgcOrderNo},status=2
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="examine"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set examine_status=#{examineStatus},examiner=#{examiner},examine_time=#{etime}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+    <update id="signExamineOrder"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set sign_examine_status=#{examineStatus},sign_examiner=#{examiner},sign_examine_time=#{etime}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+    <update id="signExamine"  useGeneratedKeys="true" keyColumn="id">
+        update sinput_info set examine_status=#{examineStatus},examiner=#{examiner},examine_time=#{etime}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+    <update id="sendUpdate"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set send_substation_no=#{sno},send_courier_no=#{cno}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+        <update id="proUpdate"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set send_substation_no=#{sno},send_courier_no=#{cno},status=8
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="examineUpdate"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set take_courier_no=#{takeCourierNo},send_courier_no=#{sendCourierNo},cod=#{cod},freight_type=#{freight_type},cod=#{cod},
+        pay_type=#{payType},month_settle_no=#{monthSettleNo},dis_user_no=#{disUserNo},cod_name=#{cod_name},good_price=#{good_price},
+        cpay=#{cpay},good_valuation=#{goodValuation},vpay=#{vpay},freight=#{freight},tnpay=#{tnpay},snpay=#{snpay},pay_acount=#{payAcount},
+        month_discount=#{monthDiscount},cod_rate=#{codRate}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="completed"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set status=3
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="updateSendLocation"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set send_longitude=#{lng},send_latitude=#{lat}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="updateRevLocation"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set rev_longitude=#{lng},rev_latitude=#{lat}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+     <update id="updateStatus"  useGeneratedKeys="true" keyColumn="id">
+        update order_info set `status`=#{s}
+        <where>
+            order_no=#{orderNo}
+        </where>
+    </update>
+    
+    
+
+    <insert id="save" parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id" keyProperty="id">  
+        insert into order_info(order_no,send_area,send_addr,send_name,send_phone,rev_area,rev_addr,rev_name,rev_phone,item_Status,message,
+        item_name,freight_type,freight,tnpay,cod,take_time_begin,take_time_end,take_time,take_addr,pay_status,order_note,create_time,last_update_time,
+        lgc_no,status,kstatus,source,lgc_order_no,sub_station_no,take_courier_no) values(#{orderNo}, #{sendArea},#{sendAddr},#{sendName},#{sendPhone},#{revArea},#{revAddr},
+        #{revName},#{revPhone},#{itemStatus},#{message},#{itemName},#{freightType},#{freight},#{freight},#{cod},#{takeTimeBegin},#{takeTimeEnd},#{takeTime},#{takeAddr},#{payStatus}
+        ,#{orderNote},#{createTime},#{lastUpdateTime},#{lgcNo},#{status},#{kstatus},#{source},#{lgcOrderNo},#{subStationNo},#{takeCourierNo})  
+    </insert> 
+    
+    <insert id="takesave" parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id" keyProperty="id">  
+        insert into order_info(order_no,send_area,send_addr,send_name,send_phone,rev_area,rev_addr,rev_name,rev_phone,item_Status,take_order_time,
+        item_name,freight_type,freight,tnpay,cod,take_time_begin,take_time_end,take_time,take_addr,pay_status,order_note,create_time,last_update_time,
+        lgc_no,status,kstatus,source,lgc_order_no,sub_station_no,take_courier_no) values(#{orderNo}, #{sendArea},#{sendAddr},#{sendName},#{sendPhone},#{revArea},#{revAddr},
+        #{revName},#{revPhone},#{itemStatus},#{takeOrderTime},#{itemName},#{freightType},#{freight},#{freight},#{cod},#{takeTimeBegin},#{takeTimeEnd},#{takeTime},#{takeAddr},#{payStatus}
+        ,#{orderNote},#{createTime},#{lastUpdateTime},#{lgcNo},#{status},#{kstatus},#{source},#{lgcOrderNo},#{subStationNo},#{takeCourierNo})  
+    </insert>
+    
+    <insert id="saveZid" parameterType="OrderInfo" useGeneratedKeys="true" keyColumn="id" keyProperty="id">  
+        insert into order_info(order_no,send_area,send_addr,send_name,send_phone,rev_area,rev_addr,rev_name,rev_phone,item_Status,zid,
+        item_name,freight_type,freight,tnpay,cod,take_time_begin,take_time_end,take_time,take_addr,pay_status,order_note,create_time,last_update_time,
+        lgc_no,status,kstatus,source,lgc_order_no,sub_station_no,take_courier_no) values(#{orderNo}, #{sendArea},#{sendAddr},#{sendName},#{sendPhone},#{revArea},#{revAddr},
+        #{revName},#{revPhone},#{itemStatus},'1',#{itemName},#{freightType},#{freight},#{freight},#{cod},#{takeTimeBegin},#{takeTimeEnd},#{takeTime},#{takeAddr},#{payStatus}
+        ,#{orderNote},#{createTime},#{lastUpdateTime},#{lgcNo},#{status},#{kstatus},#{source},#{lgcOrderNo},#{subStationNo},#{takeCourierNo})  
+    </insert> 
+    
+    
+    <!--  获取快递员未收或已收订单  -->
+    <select id="getRevOrder" resultType="java.util.HashMap">  
+        select o.`status`,o.order_no,o.lgc_order_no,concat(o.send_area,o.send_addr) addr,o.create_time,o.take_order_time,o.send_phone,o.take_courier_no,c.real_name
+        from order_info o left join courier c on o.take_courier_no=c.courier_no 
+        <where>
+            o.`status` in (1,2,3,6) 
+            <if test="substationNo != null and substationNo != ''"> and c.substation_no in (0,${substationNo}) </if>
+            <if test="substationNo == null or substationNo == ''"> and 1=2 </if>
+            <if test="orderStatus != null and orderStatus==1"> and o.`status`=1  </if>
+            <if test="orderStatus != null and orderStatus==2"> and  o.`status` in (2,3,6,7,8)</if>
+            <if test="lgcOrderNo != null and lgcOrderNo != ''"> and o.lgc_order_no=#{lgcOrderNo}</if>
+            <if test="courierNo != null and courierNo != ''"> and c.courier_no=#{courierNo}</if>
+            <if test="realName!=null and realName!=''">and c.real_name like  CONCAT(CONCAT('%', #{realName}),'%')</if>
+            <if test="createTimeBegin != null and createTimeBegin !=''"> and o.create_time&gt;=#{createTimeBegin}</if>
+            <if test="createTimeEnd != null and createTimeEnd !=''"> and o.create_time&lt;#{createTimeEnd}</if>
+            <if test="takeTimeBegin != null and takeTimeBegin !=''"> and o.take_order_time&gt;=#{takeTimeBegin}</if>
+            <if test="takeTimeEnd != null and takeTimeEnd !=''"> and o.take_order_time&lt;#{takeTimeEnd}</if>
+        </where> 
+    </select> 
+    
+    <!--  获取快递员待派或已派订单  -->
+    <select id="getSendOrder" resultType="java.util.HashMap">  
+        select o.`status`,o.order_no,o.lgc_order_no,concat(o.rev_area,o.rev_addr) addr,o.create_time,o.send_phone,o.send_courier_no,c.real_name,o.send_order_time
+        from order_info o left join courier c on o.send_courier_no=c.courier_no
+        <where>
+            o.`status` in (2,3)
+            <if test="substationNo != null and substationNo != ''"> and c.substation_no in (0,${substationNo}) </if>
+            <if test="substationNo == null or substationNo == ''"> and 1=2 </if>
+            <if test="orderStatus != null and orderStatus==1"> and o.`status`=2  </if>
+            <if test="orderStatus != null and orderStatus==2"> and o.`status` in (3)   </if>
+            <if test="lgcOrderNo != null and lgcOrderNo != ''"> and o.lgc_order_no=#{lgcOrderNo}</if>
+            <if test="courierNo != null and courierNo != ''"> and c.courier_no=#{courierNo}</if>
+            <if test="createTimeBegin != null and createTimeBegin !=''"> and o.create_time&gt;=#{createTimeBegin}</if>
+            <if test="createTimeEnd != null and createTimeEnd !=''"> and o.create_time&lt;#{createTimeEnd}</if>
+            <if test="sendTimeBegin not in {null,''}">and o.send_order_time <![CDATA[>=]]>#{sendTimeBegin}</if>
+            <if test="sendTimeEnd not in {null,''}">and o.send_order_time <![CDATA[<=]]>#{sendTimeEnd}</if>
+        </where>
+    </select> 
+    
+    <select id="examineOrder" resultType="java.util.HashMap">  
+        select o.*,s.id sid,s.si_freight_type,s.si_freight,s.si_pay_type,s.si_month_settle_no,s.si_dis_user_no,s.si_cod_name,
+        s.si_good_price,s.si_good_valuation,s.si_cpay,s.si_vpay,s.si_snpay,s.si_pay_acount,s.erred si_erred,s.examine_status si_examine_status,s.sinputor
+             from order_info o left join sinput_info  s on o.order_no=s.order_no
+                    left join courier c on o.take_courier_no=c.courier_no 
+             where 1=1 and  o.deled=0  
+        <if test="ids != null and ids !=''"> and o.id in (${ids})</if>
+        <if test="orderNos != null and orderNos !=''"> and o.lgc_order_no in (${orderNos})</if>
+        <if test="examineStatus != null and examineStatus !='' and examineStatus =='PASS'"> and s.examine_status =#{examineStatus} </if>
+        <if test="examineStatus != null and examineStatus =='NONE'"> and (s.examine_status IS NULL OR s.examine_status='INIT')  </if>  <!-- 待审核 -->
+        <if test="createTimeBegin != null and createTimeBegin !=''"> and o.send_order_time&gt;=#{createTimeBegin}</if>
+        <if test="createTimeEnd != null and createTimeEnd !=''"> and o.send_order_time&lt;#{createTimeEnd}</if>
+        <if test="courierNo != null and courierNo !=''"> and (c.real_name like  CONCAT(CONCAT('%', #{courierNo}),'%'))</if> 
+        <if test="erred != null and erred==1"> and (s.erred ='Y' or s.erred is null) </if> 
+        <if test="erred != null and erred==2"> and s.erred ='N' </if> 
+        <if test="sendSno != null and sendSno!=''"> and o.send_substation_no = #{sendSno} </if> 
+        <if test="reqRece != null and reqRece !=''"> and o.req_rece=#{reqRece}</if>
+        <if test="freightType != null and freightType !=''"> and s.si_freight_type=#{freightType}</if>
+        <if test="payType != null and payType !=''"> and s.si_pay_type=#{payType}</if>
+        <if test="monthSettleNo != null and monthSettleNo !=''"> and s.si_month_settle_no=#{monthSettleNo}</if>
+        <if test="proOrder != null and proOrder !=''"> and o.pro_order=#{proOrder}</if>
+         <if test="goodPrice != null and goodPrice !=''"> and s.si_good_price&gt;0.001</if>
+         <if test="vpay != null and vpay !=''"> and s.si_vpay&gt;0.001</if>
+         order by o.id desc 
+    </select> 
+    
+    <!--  签收单列表 -->
+    <select id="sendOrder" resultType="java.util.HashMap">  
+      select o.*,c.real_name send_courier_name,s.id sid,s.si_freight_type,s.si_freight,s.si_pay_type,s.si_month_settle_no,s.si_dis_user_no,s.si_cod_name,
+        s.si_good_price,s.si_good_valuation,s.si_cpay,s.si_vpay,s.si_snpay,s.si_pay_acount,s.erred si_erred,s.examine_status si_examine_status,s.sinputor,
+         m.month_sname monthSname,s1.substation_name sendSubstationName    
+             from order_info o left join sinput_info  s on o.order_no=s.order_no
+                    left join courier c on o.send_courier_no=c.courier_no 
+                left join month_settle_user  m on (o.month_settle_no = m.month_settle_no)
+              left join substation s1 on (o.send_substation_no = s1.substation_no)       
+             where 1=1 and  o.deled=0  
+        <if test="ids != null and ids !=''"> and o.id in (${ids})</if>
+        <if test="zid != null and zid !=''"> and o.zid=0</if>  <!--  去除子单 -->
+        <if test="orderNos != null and orderNos !=''"> and o.lgc_order_no in (${orderNos})</if>
+        <if test="examineStatus != null and examineStatus !='' and examineStatus =='PASS'"> and o.sign_examine_status =#{examineStatus} </if>
+        <if test="examineStatus != null and examineStatus =='NONE'"> and (o.sign_examine_status IS NULL OR o.sign_examine_status='INIT')  </if>  <!-- 待审核 -->
+        <if test="createTimeBegin != null and createTimeBegin !=''"> and o.send_order_time&gt;=#{createTimeBegin}</if>
+        <if test="createTimeEnd != null and createTimeEnd !=''"> and o.send_order_time&lt;#{createTimeEnd}</if>
+        <if test="courierNo != null and courierNo !=''"> and c.real_name =#{courierNo}</if> 
+        <if test="erred != null and erred==1"> and (s.erred ='Y' or s.erred is null) </if> 
+        <if test="erred != null and erred==2"> and s.erred ='N' </if> 
+        <if test="sendSno != null and sendSno!=''"> and o.send_substation_no = #{sendSno} </if> 
+        <if test="reqRece != null and reqRece !=''"> and o.req_rece=#{reqRece}</if>
+        <if test="freightType != null and freightType !=''"> and o.freight_type=#{freightType}</if>
+        <if test="payType != null and payType !=''"> and o.pay_type=#{payType}</if>
+        <if test="monthSettleNo != null and monthSettleNo !=''"> and m.month_settle_no=#{monthSettleNo}</if>
+        <if test="proOrder != null and proOrder !=''"> and o.pro_order=#{proOrder}</if>
+         <if test="goodPrice != null and goodPrice !=''"> and o.good_price&gt;0.001</if>
+         <if test="vpay != null and vpay !=''"> and o.vpay&gt;0.001</if>
+           <if test="forOrder != null and forOrder !=''"> and LENGTH(o.for_no)>0 AND o.for_no IS NOT NULL</if>
+         <if test="zidan != null and zidan !=''"> and LENGTH(o.zidan_order)>0 AND o.zidan_order IS NOT NULL</if>
+          <if test="substationNo != null and substationNo !=''"> and o.send_substation_no in('',0,${substationNo}) </if>
+         <if test="orderBy != null and orderBy ==1"> order by o.freight desc</if> 	
+		 <if test="orderBy != null and orderBy ==2"> order by o.freight asc</if> 	 
+		 <if test="orderBy != null and orderBy ==3"> order by o.good_price desc</if> 
+		 <if test="orderBy != null and orderBy ==4"> order by o.good_price asc</if>
+		 <if test="orderBy == null or orderBy == ''">  order by o.good_price desc,o.id desc</if> 	
+    </select>  
+    
+    <!--  签收单列表导出 -->
+    <select id="sendOrderList" resultType="java.util.HashMap">  
+      select o.*,c.real_name takeCourierName,s.id sid,s.si_freight_type,s.si_freight,s.si_pay_type,s.si_month_settle_no,s.si_dis_user_no,s.si_cod_name,
+        s.si_good_price,s.si_good_valuation,s.si_cpay,s.si_vpay,s.si_snpay,s.si_pay_acount,s.erred si_erred,s.examine_status si_examine_status,s.sinputor,
+        s.sinput_time ,m.month_sname monthSname,s2.substation_name takeSubstationName,
+          s1.substation_name sendSubstationName,c1.real_name sendCourierName  ,p.descb       
+             from order_info o left join sinput_info  s on o.order_no=s.order_no
+                    left join courier c on o.take_courier_no=c.courier_no 
+                       left join month_settle_user  m on (o.month_settle_no = m.month_settle_no)
+                    left join substation s2 on (o.sub_station_no = s2.substation_no) 
+              left join substation s1 on (o.send_substation_no = s1.substation_no)
+              left join courier c1 on (o.send_courier_no=c1.courier_no)
+              left join pro_order p on (o.order_no = p.order_no)
+             where 1=1 and  o.deled=0  and  o.deled=0  
+        <if test="ids != null and ids !=''"> and o.id in (${ids})</if>
+          <if test="zid != null and zid !=''"> and o.zid=0</if>  <!--  去除子单 -->
+        <if test="orderNos != null and orderNos !=''"> and o.lgc_order_no in (${orderNos})</if>
+        <if test="examineStatus != null and examineStatus !='' and examineStatus =='PASS'"> and o.sign_examine_status =#{examineStatus} </if>
+        <if test="examineStatus != null and examineStatus =='NONE'"> and (o.sign_examine_status IS NULL OR o.sign_examine_status='INIT')  </if>  <!-- 待审核 -->
+        <if test="createTimeBegin != null and createTimeBegin !=''"> and o.send_order_time&gt;=#{createTimeBegin}</if>
+        <if test="createTimeEnd != null and createTimeEnd !=''"> and o.send_order_time&lt;#{createTimeEnd}</if>
+        <if test="courierNo != null and courierNo !=''"> and c1.real_name=#{courierNo}</if> 
+        <if test="erred != null and erred==1"> and (s.erred ='Y' or s.erred is null) </if> 
+        <if test="erred != null and erred==2"> and s.erred ='N' </if> 
+        <if test="sendSno != null and sendSno!=''"> and o.send_substation_no = #{sendSno} </if> 
+        <if test="reqRece != null and reqRece !=''"> and o.req_rece=#{reqRece}</if>
+        <if test="freightType != null and freightType !=''"> and o.freight_type=#{freightType}</if>
+        <if test="payType != null and payType !=''"> and o.pay_type=#{payType}</if>
+        <if test="monthSettleNo != null and monthSettleNo !=''"> and o.month_settle_no=#{monthSettleNo}</if>
+        <if test="proOrder != null and proOrder !=''"> and o.pro_order=#{proOrder}</if>
+         <if test="goodPrice != null and goodPrice !=''"> and o.good_price&gt;0.001</if>
+         <if test="vpay != null and vpay !=''"> and o.vpay&gt;0.001</if>
+           <if test="forOrder != null and forOrder !=''"> and LENGTH(o.for_no)>0 AND o.for_no IS NOT NULL</if>
+         <if test="zidan != null and zidan !=''"> and LENGTH(o.zidan_order)>0 AND o.zidan_order IS NOT NULL</if>
+         <if test="orderBy != null and orderBy ==1"> order by o.freight desc</if> 	
+		 <if test="orderBy != null and orderBy ==2"> order by o.freight asc</if> 	 
+		 <if test="orderBy != null and orderBy ==3"> order by o.good_price desc</if> 
+		 <if test="orderBy != null and orderBy ==4"> order by o.good_price asc</if>
+		 <if test="orderBy == null or orderBy == ''">  order by o.good_price desc,o.id desc</if> 		
+    </select>  
+    
+    
+    <select id="examinePassOrder" resultType="java.util.HashMap">  
+        select o.* from order_info o left join courier c on (o.take_courier_no=c.courier_no or o.send_courier_no=c.courier_no)  where deled=0 and o.examine_status='PASS' and o.sign_examine_status='PASS' and o.`status`=3
+        <if test="orderNos != null and orderNos !=''"> and o.lgc_order_no in (${orderNos})</if>
+        <if test="createTimeBegin != null and createTimeBegin !=''"> and o.take_order_time&gt;=#{createTimeBegin}</if>
+        <if test="createTimeEnd != null and createTimeEnd !=''"> and o.take_order_time&lt;#{createTimeEnd}</if>
+         <if test="sendTimeBegin != null and sendTimeBegin !=''"> and o.send_order_time&gt;=#{sendTimeBegin}</if>
+        <if test="sendTimeEnd != null and sendTimeEnd !=''"> and o.send_order_time&lt;#{sendTimeEnd}</if>
+        <if test="monthSettleNo != null and monthSettleNo !=''"> and o.month_settle_no=#{monthSettleNo} </if> 
+        <if test="codName != null and codName !=''"> and o.cod_name =#{codName} </if> 
+        <if test="disUserNo != null and disUserNo !=''"> and o.dis_user_no =#{disUserNo} </if> 
+        <if test="courierNo != null and courierNo !=''"> and (o.take_courier_no =#{courierNo} or o.send_courier_no=#{courierNo})</if> 
+        <if test="realName != null and realName !=''"> and c.real_name like  CONCAT(CONCAT('%', #{realName}),'%')</if> 
+        group by id order by id desc 
+    </select>
+    
+    
+    <select id="ehistory" resultType="java.util.HashMap">  
+        select  s.*,c1.real_name AS takeName,c2.real_name AS sendName  from edit_record s 
+               left join courier c1 on s.take_courier_no=c1.courier_no
+               left join courier c2 on s.send_courier_no=c2.courier_no
+        where 1=1 
+        <if test="orderNos != null and orderNos !=''"> and (s.lgc_order_no in (${orderNos}) or s.order_no in (${orderNos}))</if>
+        <if test="createTimeBegin != null and createTimeBegin !=''"> and s.create_time&gt;=#{createTimeBegin}</if>
+        <if test="createTimeEnd != null and createTimeEnd !=''"> and s.create_time&lt;#{createTimeEnd}</if>
+        <if test="operator != null and operator !=''"> and s.operator like  CONCAT(CONCAT('%', #{operator}),'%')</if> 
+        order by s.id desc
+    </select> 
+    
+    
+    
+    
+    <select id="getSinputInfoById" resultType="java.util.HashMap" parameterType="java.lang.Integer">  
+        select * from sinput_info
+        <where>
+            id= #{id}
+        </where>
+    </select>
+    
+    <select id="codList" resultType="java.util.HashMap">  
+        select d.id d_id,IFNULL(d.pay_status,0) pay_status,d.pay_time,d.pay_type,d.pay_name,d.note,o.id,o.order_no,o.month_settle_no,o.cod_name cod_no,c.month_sname,o.lgc_order_no,o.rece_no,o.for_no,o.take_order_time,o.create_time,o.send_name,o.send_order_time,
+        o.sign_name,o.item_Status,o.item_weight,o.good_price,o.take_courier_no,o.send_courier_no,c1.real_name takeName,c2.real_name sendName,o.cpay
+        from order_info o left join month_settle_user c on o.month_settle_no=c.month_settle_no left join cod_info d on o.order_no=d.order_no
+           left join courier c1 on o.take_courier_no=c1.courier_no left join courier c2 on o.send_courier_no=c2.courier_no
+        <where>
+            o.good_price>0 and o.`status`=3 and o.deled=0 <if test="reportExam != null and reportExam eq 'YY'"> AND o.sign_examine_status='PASS' </if> 
+             <if test="orderNos != null and orderNos !=''"> and o.lgc_order_no in (${orderNos})</if>
+            <if test="createTimeBegin != null and createTimeBegin !=''"> 
+                 <if test="ttype != null and ttype =='SSS'">
+                     and o.take_order_time&gt;=#{createTimeBegin}
+                 </if>
+                  <if test="ttype != null and ttype =='RRR'">
+                     and o.send_order_time&gt;=#{createTimeBegin}
+                 </if>
+                  <if test="ttype != null and ttype =='PPP'">
+                     and d.pay_time&gt;=#{createTimeBegin}
+                 </if>
+            </if>
+            <if test="createTimeEnd != null and createTimeEnd !=''">
+             <if test="ttype != null and ttype  eq 'SSS'">
+                     and o.take_order_time&lt;#{createTimeEnd}
+                 </if>
+                  <if test="ttype != null and ttype eq 'RRR'">
+                     and o.send_order_time&lt;#{createTimeEnd}
+                 </if>
+                  <if test="ttype != null and ttype eq 'PPP'">
+                     and d.pay_time&lt;#{createTimeEnd}
+                 </if>
+            </if> 
+           <!--  <if test="tcourierNo != null and tcourierNo !=''"> and o.take_courier_no=#{tcourierNo}</if> 	 
+            <if test="scourierNo != null and scourierNo !=''"> and o.send_courier_no=#{scourierNo}</if>  -->
+            <if test="tcourierNo != null and tcourierNo !=''"> and c1.real_name like concat('%',#{tcourierNo},'%')</if> 	 
+            <if test="scourierNo != null and scourierNo !=''"> and c2.real_name like concat('%',#{scourierNo},'%')</if>
+            <if test="codNo != null and codNo !=''"> and o.month_settle_no=#{codNo}</if> 	
+             <if test="payType != null and payType !=''"> and d.pay_type=#{payType}</if> 	
+            
+             <if test="payStatus != null and payStatus =='NN'"> and (d.pay_status is null or d.pay_status=0)</if> 
+             <if test="payStatus != null and payStatus =='YY'"> and d.pay_status=1</if> 		
+            <if test="substationNo != null and substationNo !=''"> and (c.substation_no in (${substationNo}) or ISNULL(c.substation_no) or LENGTH(c.substation_no)&lt;1)</if>  
+        </where>
+        <if test="orderBy != null and orderBy ==1"> order by o.cod_name desc</if> 	
+        <if test="orderBy != null and orderBy ==2"> order by o.cod_name asc</if> 	 
+        <if test="orderBy != null and orderBy ==3"> order by o.good_price desc</if> 
+        <if test="orderBy != null and orderBy ==4"> order by o.good_price asc</if> 		
+        <if test="orderBy == null or orderBy == ''"> order by o.id desc</if> 	
+    </select>
+    
+    
+   
+    <select id="codMonthList" resultType="java.util.HashMap">  
+        select if(isnull(o.cod_name),'',o.cod_name) codNo,t.discount,sum(o.good_price) codPrice 
+        from order_info o left join cod_settle_user c on o.cod_name=c.cod_no left join cod_rate_type t on c.cstype=t.id
+        where  o.good_price>0 and o.examine_status='PASS' and o.`status`=3 
+        <if test="createTimeBegin != null and createTimeBegin !=''"> and o.take_order_time&gt;=#{createTimeBegin}</if>
+        <if test="createTimeEnd != null and createTimeEnd !=''"> and o.take_order_time&lt;#{createTimeEnd}</if>
+        <if test="substationNo != null and substationNo !=''"> and (c.substation_no in (${substationNo}) or ISNULL(c.substation_no) or LENGTH(c.substation_no)&lt;1)</if>  
+        group by codNo
+    </select> 
+    
+    
+    <select id="Satistics" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select
+        g.sendCourierNo courierNo,
+        g.sendCount sendCount,
+        h.takeCount takeCount,
+        (g.sumPay+h.sumPay) sumMoney,
+        (g.sumMapy+h.sumMapy) sumMMoney,
+        g.sumGoodPrice sumGoodPrice,
+        (g.sumSnpay+h.sumTnpay) sumNpay
+        from
+	
+        (select
+        f.courier_no sendCourierNo ,
+        IF(ISNULL(c.sendCount),0,c.sendCount) sendCount,
+        IF(ISNULL(c.sumPay),0.00,c.sumPay) sumPay,
+        IF(ISNULL(c.sumMapy),0.00,c.sumMapy) sumMapy,
+        IF(ISNULL(c.sumGoodPrice),0.00,c.sumGoodPrice) sumGoodPrice,
+        IF(ISNULL(c.sumSnpay),0.00,c.sumSnpay) sumSnpay
+        from
+	
+        ( select
+        b.send_courier_no sendCourierNo,
+        count(*) sendCount,
+        SUM(IF(b.freight_type IN(3,4),0.00,IF(b.freight_type=2,b.freight,0.00))) sumPay,
+        SUM(IF(b.freight_type=4,b.mpay,0.00))sumMapy,
+        sum(IF(ISNULL(b.good_price),0.00,b.good_price)) sumGoodPrice,
+        sum(IF(ISNULL(b.snpay),0.00,b.snpay)) sumSnpay
+        from order_info b
+        where
+        substr(b.send_order_time,1,10)=#{nowTime}
+        and b.status=3
+        and b.examine_status='PASS'
+        group by b.send_courier_no )
+        c
+        right join
+        courier f
+        on f.courier_no=c.sendCourierNo) g
+        JOIN
+        (select
+        f.courier_no takeCourierNo,
+        IF(ISNULL(d.takeCount),0,d.takeCount) takeCount,
+        IF(ISNULL(d.sumPay),0.00,d.sumPay) sumPay,
+        IF(ISNULL(d.sumMapy),0.00,d.sumMapy) sumMapy,
+        IF(ISNULL(d.sumTnpay),0.00,d.sumTnpay) sumTnpay
+        from
+        ( select
+        a.take_courier_no takeCourierNo,
+        count(a.id) takeCount ,
+        SUM(IF(a.freight_type IN(3,4),0.00,IF(a.freight_type=1,a.freight+a.cpay+a.vpay,a.cpay+a.vpay))) sumPay,
+        SUM(IF(a.freight_type=3,a.mpay,0.00))sumMapy,
+        SUM(IF(ISNULL(a.tnpay),0.00,a.tnpay)) sumTnpay
+        from order_info a
+        where
+        substr(a.take_order_time,1,10)=#{nowTime}
+        and a.status=3
+        and a.examine_status='PASS'
+        group by
+        a.take_courier_no
+        ) d
+        RIGHT JOIN
+        courier f
+        ON
+        f.courier_no=d.takeCourierNo) h
+        ON g.sendCourierNo=h.takeCourierNo
+
+    </select>
+	
+    <insert id="note"  useGeneratedKeys="true" keyColumn="id">  
+        insert into order_note(order_id,note,operator,op_src,create_time) 
+        values (#{orderId},#{note},#{operator},#{opSrc},#{createTime})  
+    </insert> 
+    
+    <select id="getNoteList" resultType="java.util.HashMap" parameterType="java.lang.Integer">  
+        select * from order_note
+        <where>
+            order_id= #{orderId}
+        </where>
+    </select>
+    <select id="getOrderInoList" resultType ="com.yogapay.boss.domain.OrderInfo" parameterType="java.lang.String">  
+        select * from order_info
+        <where>
+            user_no= #{userNo}
+        </where>
+    </select>
+	
+    <select id="selectOrder" parameterType="java.lang.String" resultType="map">
+        select count(id) as count from order_info where lgc_order_no=#{lgcOrderNo}
+    </select>
+	
+    <update id="updateSendImgUrl" parameterType="java.util.List">
+        update order_info set send_plane=case <foreach item="t" collection="list" separator=" "> when lgc_order_no=#{t.lgcOrderNo} then #{t.imgPath} </foreach> end
+        where lgc_order_no in <foreach item="t" collection="list" separator="," open="(" close=")">#{t.lgcOrderNo}</foreach>
+    </update>
+	
+    <update id="updateTakeImgUrl" parameterType="java.util.List">
+        update order_info set take_plane= case <foreach item="t" collection="list" separator=" "> when lgc_order_no=#{t.lgcOrderNo} then #{t.imgPath} </foreach> end
+        where lgc_order_no in <foreach item="t" collection="list" separator="," open="(" close=")">#{t.lgcOrderNo}</foreach>
+    </update>
+        
+        
+    <!--    <select id="dayCompanyInfo" parameterType="map" resultType="map">
+        select tx.*,tj.time_join as timejoin,x2.* from timejoin tj left join
+        (select * from(select count(p.id) as wtcount,count(o.id) as jcount,IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=1 then o.freight+o.vpay end),0.0) as jcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1 then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1 then o.freight+o.vpay end),0.0) as jmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1) then o.freight+o.vpay end),0.0) as jtotalMoney,DATE(o.take_order_time) as jtime  
+        from order_info o left join pro_order p on o.order_no=p.order_no where DATE(o.take_order_time) BETWEEN #{beginTime} and #{endTime} and o.examine_status='PASS' group by DATE(o.take_order_time)) t) tx on tj.time_join=tx.jtime
+        left join 
+        (
+        select * from(select count(o.id) as dcount,IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join pro_order p on o.order_no=p.order_no where DATE(o.send_order_time) BETWEEN #{beginTime} and #{endTime} and o.sign_examine_status='PASS' group by DATE(o.send_order_time)) x) x2 on tj.time_join=x2.dtime where tj.time_join BETWEEN  #{beginTime} and #{endTime} and (tx.jcount is not null or x2.dcount is not null)
+    </select>-->
+    
+    
+    <select id="dayCompanyInfo" parameterType="map" resultType="map">
+        select t.*,x.*,h.*,nt.* from (
+        select tj.time_join as timejoin from timejoin tj ) x
+        left join
+        (
+        select count(case when o.deled=0 then p.id end) as wtcount,DATE(p.create_time) as ntime from order_info o 
+        left join pro_order p on o.order_no=p.order_no where DATE(p.create_time) BETWEEN #{beginTime} and #{endTime}       
+        group by DATE(p.create_time)
+        ) nt on (x.timejoin=nt.ntime)
+        left join 
+        (
+        select count(case when 1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if> then o.id end) as jcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if>) then o.freight+o.vpay end),0.0) as jtotalMoney,
+        DATE(o.take_order_time) as jtime from order_info o 
+        where o.take_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59') and o.status in (2,3,7,8) and o.zid=0   <!-- left join pro_order p on o.order_no=p.order_no--><!-- 新加分站权限  -->
+        group by DATE(o.take_order_time)
+        ) t on (x.timejoin=t.jtime) 
+
+        left join (
+        select count(o.id) as dcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=2 then o.freight+ o.vpay end),0.0) as dcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o  where o.send_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59') and o.zid=0 and o.status=3 <if test="reportExam != null and reportExam eq 'YY'"> AND o.sign_examine_status='PASS' </if>  <!-- left join pro_order p on o.order_no=p.order_no-->
+        group by DATE(o.send_order_time)
+        ) h on (x.timejoin=h.dtime)  where (t.jtime BETWEEN #{beginTime} and #{endTime} or  h.dtime BETWEEN #{beginTime} and #{endTime} or nt.ntime BETWEEN #{beginTime} and #{endTime}) and ((nt.wtcount !=0 and nt.wtcount is not null) or (t.jcount !=0 and t.jcount is not NULL) or (h.dcount !=0 and h.dcount is not null) or h.dgoodMoney is not null)
+    </select>
+    
+    <!--    <select id="dayCompanyCountSum" parameterType="map" resultType="map">        
+        select sum(wtcount) as wtcount,sum(jcount) as jcount,sum(jcashMoney) as jcashMoney,sum(jmonthMoney) as jmonthMoney,sum(jmemberMoney) as jmemberMoney,
+        sum(jtotalMoney) as jtotalMoney,sum(dcount) as dcount,sum(dcashMoney) as dcashMoney,sum(dmonthMoney) as dmonthMoney,sum(dmemberMoney) as dmemberMoney,
+        sum(dtotalMoney) as dtotalMoney,sum(dgoodMoney) as dgoodMoney from (
+        select tx.*,tj.time_join as timejoin,x2.* from timejoin tj left join
+        (select * from(select count(case when o.examine_status='PASS' then p.id end) as wtcount,count(case when o.examine_status='PASS' then o.id end) as jcount,IFNULL(sum(case when o.pay_type='CASH' and freight_type=1 and o.examine_status='PASS' then o.freight+o.vpay end),0.0) as jcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1 and o.examine_status='PASS' then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1 and o.examine_status='PASS' then o.freight+o.vpay end),0.0) as jmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1 and o.examine_status='PASS') then o.freight+o.vpay end),0.0) as jtotalMoney,DATE(case when o.examine_status='PASS' then o.take_order_time end) as jtime  
+        from order_info o left join pro_order p on o.order_no=p.order_no where DATE(o.take_order_time) BETWEEN #{beginTime} and #{endTime} group by DATE(o.take_order_time)) t) tx on tj.time_join=tx.jtime
+        left join 
+        (
+        select * from(select count(o.id) as dcount,IFNULL(sum(case when o.pay_type='CASH' and freight_type=2 then o.freight+o.vpay end),0.0) as dcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1'  then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join pro_order p on o.order_no=p.order_no where o.send_order_time BETWEEN  #{beginTime} and #{endTime} and o.sign_examine_status='PASS'  group by DATE(o.send_order_time)) x) x2 on tj.time_join=x2.dtime where tj.time_join BETWEEN  #{beginTime} and #{endTime} and (tx.jcount is not null or x2.dcount is not null)) p
+    </select>-->
+    
+    <select id="dayCompanyCountSum" parameterType="map" resultType="map">        
+        select sum(wtcount) as wtcount,sum(jcount) as jcount,sum(jcashMoney) as jcashMoney,sum(jmonthMoney) as jmonthMoney,sum(jmemberMoney) as jmemberMoney,
+        sum(jtotalMoney) as jtotalMoney,sum(dcount) as dcount,IFNULL(sum(dcashMoney),0.0) as dcashMoney,sum(dmonthMoney) as dmonthMoney,sum(dmemberMoney) as dmemberMoney,
+        sum(dtotalMoney) as dtotalMoney,sum(IFNULL(dgoodMoney,0.0)) as dgoodMoney,sum(jcashMoney+dcashMoney+IFNULL(dgoodMoney,0.0)) as xjtotal,sum(jmonthMoney+dmonthMoney) as yjtotal,sum(jmemberMoney+dmemberMoney) as hytotal,sum(jtotalMoney+dtotalMoney+IFNULL(dgoodMoney,0.0)) as total from(
+        select sum(wtcount) as wtcount,sum(jcount) as jcount,IFNULL(sum(jcashMoney),0.0) as jcashMoney,IFNULL(sum(jmonthMoney),0.0) as jmonthMoney,IFNULL(sum(jmemberMoney),0.0) as jmemberMoney,
+        IFNULL(sum(jtotalMoney),0.0) as jtotalMoney,sum(dcount) as dcount,IFNULL(sum(dcashMoney),0.0) as dcashMoney,IFNULL(sum(dmonthMoney),0.0) as dmonthMoney,IFNULL(sum(dmemberMoney),0.0) as dmemberMoney,
+        IFNULL(sum(dtotalMoney),0.0) as dtotalMoney,sum(IFNULL(dgoodMoney,0.0)) as dgoodMoney from (
+        select t.*,x.*,h.*,nt.* from (
+        select tj.time_join as timejoin from timejoin tj) x
+        left join
+        (
+        select count(case when o.deled=0 then p.id end) as wtcount,DATE(p.create_time) as ntime from order_info o 
+        left join pro_order p on o.order_no=p.order_no where DATE(p.create_time) BETWEEN #{beginTime} and #{endTime} 
+        group by DATE(p.create_time)
+        ) nt on (x.timejoin=nt.ntime)
+        left join 
+        (
+        select count(case when 1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if> then o.id end) as jcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if>) then o.freight+o.vpay end),0.0) as jtotalMoney,
+        DATE(o.take_order_time) as jtime from order_info o 
+         where o.take_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59') and o.status in (2,3,7,8) and o.zid=0 <!-- left join pro_order p on o.order_no=p.order_no-->
+        group by DATE(o.take_order_time)
+        ) t on (x.timejoin=t.jtime) 
+
+        left join (
+        select count(o.id) as dcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=2 then o.freight+ o.vpay end),0.0) as dcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o  where o.send_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59') and o.zid=0 and o.status=3 <if test="reportExam != null and reportExam eq 'YY'"> AND o.sign_examine_status='PASS' </if> <!-- left join pro_order p on o.order_no=p.order_no-->
+        group by DATE(o.send_order_time)
+        ) h on (x.timejoin=h.dtime)  where (t.jtime BETWEEN #{beginTime} and #{endTime} or  h.dtime BETWEEN #{beginTime} and #{endTime} or nt.ntime BETWEEN #{beginTime} and #{endTime}) and ((nt.wtcount !=0 and nt.wtcount is not null) or (t.jcount !=0 and t.jcount is not NULL) or (h.dcount !=0 and h.dcount is not null) or h.dgoodMoney is not null)) p) t
+        
+    </select>
+    
+    
+    <!--    <select id="daysubstationInfo" parameterType="map" resultType="map">
+        select tx.*,tj.time_join as timejoin,x2.* from timejoin tj left join
+        (select * from (select o.sub_station_no as jsubstationNo,s.substation_name as jsubstationName,count(p.id) as wtcount,count(o.id) as jcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=1 then o.freight+o.vpay end),0.0) as jcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1 then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1 then o.freight+o.vpay end),0.0) as jmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1) then o.freight+o.vpay end),0.0) as jtotalMoney,
+        DATE(o.take_order_time) as jtime  
+        from order_info o left join substation s on o.sub_station_no=s.substation_no left join pro_order p on o.order_no=p.order_no where DATE(o.take_order_time) BETWEEN #{beginTime} and #{endTime} and o.sub_station_no is not NULL and o.examine_status='PASS'<if test="substationNo != null and substationNo !=''"> and o.sub_station_no like concat('%',#{substationNo},'%')</if>  group by DATE(o.take_order_time),o.sub_station_no) t) tx on tj.time_join=tx.jtime
+        left join 
+        (
+        select * from (select o.sub_station_no as dsubstationNo,s.substation_name as dsubstationName,count(o.id) as dcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join substation s on o.sub_station_no=s.substation_no left join pro_order p on o.order_no=p.order_no where DATE(o.send_order_time) BETWEEN #{beginTime} and #{endTime} and o.sub_station_no is not NULL and o.sign_examine_status='PASS'<if test="substationNo != null and substationNo !=''"> and o.send_substation_no like concat('%',#{substationNo},'%')</if> group by DATE(o.send_order_time),o.sub_station_no) x) x2 on (tj.time_join=x2.dtime) where tj.time_join BETWEEN  #{beginTime} and #{endTime} and (tx.jcount is not null or x2.dcount is not null)
+         tx.jsubstationNo=x2.dsubstationNo and 
+    </select>-->
+    
+    <select id="daysubstationInfo" parameterType="map" resultType="map">
+        select t.*,x.*,h.*,nt.* from (
+        select s.substation_no as substationNo,s.inner_no sinnerNo,s.substation_name as substationName,tj.time_join as timejoin from substation s join timejoin tj ) x
+        left join
+        (
+        select o.send_substation_no as nsubstationNo,s.substation_name as nsubstationName,count(case when o.deled=0 then p.id end) as wtcount,
+        DATE(p.create_time) as ntime from order_info o 
+        left join substation s on o.send_substation_no=s.substation_no left join pro_order p on o.order_no=p.order_no where DATE(p.create_time) BETWEEN #{beginTime} and #{endTime}
+        <if test="substationNo != null and substationNo !=''"> and o.send_substation_no in (${substationNo})</if> 
+        group by DATE(p.create_time),o.send_substation_no
+        ) nt on (x.substationNo=nt.nsubstationNo and x.timejoin=nt.ntime)
+        left join         
+        (
+        select o.sub_station_no as jsubstationNo,s.substation_name as jsubstationName,count(case when 1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if>  then o.id end) as jcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if>  then o.freight+o.vpay end),0.0) as jcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if>  then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if>  then o.freight+o.vpay end),0.0) as jmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if> ) then o.freight+o.vpay end),0.0) as jtotalMoney,
+        DATE(o.take_order_time) as jtime from order_info o 
+        left join substation s on o.sub_station_no=s.substation_no  where o.take_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59')  and o.zid=0  and o.status in (2,3,7,8) and o.sub_station_no is not NULL <!-- left join pro_order p on o.order_no=p.order_no-->
+        <if test="substationNo != null and substationNo !=''"> and o.sub_station_no in (${substationNo})</if>
+        group by DATE(o.take_order_time),o.sub_station_no
+        ) t on (x.substationNo=t.jsubstationNo and x.timejoin=t.jtime)
+
+        left join (
+        select o.send_substation_no as dsubstationNo,s.substation_name as dsubstationName,count(o.id) as dcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=2 then o.freight+ o.vpay end),0.0) as dcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join substation s on o.send_substation_no=s.substation_no  where o.send_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59') and o.zid=0  and o.status=3 and o.send_substation_no is not NULL <if test="reportExam != null and reportExam eq 'YY'"> AND o.sign_examine_status='PASS' </if> <!-- left join pro_order p on o.order_no=p.order_no-->
+        <if test="substationNo != null and substationNo !=''"> and o.send_substation_no in (${substationNo})</if> 
+        group by DATE(o.send_order_time),o.send_substation_no
+        ) h on (x.substationNo=h.dsubstationNo and x.timejoin=h.dtime)  where (t.jtime BETWEEN #{beginTime} and #{endTime} or  h.dtime BETWEEN #{beginTime} and #{endTime} or nt.ntime BETWEEN #{beginTime} and #{endTime}) and ((nt.wtcount !=0 and nt.wtcount is not null) or (t.jcount !=0 and t.jcount is not NULL) or (h.dcount !=0 and h.dcount is not null) or h.dgoodMoney is not null)      
+    </select>    
+    
+    <!--    <select id="daysubstationCountSum" parameterType="map" resultType="map">        
+        select sum(wtcount) as wtcount,sum(jcount) as jcount,sum(jcashMoney) as jcashMoney,sum(jmonthMoney) as jmonthMoney,sum(jmemberMoney) as jmemberMoney,
+        sum(jtotalMoney) as jtotalMoney,sum(dcount) as dcount,sum(dcashMoney) as dcashMoney,sum(dmonthMoney) as dmonthMoney,sum(dmemberMoney) as dmemberMoney,
+        sum(dtotalMoney) as dtotalMoney,sum(dgoodMoney) as dgoodMoney from (
+        select tx.*,tj.time_join as timejoin,x2.* from timejoin tj left join
+        (select * from(select o.sub_station_no as jsubstationNo, count(p.id) as wtcount,count(o.id) as jcount,IFNULL(sum(case when o.pay_type='CASH' and freight_type=1 then freight+vpay end),0.0) as jcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and freight_type=1 then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and freight_type=1 then o.freight+o.vpay end),0.0) as jmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1) then o.freight+o.vpay end),0.0) as jtotalMoney,DATE(o.take_order_time) as jtime  
+        from order_info o left join substation s on o.sub_station_no=s.substation_no left join pro_order p on o.order_no=p.order_no where DATE(o.take_order_time) BETWEEN #{beginTime} and #{endTime} and o.sub_station_no is not NULL and o.examine_status='PASS'<if test="substationNo != null and substationNo !=''"> and o.sub_station_no like concat('%',#{substationNo},'%')</if>  group by DATE(o.take_order_time),o.sub_station_no) t) tx on tj.time_join=tx.jtime
+        left join 
+        (
+        select * from (select o.sub_station_no as dsubstationNo,count(o.id) as dcount,IFNULL(sum(case when o.pay_type='CASH' and freight_type=2 then freight+vpay end),0.0) as dcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join substation s on o.sub_station_no=s.substation_no left join pro_order p on o.order_no=p.order_no where DATE(o.send_order_time) BETWEEN  #{beginTime} and #{endTime} and o.sub_station_no is not NULL and o.sign_examine_status='PASS'<if test="substationNo != null and substationNo !=''"> and o.send_substation_no like concat('%',#{substationNo},'%')</if>  group by DATE(o.send_order_time),o.sub_station_no) x) x2 on (tj.time_join=x2.dtime) where tj.time_join BETWEEN  #{beginTime} and #{endTime} and (tx.jcount is not null or x2.dcount is not null)) p
+         tx.jsubstationNo=x2.dsubstationNo and 
+    </select>-->
+    
+    
+    <select id="daysubstationCountSum" parameterType="map" resultType="map">     
+        select sum(wtcount) as wtcount,sum(jcount) as jcount,sum(jcashMoney) as jcashMoney,sum(jmonthMoney) as jmonthMoney,sum(jmemberMoney) as jmemberMoney,
+        sum(jtotalMoney) as jtotalMoney,sum(dcount) as dcount,IFNULL(sum(dcashMoney),0.0) as dcashMoney,sum(dmonthMoney) as dmonthMoney,sum(dmemberMoney) as dmemberMoney,
+        sum(dtotalMoney) as dtotalMoney,sum(IFNULL(dgoodMoney,0.0)) as dgoodMoney,sum(jcashMoney+dcashMoney+IFNULL(dgoodMoney,0.0)) as xjtotal,sum(jmonthMoney+dmonthMoney) as yjtotal,sum(jmemberMoney+dmemberMoney) as hytotal,sum(jtotalMoney+dtotalMoney+IFNULL(dgoodMoney,0.0)) as total from(
+        select sum(wtcount) as wtcount,sum(jcount) as jcount,IFNULL(sum(jcashMoney),0.0) as jcashMoney,IFNULL(sum(jmonthMoney),0.0) as jmonthMoney,IFNULL(sum(jmemberMoney),0.0) as jmemberMoney,
+        IFNULL(sum(jtotalMoney),0.0) as jtotalMoney,sum(dcount) as dcount,IFNULL(sum(dcashMoney),0.0) as dcashMoney,IFNULL(sum(dmonthMoney),0.0) as dmonthMoney,IFNULL(sum(dmemberMoney),0.0) as dmemberMoney,
+        IFNULL(sum(dtotalMoney),0.0) as dtotalMoney,sum(IFNULL(dgoodMoney,0.0)) as dgoodMoney from (
+        select t.*,x.*,h.*,nt.* from (
+        select s.substation_no as substationNo,tj.time_join as timejoin from substation s join timejoin tj ) x
+        left join
+        (
+        select o.send_substation_no as nsubstationNo,s.substation_name as nsubstationName,count(case when o.deled=0 then p.id end) as wtcount,
+        DATE(p.create_time) as ntime from order_info o 
+        left join substation s on o.send_substation_no=s.substation_no left join pro_order p on o.order_no=p.order_no where DATE(p.create_time) BETWEEN #{beginTime} and #{endTime}
+        <if test="substationNo != null and substationNo !=''"> and o.send_substation_no in (${substationNo})</if> 
+        group by DATE(p.create_time),o.send_substation_no
+        ) nt on (x.substationNo=nt.nsubstationNo and x.timejoin=nt.ntime)
+        left join 
+        (
+        select o.sub_station_no as jsubstationNo,s.substation_name as jsubstationName,count(case when 1=1  
+        <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if> then o.id end) as jcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=1  <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if> then o.freight+o.vpay end),0.0) as jcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1  <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if> then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1  <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if> then o.freight+o.vpay end),0.0) as jmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1  <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS'</if>) then o.freight+o.vpay end),0.0) as jtotalMoney,
+        DATE(o.take_order_time) as jtime from order_info o 
+        left join substation s on o.sub_station_no=s.substation_no  where o.take_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59')  and o.zid=0  and o.status in (2,3,7,8) and o.sub_station_no is not NULL <!-- left join pro_order p on o.order_no=p.order_no-->
+        <if test="substationNo != null and substationNo !=''"> and o.sub_station_no in (${substationNo})</if>
+        group by DATE(o.take_order_time),o.sub_station_no
+        ) t on (x.substationNo=t.jsubstationNo and x.timejoin=t.jtime)
+
+        left join (
+        select o.send_substation_no as dsubstationNo,s.substation_name as dsubstationName,count(o.id) as dcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=2 then o.freight+ o.vpay end),0.0) as dcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join substation s on o.send_substation_no=s.substation_no where o.send_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59')  and o.zid=0  and o.status=3 and o.send_substation_no is not NULL  <if test="reportExam != null and reportExam eq 'YY'"> and o.sign_examine_status='PASS'</if> <!-- left join pro_order p on o.order_no=p.order_no-->
+        <if test="substationNo != null and substationNo !=''"> and o.send_substation_no in (${substationNo})</if>
+        group by DATE(o.send_order_time),o.send_substation_no
+        ) h on (x.substationNo=h.dsubstationNo and x.timejoin=h.dtime)  where (t.jtime BETWEEN #{beginTime} and #{endTime} or  h.dtime BETWEEN #{beginTime} and #{endTime} or nt.ntime BETWEEN #{beginTime} and #{endTime}) and ((nt.wtcount !=0 and nt.wtcount is not null) or (t.jcount !=0 and t.jcount is not NULL) or (h.dcount !=0 and h.dcount is not null) or h.dgoodMoney is not null)) p) t
+        
+    </select>
+    
+    
+    <!--    <select id="daycourierInfo" parameterType="map" resultType="map">
+        select tx.*,tj.time_join as timejoin,x2.* from timejoin tj left join
+        (select * from (select o.take_courier_no as jcourierNo,s.real_name as jcourierName,count(p.id) as wtcount,count(o.id) as jcount,IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=1 then o.freight+o.vpay end),0.0) as jcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1 then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1 then o.freight+o.vpay end),0.0) as jmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1) then o.freight+o.vpay end),0.0) as jtotalMoney,DATE(o.take_order_time) as jtime  
+        from order_info o left join courier s on o.take_courier_no=s.courier_no left join pro_order p on o.order_no=p.order_no where DATE(o.take_order_time) BETWEEN #{beginTime} and #{endTime} and o.examine_status='PASS'<if test="courierNo != null and courierNo !=''"> and o.take_courier_no like concat('%',#{courierNo},'%')</if>
+        <if test="substationNo != null and substationNo !=''"> and o.sub_station_no like concat('%',#{substationNo},'%')</if> group by DATE(o.take_order_time),o.take_courier_no) t) tx on tj.time_join=tx.jtime
+        left join 
+        (
+        select * from (select o.send_courier_no as dcourierNo,s.real_name as dcourierName,count(o.id) as dcount,IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=2 then o.freight+ o.vpay end),0.0) as dcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join courier s on o.send_courier_no=s.courier_no left join pro_order p on o.order_no=p.order_no where DATE(o.send_order_time) BETWEEN #{beginTime} and #{endTime} and o.sign_examine_status='PASS'<if test="courierNo != null and courierNo !=''"> and o.send_courier_no like concat('%',#{courierNo},'%')</if>
+        <if test="substationNo != null and substationNo !=''"> and o.send_substation_no like concat('%',#{substationNo},'%')</if> group by DATE(o.send_order_time),o.send_courier_no) x) x2 on (tj.time_join=x2.dtime) where tj.time_join BETWEEN  #{beginTime} and #{endTime} and (tx.jcount is not null or x2.dcount is not null)
+         tx.jcourierNo=x2.dcourierNo and  
+    </select>-->
+    
+    <select id="daycourierInfo" parameterType="map" resultType="map">
+        select t.*,x.*,h.*,nt.*,cds.id  cdsid,cds.cash_count  AS cdsCash ,cds.month_count as cdsMonth,cds.good_count as cdsGood,
+        IFNULL(jcashMoney,0)+IFNULL(dcashMoney,0) as cashhj,IFNULL(jmonthMoney,0)+IFNULL(dmonthMoney,0) as monthhj,
+        IF((IFNULL(jcashMoney,0)+IFNULL(dcashMoney,0)-cds.cash_count)>0,'Y','N') as cashNew,
+        IF((IFNULL(jmonthMoney,0)+IFNULL(dmonthMoney,0)-cds.month_count)>0,'Y','N') as monthNew,
+        IF((IFNULL(dgoodMoney,0)-cds.good_count)>0,'Y','N') as goodNew
+        from (
+        select c.courier_no as courierNo,c.inner_no cinnerNo,c.real_name as courierName,c.substation_no ,sc.inner_no as scno,sc.substation_name as scname, tj.time_join as timejoin ,concat(c.id,tj.id) AS ctime from courier c join timejoin tj left join substation sc on c.substation_no=sc.substation_no  ) x        
+        left join courier_day_settle cds on cds.ctime=x.ctime left join
+        (
+        select o.send_courier_no as ncourierNo,count(case when o.deled=0 then p.id end) as wtcount,
+        DATE(p.create_time) as ntime ,s2.inner_no as nsubstationNo,s2.substation_name as nsubstationName from order_info o 
+        left join courier s on o.send_courier_no=s.courier_no  left join substation s2  on s2.substation_no =s.substation_no left join pro_order p on o.order_no=p.order_no where DATE(p.create_time) BETWEEN #{beginTime} and #{endTime}
+        <if test="courierNo != null and courierNo !=''"> 
+        and (o.send_courier_no like concat('%',#{courierNo},'%') or s.real_name like concat('%',#{courierNo},'%')  or s.inner_no  like concat('%',#{courierNo},'%') )     
+        </if>
+        <if test="substationNo != null and substationNo !=''"> and s2.substation_no in  (${substationNo} )</if>
+        group by DATE(p.create_time),o.send_courier_no
+        ) nt on (x.courierNo=nt.ncourierNo and x.timejoin=nt.ntime)
+        left join 
+        (
+        select o.take_courier_no as jcourierNo,s.real_name as jcourierName,s2.inner_no as jsubstationNo,s2.substation_name as jsubstationName,count(case when 1=1 <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> then o.id end) as jcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=1  <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if>) then o.freight+o.vpay end),0.0) as jtotalMoney,
+        DATE(o.take_order_time) as jtime from order_info o 
+        left join courier s on o.take_courier_no=s.courier_no
+        left join substation s2  on s2.substation_no =s.substation_no where o.take_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59')  and o.zid=0 and o.status in (2,3,7,8) <!-- left join pro_order p on o.order_no=p.order_no-->
+        <if test="courierNo != null and courierNo !=''">
+         and (o.take_courier_no like concat('%',#{courierNo},'%') or s.real_name like concat('%',#{courierNo},'%')  or s.inner_no  like concat('%',#{courierNo},'%') )          
+         </if>
+        <if test="substationNo != null and substationNo !=''"> and s2.substation_no  in (${substationNo} )</if>
+        group by DATE(o.take_order_time),o.take_courier_no
+        ) t on (x.courierNo=t.jcourierNo and x.timejoin=t.jtime)      
+        left join (
+        select o.send_courier_no as dcourierNo,s.real_name as dcourierName,s2.inner_no as dsubstationNo,s2.substation_name as dsubstationName,count(o.id) as dcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=2 then o.freight+ o.vpay end),0.0) as dcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join courier s on o.send_courier_no=s.courier_no  
+        left join substation s2  on s2.substation_no =s.substation_no where o.send_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59')  and o.zid=0 and o.`status`=3 <if test="reportExam != null and reportExam eq 'YY'"> and o.sign_examine_status='PASS' </if>  <!-- left join pro_order p on o.order_no=p.order_no-->
+        <if test="courierNo != null and courierNo !=''"> 
+        and (o.send_courier_no like concat('%',#{courierNo},'%') or s.real_name like concat('%',#{courierNo},'%')  or s.inner_no  like concat('%',#{courierNo},'%') )  
+        </if>
+        <if test="substationNo != null and substationNo !=''"> and s2.substation_no  in (${substationNo} )</if>
+        group by DATE(o.send_order_time),o.send_courier_no
+        ) h on (x.courierNo=h.dcourierNo and x.timejoin=h.dtime)  where 1=1   <if test="ctime != null and ctime !=''"> and x.ctime in (${ctime} )</if>
+        and (t.jtime BETWEEN #{beginTime} and #{endTime} or  h.dtime BETWEEN #{beginTime} and #{endTime} or nt.ntime BETWEEN #{beginTime} and #{endTime}) and ((nt.wtcount !=0 and nt.wtcount is not null) or (t.jcount !=0 and t.jcount is not NULL) or (h.dcount !=0 and h.dcount is not null) or h.dgoodMoney is not null)
+    </select>
+    
+    <!--    <select id="daycourierCountSum" parameterType="map" resultType="map">        
+        select sum(wtcount) as wtcount,sum(jcount) as jcount,sum(jcashMoney) as jcashMoney,sum(jmonthMoney) as jmonthMoney,sum(jmemberMoney) as jmemberMoney,
+        sum(jtotalMoney) as jtotalMoney,sum(dcount) as dcount,sum(dcashMoney) as dcashMoney,sum(dmonthMoney) as dmonthMoney,sum(dmemberMoney) as dmemberMoney,
+        sum(dtotalMoney) as dtotalMoney,sum(dgoodMoney) as dgoodMoney from (
+        select tx.*,tj.time_join as timejoin,x2.* from timejoin tj left join
+        (select * from(select o.take_courier_no as jcourierNo, count(p.id) as wtcount,count(o.id) as jcount,IFNULL(sum(case when o.pay_type='CASH' and freight_type=1 then o.freight+o.vpay end),0.0) as jcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and freight_type=1 then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and freight_type=1 then o.freight+o.vpay end),0.0) as jmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1) then o.freight+o.vpay end),0.0) as jtotalMoney,DATE(o.take_order_time) as jtime  
+        from order_info o left join courier s on o.take_courier_no=s.courier_no left join pro_order p on o.order_no=p.order_no where DATE(o.take_order_time) BETWEEN #{beginTime} and #{endTime} and o.examine_status='PASS'<if test="courierNo != null and courierNo !=''"> and o.take_courier_no like concat('%',#{courierNo},'%')</if>
+        <if test="substationNo != null and substationNo !=''"> and o.sub_station_no like concat('%',#{substationNo},'%')</if> group by DATE(o.take_order_time),o.take_courier_no) t) tx on tj.time_join=tx.jtime
+        left join 
+        (
+        select * from (select o.send_courier_no as dcourierNo,count(o.id) as dcount,IFNULL(sum(case when o.pay_type='CASH' and freight_type=2 then o.freight+o.vpay end),0.0) as dcashMoney,IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' and o.freight_type=2 then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join courier s on o.send_courier_no=s.courier_no left join pro_order p on o.order_no=p.order_no where DATE(o.send_order_time) BETWEEN  #{beginTime} and #{endTime} and o.sign_examine_status='PASS'<if test="courierNo != null and courierNo !=''"> and o.take_courier_no like concat('%',#{courierNo},'%')</if>
+        <if test="substationNo != null and substationNo !=''"> and o.send_substation_no like concat('%',#{substationNo},'%')</if> group by DATE(o.send_order_time),o.send_courier_no) x) x2 on (tj.time_join=x2.dtime) where tj.time_join BETWEEN  #{beginTime} and #{endTime} and (tx.jcount is not null or x2.dcount is not null)) p
+         tx.jcourierNo=x2.dcourierNo and  
+    </select>-->
+    
+    <select id="daycourierCountSum" parameterType="map" resultType="map">  
+        select sum(wtcount) as wtcount,sum(jcount) as jcount,sum(jcashMoney) as jcashMoney,sum(jmonthMoney) as jmonthMoney,sum(jmemberMoney) as jmemberMoney,
+        sum(jtotalMoney) as jtotalMoney,sum(dcount) as dcount,IFNULL(sum(dcashMoney),0.0) as dcashMoney,sum(dmonthMoney) as dmonthMoney,sum(dmemberMoney) as dmemberMoney,
+        sum(dtotalMoney) as dtotalMoney,sum(dgoodMoney) as dgoodMoney,sum(jcashMoney+dcashMoney+dgoodMoney) as xjtotal,sum(jmonthMoney+dmonthMoney) as yjtotal,sum(jmemberMoney+dmemberMoney) as hytotal,sum(jtotalMoney+dtotalMoney+dgoodMoney) as total from(
+        select sum(wtcount) as wtcount,sum(jcount) as jcount,IFNULL(sum(jcashMoney),0.0) as jcashMoney,IFNULL(sum(jmonthMoney),0.0) as jmonthMoney,IFNULL(sum(jmemberMoney),0.0) as jmemberMoney,
+        IFNULL(sum(jtotalMoney),0.0) as jtotalMoney,sum(dcount) as dcount,IFNULL(sum(dcashMoney),0.0) as dcashMoney,IFNULL(sum(dmonthMoney),0.0) as dmonthMoney,IFNULL(sum(dmemberMoney),0.0) as dmemberMoney,
+        IFNULL(sum(dtotalMoney),0.0) as dtotalMoney,sum(dgoodMoney) as dgoodMoney from (      
+        select t.*,x.*,h.*,nt.* from (
+        select c.courier_no as courierNo,c.real_name as courierName,tj.time_join as timejoin from courier c join timejoin tj ) x
+        left join
+        (
+        select o.send_courier_no as ncourierNo,count(case when o.deled=0 then p.id end) as wtcount,
+        DATE(p.create_time) as ntime from order_info o 
+        left join courier s on o.send_courier_no=s.courier_no left join substation s2  on s2.substation_no =s.substation_no left join pro_order p on o.order_no=p.order_no where DATE(p.create_time) BETWEEN #{beginTime} and #{endTime}
+        <if test="courierNo != null and courierNo !=''">
+         and (o.send_courier_no like concat('%',#{courierNo},'%') or s.real_name like concat('%',#{courierNo},'%')  or s.inner_no  like concat('%',#{courierNo},'%') )  
+         </if>
+        <if test="substationNo != null and substationNo !=''"> and s2.substation_no in (${substationNo} )</if>
+        group by DATE(p.create_time),o.send_courier_no
+        ) nt on (x.courierNo=nt.ncourierNo and x.timejoin=nt.ntime)
+        left join 
+        (
+        select o.take_courier_no as jcourierNo,s.real_name as jcourierName,count(case when 1=1 <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> then o.id end) as jcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> then o.freight+o.vpay end),0.0) as jmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if>) then o.freight+o.vpay end),0.0) as jtotalMoney,
+        DATE(o.take_order_time) as jtime from order_info o 
+        left join courier s on o.take_courier_no=s.courier_no 
+        left join substation s2  on s2.substation_no =s.substation_no where o.take_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59')  and o.zid=0 and o.`status` in (2,3,7,8) <!-- left join pro_order p on o.order_no=p.order_no-->
+        <if test="courierNo != null and courierNo !=''"> 
+        and ( o.take_courier_no like concat('%',#{courierNo},'%') or s.real_name like concat('%',#{courierNo},'%')  or s.inner_no  like concat('%',#{courierNo},'%') )  
+        </if>
+        <if test="substationNo != null and substationNo !=''"> and s2.substation_no in (${substationNo} )</if>
+        group by DATE(o.take_order_time),o.take_courier_no
+        ) t on (x.courierNo=t.jcourierNo and x.timejoin=t.jtime)
+        left join (
+        select o.send_courier_no as dcourierNo,s.real_name as dcourierName,count(o.id) as dcount,
+        IFNULL(sum(case when o.pay_type='CASH' and o.freight_type=2 then o.freight+ o.vpay end),0.0) as dcashMoney,
+        IFNULL(sum(case when o.pay_type='MONTH' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmonthMoney,
+        IFNULL(sum(case when o.pay_type='HUIYUAN' and o.freight_type=2 then o.freight+o.vpay end),0.0) as dmemberMoney,
+        IFNULL(sum(case when ((o.pay_type='CASH' or o.pay_type='MONTH' or o.pay_type='HUIYUAN') and o.freight_type=2) then o.freight+o.vpay end),0.0) as dtotalMoney,
+        IFNULL(sum(case when o.cod='1' then o.good_price end),0.0) as dgoodMoney,DATE(o.send_order_time) as dtime  
+        from order_info o left join courier s on o.send_courier_no=s.courier_no  
+        left join substation s2  on s2.substation_no =s.substation_no where o.send_order_time BETWEEN #{beginTime} and concat(#{endTime},' 23:59:59')  and o.zid=0 and o.`status`=3 <if test="reportExam != null and reportExam eq 'YY'"> and o.sign_examine_status='PASS' </if> <!-- left join pro_order p on o.order_no=p.order_no-->
+        <if test="courierNo != null and courierNo !=''"> 
+        and (o.send_courier_no like concat('%',#{courierNo},'%') or s.real_name like concat('%',#{courierNo},'%')  or s.inner_no  like concat('%',#{courierNo},'%') )  
+        </if>
+        <if test="substationNo != null and substationNo !=''"> and s2.substation_no in (${substationNo} )</if>
+        group by DATE(o.send_order_time),o.send_courier_no
+        ) h on (x.courierNo=h.dcourierNo and x.timejoin=h.dtime)  where (t.jtime BETWEEN #{beginTime} and #{endTime} or  h.dtime BETWEEN #{beginTime} and #{endTime} or nt.ntime BETWEEN #{beginTime} and #{endTime}) and ((nt.wtcount !=0 and nt.wtcount is not null) or (t.jcount !=0 and t.jcount is not NULL) or (h.dcount !=0 and h.dcount is not null) or h.dgoodMoney is not null)) p) t
+       
+    </select>
+    
+    
+    <!-- 寄件单审核统计 -->
+     <select id="sendEcount" resultType="java.util.HashMap">  
+       SELECT count(0) piao,o.freight_type,o.pay_type,o.freight,sum(o.freight) cfreight  FROM order_info o 
+       left join courier c on (o.take_courier_no=c.courier_no) 
+       where 1=1 
+          <if test="orderNos != null and orderNos !=''"> and (o.lgc_order_no in (${orderNos}) or o.order_no in (${orderNos}))</if>
+          <if test="sendName != null and sendName !=''"> and o.send_name=#{sendName}</if>
+            <if test="createTimeBegin != null and createTimeBegin !=''"> and o.take_order_time&gt;=#{createTimeBegin}</if>
+          <if test="createTimeEnd != null and createTimeEnd !=''"> and o.take_order_time&lt;#{createTimeEnd}</if>
+           <if test="takeTimeBegin != null and takeTimeBegin !=''"> and o.take_order_time&gt;=#{takeTimeBegin}</if>
+          <if test="takeTimeEnd != null and takeTimeEnd !=''"> and o.take_order_time&lt;#{takeTimeEnd}</if>
+          <if test="status != null and status !=''"> and o.`status`=#{status}</if>
+          <if test="payStatus != null and payStatus !=''"> and o.pay_status=#{payStatus}</if>
+          <if test="revName != null and revName !=''"> and o.rev_name=#{revName}</if>
+          <if test="substationNo != null and substationNo != ''"> and (o.sub_station_no in (0,${substationNo})
+            <if test="orderAssign != null and orderAssign !=''"> or o.sub_station_no is null </if>)
+          </if>
+        <if test="substationNo == null or substationNo == ''">and 1=2</if>
+         <if test="courier != null and courier !=''"> and c.real_name like  CONCAT(CONCAT('%', #{courier}),'%')</if> 
+        <if test="assignTos != null and assignTos !=''"> and o.asign_status='S'</if>
+        <if test="assignToc != null and assignToc !=''"> and o.asign_status='C'</if>
+        <if test="el != null and el !=''"> and o.status in (2,3,7,8)</if>
+          <if test="zid != null and zid !=''"> and o.zid=0</if>  <!--  去除子单 -->
+        <if test="noneAssign != null and noneAssign !=''"> and o.asign_status is null</if>
+        <if test="examineStatus != null and examineStatus =='PASS'"> and o.examine_status='PASS'</if>
+        <if test="examineStatus != null and examineStatus =='NONE'"> and (o.examine_status!='PASS' OR o.examine_status is null)</if>
+        <if test="reqRece != null and reqRece !=''"> and o.req_rece=#{reqRece}</if>
+        <if test="freightType != null and freightType !=''"> and o.freight_type=#{freightType}</if>
+        <if test="payType != null and payType !=''"> and o.pay_type=#{payType}</if>
+        <if test="monthSettleNo != null and monthSettleNo !=''"> and o.month_settle_no=#{monthSettleNo}</if>
+        <if test="proOrder != null and proOrder !=''"> and o.pro_order=#{proOrder}</if>
+         <if test="goodPrice != null and goodPrice !=''"> and o.good_price&gt;0.001</if>
+         <if test="vpay != null and vpay !=''"> and o.vpay&gt;0.001</if>
+          <if test="forOrder != null and forOrder !=''"> and LENGTH(o.for_no)>0 AND o.for_no IS NOT NULL</if>
+         <if test="zidan != null and zidan !=''"> and LENGTH(o.zidan_order)>0 AND o.zidan_order IS NOT NULL</if>
+         <if test="deled != null and deled !=''"> and o.deled=1</if>  <!--  无效单查询 -->
+        <if test="deled == null or deled ==''"> and o.deled=0</if>  
+        GROUP BY o.freight,o.freight_type,o.pay_type
+    </select>  
+    
+    <!--  签收单列表统计查询 -->
+    <select id="revEcount" resultType="java.util.HashMap">  
+     SELECT count(0) piao,o.freight_type freight_type,o.pay_type pay_type,o.freight freight,sum(o.freight) cfreight 
+         from order_info o left join sinput_info  s on o.order_no=s.order_no
+         left join courier c on (o.send_courier_no=c.courier_no) 
+             where 1=1 and  o.deled=0 
+        <if test="ids != null and ids !=''"> and o.id in (${ids})</if>
+          <if test="zid != null and zid !=''"> and o.zid=0</if>  <!--  去除子单 -->
+        <if test="orderNos != null and orderNos !=''"> and o.lgc_order_no in (${orderNos})</if>
+        <if test="examineStatus != null and examineStatus !='' and examineStatus =='PASS'"> and o.sign_examine_status =#{examineStatus} </if>
+        <if test="examineStatus != null and examineStatus =='NONE'"> and (o.sign_examine_status IS NULL OR o.sign_examine_status='INIT')  </if>  <!-- 待审核 -->
+        <if test="createTimeBegin != null and createTimeBegin !=''"> and o.send_order_time&gt;=#{createTimeBegin}</if>
+        <if test="createTimeEnd != null and createTimeEnd !=''"> and o.send_order_time&lt;#{createTimeEnd}</if>
+        <if test="erred != null and erred==1"> and (s.erred ='Y' or s.erred is null) </if> 
+        <if test="erred != null and erred==2"> and s.erred ='N' </if> 
+        <if test="courierNo != null and courierNo !=''"> and (c.real_name like  CONCAT(CONCAT('%', #{courierNo}),'%'))</if> 
+        <if test="sendSno != null and sendSno!=''"> and o.send_substation_no = #{sendSno} </if> 
+        <if test="reqRece != null and reqRece !=''"> and o.req_rece=#{reqRece}</if>
+        <if test="freightType != null and freightType !=''"> and o.freight_type=#{freightType}</if>
+        <if test="payType != null and payType !=''"> and o.pay_type=#{payType}</if>
+        <if test="monthSettleNo != null and monthSettleNo !=''"> and o.month_settle_no=#{monthSettleNo}</if>
+        <if test="proOrder != null and proOrder !=''"> and o.pro_order=#{proOrder}</if>
+         <if test="goodPrice != null and goodPrice !=''"> and o.good_price&gt;0.001</if>
+         <if test="vpay != null and vpay !=''"> and o.vpay&gt;0.001</if>
+         GROUP BY o.freight,o.freight_type,o.pay_type
+    </select>  
+    
+    
+    
+	<select id="queryDayCourierInfoByWang" parameterType="map" resultType="map">  
+select DISTINCT c.inner_no courierInnerNo,c.real_name,
+c.courier_no,s.inner_no subtationInnerNo,s.substation_name,
+s.substation_no,e.*,(e.sumCash+e.sumMonth+e.sumHuiyuan) sumAll from courier c,
+substation s ,
+(select 
+c.timeJoin1,
+c.courierNo1,
+c.takeCount,
+c.takeCashCol,
+c.takeMonthCol,
+c.takeHuiyuanCol,
+c.takeWeight,
+d.sendCount,
+d.sendCashCol,
+d.sendMonthCol,
+d.sendHuiyuanCol,
+d.sendGoodPrice,
+d.sendWeight,
+(c.takeCashCol+d.sendCashCol+d.sendGoodPrice) sumCash,
+(c.takeMonthCol+d.sendMonthCol) sumMonth,
+(c.takeHuiyuanCol+c.d.sendHuiyuanCol) sumHuiyuan,
+f.takeForCount,
+f.takeForCol,
+f.takeForWeight,
+c._sum
+ from 
+(select  a.timeJoin1 ,a.courierNo1,b.takeCourierNo,b.takeOrderTime,
+IFNULL(b.takeCount,0)  takeCount,
+IFNULL(b.takeCashCol,0.00) takeCashCol ,
+IFNULL(b.takeMonthCol,0.00) takeMonthCol ,
+IFNULL(b.takeHuiyuanCol,0.00) takeHuiyuanCol,
+IFNULL(b.takeWeight,0.00) takeWeight,
+IFNULL(b._sum,0.00) _sum
+from
+(select  t1.time_join timeJoin1 ,c1.courier_no  courierNo1  from  timejoin t1,courier c1 where  1=1
+<if test="beginTime!=null and beginTime!=''">
+		and t1.time_join>=#{beginTime}
+</if>
+<if test="endTime!=null and endTime!=''">
+		and #{endTime}>=t1.time_join
+</if>
+ ) a
+left join
+(select o1.take_courier_no takeCourierNo,date(o1.take_order_time) takeOrderTime,
+count(o1.id) takeCount,
+SUM(case when o1.freight_type='1'and o1.`pay_type`='CASH' then if(isnull(o1.freight+o1.vpay),0.00,o1.freight+o1.vpay) else 0.00 end) takeCashCol,
+SUM(case when o1.freight_type='1'and o1.`pay_type`='MONTH' then if(isnull(o1.freight+o1.vpay),0.00,o1.freight+o1.vpay) else 0.00 end) takeMonthCol,  
+sum(case when o1.freight_type='1'and o1.`pay_type`='HUIYUAN' then if(isnull(o1.freight+o1.vpay),0.00,o1.freight+o1.vpay) else 0.00 end) takeHuiyuanCol,
+sum(IFNULL(o1.item_weight,0.00)) takeWeight,
+SUM(case when o1.for_no is null or o1.for_no='' then (IFNULL(o1.freight,0.00) +ifNULL(o1.vpay,0.00))  else 0.00 end) _sum
+from order_info o1 
+where o1.`status`not in(1,4,5,9)  and o1.zid=0 
+<if test="unfor != null and unfor!=''">
+  and length(IFNULL(o1.for_no,''))&lt;1 
+</if>
+ <if test="reportExam != null and reportExam eq 'YY'">
+    and o1.examine_status ='PASS' 
+</if>
+<if test="beginTime!=null and beginTime!=''">
+		and o1.take_order_time>=#{beginTime}
+</if>
+<if test="endTime!=null and endTime!=''">
+		and concat(#{endTime},' 23:59:59')>=o1.take_order_time
+</if>
+ group by date(o1.take_order_time),o1.take_courier_no
+) b 
+on a.timeJoin1 = b.takeOrderTime and a.courierNo1 = b.takeCourierNo
+) c ,
+(
+select  a.timeJoin2 ,a.courierNo2,
+b.sendOrderTime ,
+b.sendCourierNo sendCourierNo1,IFNULL(b.sendCount,0) sendCount,
+IFNULL(b.sendCashCol,0.00) sendCashCol,
+IFNULL(b.sendMonthCol,0.00) sendMonthCol,
+IFNULL(b.sendHuiyuanCol,0.00) sendHuiyuanCol,
+IFNULL(b.sendGoodPrice,0.00) sendGoodPrice,
+IFNULL(b.sendWeight,0.00) sendWeight 
+from
+(select  t1.time_join timeJoin2 ,c1.courier_no  courierNo2  from  timejoin t1,courier c1 where 1=1
+<if test="beginTime!=null and beginTime!=''">
+		and t1.time_join>=#{beginTime}
+</if>
+<if test="endTime!=null and endTime!=''">
+		and #{endTime}>=t1.time_join
+</if>
+) a
+left join 
+(select o2.send_courier_no sendCourierNo,date(o2.send_order_time) sendOrderTime,
+count(o2.id) sendCount,
+SUM(case when o2.freight_type='2'and o2.`pay_type`='CASH' then if(isnull(o2.freight+o2.vpay),0.00,o2.freight+o2.vpay) else 0.00 end) sendCashCol,
+SUM(case when o2.freight_type='2'and o2.`pay_type`='MONTH' then if(isnull(o2.freight+o2.vpay),0.00,o2.freight+o2.vpay) else 0.00 end) sendMonthCol,  
+sum(case when o2.freight_type='2'and o2.`pay_type`='HUIYUAN' then if(isnull(o2.freight+o2.vpay),0.00,o2.freight+o2.vpay) else 0.00 end) sendHuiyuanCol,  
+sum(if(isnull(o2.good_price),0.00,o2.good_price)) sendGoodPrice,
+sum(ifnull(o2.item_weight,0.00)) sendWeight
+from order_info o2 
+where o2.`status` = '3'  and o2.zid=0 
+ <if test="reportExam != null and reportExam eq 'YY'">
+   and o2.sign_examine_status ='PASS' 
+</if>
+<if test="beginTime!=null and beginTime!=''">
+		and o2.send_order_time>=#{beginTime}
+</if>
+<if test="endTime!=null and endTime!=''">
+		and concat(#{endTime},' 23:59:59')>=o2.send_order_time
+</if>
+
+group by date(o2.send_order_time),o2.send_courier_no
+) b on a.timeJoin2 = b.sendOrderTime and a.courierNo2 = b.sendCourierNo
+) d,
+(
+select  a.timeJoin3 ,a.courierNo3,b.takeCourierNo,b.takeOrderTime,
+IFNULL(b.takeForCount,0)  takeForCount,
+IFNULL(b.takeForCol,0.00) takeForCol ,
+IFNULL(b.takeForWeight,0.00) takeForWeight
+from
+(select  t1.time_join timeJoin3 ,c1.courier_no  courierNo3  from  timejoin t1,courier c1 where 1=1 
+<if test="beginTime!=null and beginTime!=''">
+		and t1.time_join>=#{beginTime}
+</if>
+<if test="endTime!=null and endTime!=''">
+		and #{endTime}>=t1.time_join
+</if>
+) a
+left join
+(select o1.take_courier_no takeCourierNo,date(o1.take_order_time) takeOrderTime,
+count(o1.id) takeForCount,
+SUM( if(isnull(o1.freight),0.00,o1.freight)) takeForCol,
+sum(ifnull(o1.item_weight,0.00)) takeForWeight
+from order_info o1 
+where o1.`status`not in(1,4,5,9)   and o1.zid=0 
+ <if test="reportExam != null and reportExam eq 'YY'">
+    and o1.examine_status ='PASS'
+</if>
+ and length(o1.for_no)>0
+
+<if test="beginTime!=null and beginTime!=''">
+		and o1.take_order_time >=#{beginTime}
+</if>
+<if test="endTime!=null and endTime!=''">
+		and concat(#{endTime},' 23:59:59')>=o1.take_order_time
+</if>
+
+ group by date(o1.take_order_time),o1.take_courier_no
+) b 
+on a.timeJoin3 = b.takeOrderTime and a.courierNo3 = b.takeCourierNo
+) f
+
+where c.timeJoin1 = d.timeJoin2 and c.courierNo1 = d.courierNo2 and d.timeJoin2 = f.timeJoin3 and d.courierNo2 =f.courierNo3
+) e where c.courier_no = e.courierNo1 and c.substation_no = s.substation_no
+and (e.takeCount>=1 or e.sendCount >=1)  
+       <if test="courierNo != null and courierNo !=''"> 
+       and (e.courierNo1 like concat('%',#{courierNo},'%') or c.real_name like concat('%',#{courierNo},'%')  or c.inner_no  like concat('%',#{courierNo},'%') )     
+       </if>
+       <if test="substationNo != null and substationNo !=''"> and s.substation_no in  (${substationNo} )
+       </if>
+    	  <if test="orderBy ==null or orderBy==''"> order by e.timeJoin1 desc  </if>
+        <if test="orderBy !=null  and orderBy ==1"> order by c.inner_no desc  </if>
+        <if test="orderBy !=null  and orderBy ==2"> order by c.inner_no asc  </if>
+        <if test="orderBy !=null  and orderBy ==3"> order by c.real_name desc  </if>
+        <if test="orderBy !=null  and orderBy ==4"> order by c.real_name asc  </if>
+    </select>
+    
+    
+   <select id="getOrderInfoByLgcOrderNo" parameterType="map" resultType="map">
+        select user_no as userNo from order_info where lgc_order_no =#{lgcOrderNo}  and lgc_no=#{lgcNo} limit 0,1
+    </select>
+    
+    
+    <update id="batchUpdateByIds">
+    	update order_info 
+    	<set>
+	    	 <if test="item_weight !=null and item_weight !=''"> 
+	    	 	item_weight=#{item_weight},
+	    	 </if>
+	    	 <if test="good_price !=null and good_price !=''"> 
+	    	 	good_price=#{good_price},
+	    	 </if>
+	    	 <if test="good_valuation !=null and good_valuation !=''"> 
+	    	 	good_valuation=#{good_valuation},
+	    	 </if>
+	    	 <if test="vpay !=null and vpay !=''"> 
+	    	 	vpay=#{vpay},
+	    	 </if>
+	    	 <if test="freight !=null and freight !=''"> 
+	    	 	freight=#{freight},
+	    	 </if>
+	    	  <if test="pay_acount !=null and pay_acount !=''"> 
+	    	 	pay_acount=#{pay_acount},
+	    	 </if>
+	    	 <if test="freight_type !=null and freight_type !=''"> 
+	    	 	freight_type=#{freight_type},
+	    	 </if>
+	    	  <if test="pay_type !=null and pay_type !=''"> 
+	    	 	pay_type=#{pay_type},
+	    	 </if>
+	    	 <if test="month_settle_no !=null and month_settle_no !=''"> 
+	    	 	month_settle_no=#{month_settle_no},
+	    	 </if>
+	    	 <if test="take_courier_no !=null and take_courier_no !=''"> 
+	    	 	take_courier_no=#{take_courier_no},
+	    	 </if>
+	    	 <if test="send_courier_no !=null and send_courier_no !=''"> 
+	    	 	send_courier_no=#{send_courier_no},
+	    	 </if>
+	    	<if test="sub_station_no !=null and sub_station_no !=''"> 
+	    	 	sub_station_no=#{sub_station_no},
+	    	 </if>
+	    	 <if test="send_substation_no !=null and send_substation_no !=''"> 
+	    	 	send_substation_no=#{send_substation_no},
+	    	 </if>
+	    	  <if test="take_order_time !=null and take_order_time !=''"> 
+	    	 	take_order_time=#{take_order_time},
+	    	 </if>
+	    	  <if test="send_order_time !=null and send_order_time !=''"> 
+	    	 	send_order_time=#{send_order_time}
+	    	 </if>
+    	 </set>
+    	where id in (${ids})
+    </update>
+    
+    <update id="batchUpdatePayAcount">
+    	update order_info t set t.pay_acount =(ifnull(good_price,0)+ifnull(good_valuation,0)+ifnull(vpay,0)+ifnull(freight,0)) where t.id in (${ids})
+    </update>
+    
+    <select id="selectByIds" resultType="java.util.HashMap">
+    	select * from order_info where id in(${ids})
+    </select>
+     
+    <update id="updateCenterWarehouseWeight">
+    	update order_info 
+    	<set>
+    		<if test="center_warehouse_weight !=null and center_warehouse_weight !='' ">
+    			center_warehouse_weight =#{center_warehouse_weight} 
+    		</if>
+    	</set>
+    	where 1=1
+    	<if test="order_no !=null and order_no !='' ">
+    		and order_no=#{order_no}
+    	</if>
+    	<if test="id !=null and id !='' ">
+    		and id=#{id}
+    	</if>
+    	<if test="lgcOrderNo !=null and lgcOrderNo !='' ">
+    		and lgc_order_no=#{lgcOrderNo}
+    	</if>
+    </update>
+    
+    <update id="updateRealSendTime" parameterType="com.yogapay.boss.domain.OrderInfo">
+    update order_info set real_send_time =#{realSendTime} where lgc_order_no=#{lgcOrderNo}
+    </update>
+    
+</mapper>  

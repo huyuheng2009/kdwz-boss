@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="JudgeLabel">  
+	<select id="list" resultType="JudgeLabel">
+		select id,label_name labelName,status,create_time createTime,sort from judge_label where 1=1 
+		<if test="labelName!=null and labelName!=''">
+			and label_name like concat('%',#{labelName},'%')
+		</if> 
+		<if test="status!=null and status!=''">
+			and status =#{status}
+		</if> 
+		order by create_time desc
+		<if test="limit != null and limit != ''"> limit 0,${limit}</if>
+	</select>
+	
+	<insert id="insert" >
+		insert into judge_label(label_name,status,create_time,sort) values(#{labelName},1,now(),0)
+	</insert>
+	
+	<update id="update">
+	
+		update judge_label set label_name=#{labelName} where id=#{id}
+	</update>
+	
+	<update id="updateStatus">
+		update judge_label set status=#{status} where id=#{id}
+	</update>
+	
+	<delete id="delete">
+		delete from judge_label where id=#{id}
+	</delete>
+	
+	
+	<select id="selectById" resultType="JudgeLabel">
+		select id,label_name labelName,status,create_time createTime,sort from judge_label where id=#{id}
+	</select>
+	
+	<select id="selectSummary" resultType="java.util.Map">
+	    select a.*,b.real_name,b.substation_no,c.substation_name from
+		(select courier_no,
+		sum(case when star=5 then 1 else 0 end )as five,
+		sum(case when star=4 then 1 else 0 end )as four,
+		sum(case when star=3 then 1 else 0 end )as three,
+		sum(case when star=2 then 1 else 0 end )as two,
+		sum(case when star=1 then 1 else 0 end )as one,
+		count(1) as service_time,
+		sum(star) as total,
+		group_concat(distinct  label_txt) as label_txt from judge_detail  where 1=1
+		<if test="beginTime !=null and beginTime !=''">
+		   and TO_DAYS(create_time) &gt;= TO_DAYS(#{beginTime})
+		</if>
+		<if test="endTime !=null and endTime !=''">
+		   and TO_DAYS(create_time) &lt;= TO_DAYS(#{endTime})
+		</if>
+		<if test="courier_no !=null and courier_no !=''">
+		   and courier_no=#{courier_no}
+		</if>
+		group by courier_no) a
+		left JOIN
+		courier b
+		on a.courier_no =b.courier_no
+		left join substation c
+		on c.substation_no=b.substation_no
+		<if test="limit != null and limit != ''"> limit 0,${limit}</if>
+	</select>
+	
+	<select id="listDetail" resultType="java.util.Map">
+	select b.take_order_time,b.order_no,b.lgc_order_no,a.courier_no,c.real_name,d.substation_no,d.substation_name,a.star,a.label_txt,a.comments from judge_detail a left join 
+		order_info b
+		on a.order_no =b.order_no
+		left join courier c
+		on a.courier_no=c.courier_no
+		left join substation d
+		on c.substation_no=d.substation_no
+		where 1=1 
+		<if test="beginTime !=null and beginTime !=''">
+		   and TO_DAYS(b.take_order_time) &gt;= TO_DAYS(#{beginTime})
+		</if>
+		<if test="endTime !=null and endTime !=''">
+		   and TO_DAYS(b.take_order_time) &lt;= TO_DAYS(#{endTime})
+		</if>
+		<if test="courier_no !=null and courier_no !=''">
+		   and a.courier_no=#{courier_no}
+		</if>
+		<if test="lgc_order_no !=null and lgc_order_no !=''">
+		   and b.lgc_order_no=#{lgc_order_no}
+		</if>
+		<if test="limit != null and limit != ''"> limit 0,${limit}</if>
+	</select>
+</mapper>

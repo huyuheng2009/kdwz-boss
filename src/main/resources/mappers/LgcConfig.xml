@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="LgcConfig">  
+	
+	<select id="getByType" resultType="java.util.HashMap">  
+        select * from lgc_config
+        <where>
+            config_type = #{configType}
+		</where>
+    </select>
+   
+
+    
+    
+    <update id="updateByTypeName"  useGeneratedKeys="true" keyColumn="id">
+    	update lgc_config set config_value=#{configValue}
+    	<where>
+    		config_type = #{configType} and config_name = #{configName}
+    	</where>
+    </update>
+    
+
+</mapper>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="FranchiseRule">  
+	
+	
+	 <insert id="saveRule"   parameterType="com.yogapay.boss.domain.FranchiseRule" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+    	insert into franchise_rule(begin_time,end_time,money_type,weight_type,wval1,wval2,vpay,zpay,create_time,create_name,fweight,fmoney,xweight,weight_text) 
+values (#{begin_time},#{end_time},#{money_type},#{weight_type},#{wval1},#{wval2},#{vpay},#{zpay},#{create_time},#{create_name},#{fweight},#{fmoney},#{xweight},#{weight_text})
+    </insert>
+	
+<insert id="batchTno" parameterType="java.util.List" >
+    	insert into franchise_rule_tno(rid,tno) values 
+    	<foreach collection="list" item="item" index="index" separator="," >  
+           (#{item.rid},#{item.tno})
+      </foreach> 
+   </insert>
+   
+   <insert id="batchSno" parameterType="java.util.List" >
+    	insert into franchise_rule_sno(rid,sno) values 
+    	<foreach collection="list" item="item" index="index" separator="," >  
+           (#{item.rid},#{item.sno})
+      </foreach> 
+   </insert>
+   
+   <insert id="batchItype" parameterType="java.util.List" >
+    	insert into franchise_rule_itype(rid,itype) values 
+    	<foreach collection="list" item="item" index="index" separator="," >  
+           (#{item.rid},#{item.itype})
+      </foreach> 
+   </insert>			
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from (
+select r1.*, GROUP_CONCAT(tt1.tno) AS tsno, GROUP_CONCAT(sub1.substation_name) AS tsname
+  from franchise_rule r1 left join franchise_rule_tno tt1 on r1.id=tt1.rid 
+   left join substation sub1 on tt1.tno=sub1.substation_no 
+ <where>
+		1=1
+		<if test="mtype!=null and mtype!=''"> and r1.money_type=#{mtype}</if>
+</where>
+  group by r1.id) t1 left join (
+select r2.id as id2,GROUP_CONCAT(tt2.sno) AS ssno, GROUP_CONCAT(sub2.substation_name) AS ssname
+  from franchise_rule r2 left join franchise_rule_sno tt2 on r2.id=tt2.rid 
+   left join substation sub2 on tt2.sno=sub2.substation_no 
+  group by r2.id) t2 on t1.id = t2.id2 
+   left join (
+select r3.id as id3,group_concat(tt3.itype)  AS citype
+  from franchise_rule r3 left join franchise_rule_itype tt3 on r3.id=tt3.rid 
+  group by r3.id) t3 on t1.id = t3.id3 
+   <where>
+		1=1
+		 <if test="tno!=null and tno!=''"> and t1.tsno like  CONCAT(CONCAT('%', #{tno}),'%')</if>
+		<if test="sno!=null and sno!=''"> and t2.ssno like  CONCAT(CONCAT('%', #{sno}),'%')</if>
+		<if test="itype!=null and itype!=''"> and t3.citype like  CONCAT(CONCAT('%', #{itype}),'%')</if>
+   </where>
+        order by id desc
+    </select>
+    
+    <select id="getById" resultType="java.util.HashMap">  
+        select * from (
+select r1.*, GROUP_CONCAT(tt1.tno) AS tsno, GROUP_CONCAT(sub1.substation_name) AS tsname
+  from franchise_rule r1 left join franchise_rule_tno tt1 on r1.id=tt1.rid 
+   left join substation sub1 on tt1.tno=sub1.substation_no 
+ <where>
+		1=1
+		<if test="id!=null and id!=''"> and r1.id=#{id}</if>
+</where>
+  group by r1.id) t1 left join (
+select r2.id as id2,GROUP_CONCAT(tt2.sno) AS ssno, GROUP_CONCAT(sub2.substation_name) AS ssname
+  from franchise_rule r2 left join franchise_rule_sno tt2 on r2.id=tt2.rid 
+   left join substation sub2 on tt2.sno=sub2.substation_no 
+  group by r2.id) t2 on t1.id = t2.id2 
+   left join (
+select r3.id as id3,group_concat(tt3.itype)  AS citype
+  from franchise_rule r3 left join franchise_rule_itype tt3 on r3.id=tt3.rid 
+  group by r3.id) t3 on t1.id = t3.id3 
+       
+    </select>
+    
+    
+    <select id="getRuleByParams"  resultType="map">
+     select r.*,tno.tno,sno.sno,itype.itype  from franchise_rule r 
+       left join franchise_rule_tno tno on r.id = tno.rid
+       left join franchise_rule_sno sno on r.id = sno.rid
+       left join franchise_rule_itype itype on r.id =itype.rid where 1=1 
+        <if test="tno!=null and tno!=''"> and tno.tno=#{tno}</if>
+		<if test="sno!=null and sno!=''"> and sno.sno=#{sno}</if>
+		<if test="itype!=null and itype!=''"> and itype.itype=#{itype}</if>
+		<if test="moneyType!=null and moneyType!=''"> and r.money_type=#{moneyType}</if>
+		<if test="weightType!=null and weightType!=''"> and r.weight_type=#{weightType}</if>
+		<if test="settleTime!=null and settleTime!=''"> and r.begin_time&lt;=#{settleTime}  and r.end_time&gt;=#{settleTime} </if>
+		order by r.id desc
+    </select>
+    
+    <select id="getRuleTakeNo"  resultType="map">
+       select * from franchise_rule_tno where rid=#{rid}
+    </select>
+    
+    <select id="getRuleSendNo"  resultType="map">
+       select * from franchise_rule_sno where rid=#{rid}
+    </select>
+
+   <select id="getRuleItype"  resultType="map">
+       select * from franchise_rule_itype where rid=#{rid}
+    </select>
+    
+    
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from franchise_rule where id=#{id}
+    </delete>
+    
+    <delete id="delTnoById" parameterType="Integer">
+    	delete from franchise_rule_tno where rid=#{id}
+    </delete>
+    
+    <delete id="delSnoById" parameterType="Integer">
+    	delete from franchise_rule_sno where rid=#{id}
+    </delete>
+    
+    <delete id="delItypeById" parameterType="Integer">
+    	delete from franchise_rule_itype where rid=#{id}
+    </delete>
+
+</mapper>

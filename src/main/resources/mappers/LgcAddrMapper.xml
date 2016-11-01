@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="LgcAddr">  
+	<select id="list" resultType="java.util.HashMap">  
+        select l.*,c.inner_no,c.`status`,IF(c.`status`='1',c.real_name,'')  AS cname from lgc_addr l left join courier c on l.courier_no=c.courier_no
+        <where>
+			1=1
+		<if test="lgcNo!=null and lgcNo!=''">
+			and l.lgc_no in (0,${lgcNo})
+		</if>
+		<if test="name!=null and name!=''">
+			and l.name=#{name,jdbcType=VARCHAR}
+		</if>
+		<if test="phone!=null and phone!=''">
+			and l.phone=#{phone,jdbcType=VARCHAR}
+		</if>
+		<if test="areaAddr!=null and areaAddr!=''">
+			and l.area_addr=#{areaAddr,jdbcType=VARCHAR}
+		</if>
+		<if test="detailAddr!=null and detailAddr!=''">
+			and l.detail_addr=#{detailAddr,jdbcType=VARCHAR}
+		</if>
+		<if test="addrType!=null and addrType!=''">
+			and l.addr_type=#{addrType,jdbcType=VARCHAR}
+		</if>
+		<if test="incomingPhone!=null and incomingPhone!=''">
+			and l.incoming_phone=#{incomingPhone,jdbcType=VARCHAR}
+		</if>
+		</where>
+		order by l.id desc
+    </select>
+    
+    <insert id="insert" parameterType="LgcAddr"  useGeneratedKeys="true"  keyColumn="id" keyProperty="id">
+    	insert into lgc_addr(lgc_no,name,area_id,area_addr,detail_addr,phone,addr_type,addr_src,courier_no,incoming_phone) values
+    	  (#{lgcNo},#{name},#{areaId},#{areaAddr},#{detailAddr},#{phone},#{addrType},#{addrSrc},#{courierNo},#{incomingPhone})
+    </insert>
+    
+        <update id="updateCourier"  useGeneratedKeys="true"  keyColumn="id">
+        update lgc_addr set courier_no=#{courierNo}
+        <where>
+            id=#{addrId}
+        </where>
+    </update>
+    
+</mapper>

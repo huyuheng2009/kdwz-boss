@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MonthSettleType">  
+	<resultMap type="MonthSettleType" id="MonthSettleType">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="name" column="name"  />
+		<result property="discount" column="discount"  />
+		<result property="discountText"  column="discount_text" />
+		<result property="note"  column="note" />
+	</resultMap>
+
+	<select id="list" resultType="java.util.HashMap">  
+        select * from month_settle_type 
+        <where>
+             1=1
+		</where>
+		order by id desc
+    </select>
+    
+    <select id="getById" resultMap="MonthSettleType" parameterType="java.lang.Integer">  
+        select * from month_settle_type
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="MonthSettleType"  useGeneratedKeys="true" keyColumn="id">
+    	insert into month_settle_type(name,discount,discount_text,note) values (
+    		             #{name},#{discount},#{discountText},#{note})
+    </insert>
+    
+    <update id="update" parameterType="MonthSettleType"  useGeneratedKeys="true" keyColumn="id">
+    	update month_settle_type set name=#{name},discount=#{discount},discount_text=#{discountText},note=#{note}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from month_settle_type where id=#{id}
+    </delete>
+    
+</mapper>

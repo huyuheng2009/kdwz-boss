@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ManagerLgcConfig">  
+
+
+	<sql id="Condition">
+		<if test="id!=null and id!=''">
+			and id=#{id,jdbcType=INTEGER}
+		</if>
+		<if test="level!=null and level!=''">
+			and level=#{level,jdbcType=INTEGER}
+		</if>
+		<if test="name!=null and name!=''">
+			and name=#{name,jdbcType=VARCHAR}
+		</if>
+		<if test="parentId!=null and parentId!=''">
+			and parent_id=#{parentId,jdbcType=INTEGER}
+		</if>
+	</sql>
+
+
+	   <select id="getByLgcNo" resultType="java.util.HashMap" >  
+        select * from lgc_config
+        <where>
+			lgc_no= #{lgcNo}
+		</where>
+    </select>
+    
+	
+
+    	<update id="updateKeyAddr"  useGeneratedKeys="true" keyColumn="id">
+		update lgc_config set last_update_time=now()
+		<if test="lgc_key!=null and lgc_key!=''"> ,lgc_key=#{lgc_key} </if>
+		<if test="web_xd_addr!=null and web_xd_addr!=''"> ,web_xd_addr=#{web_xd_addr} </if>
+		<where>
+			lgc_no= #{lgcNo}
+		</where>
+	</update>
+	
+
+   
+</mapper>

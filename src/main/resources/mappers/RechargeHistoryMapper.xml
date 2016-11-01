@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="RechargeHistory">  
+
+	<select id="list" resultType="java.util.HashMap">  
+        select r.*,u.dis_user_name,c.substation_no,c.real_name from recharge_history r 
+                 left join dis_user u on r.dis_user_no=u.dis_user_no 
+	                 left join courier c on r.gather_no=c.courier_no
+        <where>
+			1=1 and r.`status`='SUCCESS' 
+	
+		<if test="substationNo!=null and substationNo!=''">
+			and (c.substation_no in (0,${substationNo}) or r.gather_no=#{uuu})
+		</if>
+		
+		 <if test="substationNo==null or substationNo==''">
+			and 1=2
+		</if>
+	
+		 
+		<if test="gatherNo!=null and gatherNo!=''">
+			and r.gather_no=#{gatherNo}
+		</if>
+		
+		<if test="disUserNo!=null and disUserNo!=''">
+			and u.dis_user_no=#{disUserNo}
+		</if>
+		<if test="operator!=null and operator!=''">
+			and r.operator like  CONCAT(CONCAT('%', #{operator}),'%')
+		</if>
+		   <if test="createTimeBegin != null and createTimeBegin !=''"> and r.create_time&gt;=#{createTimeBegin}</if>
+           <if test="createTimeEnd != null and createTimeEnd !=''"> and r.create_time&lt;#{createTimeEnd}</if>
+		</where>
+		order by r.id desc
+    </select>
+
+
+
+    
+    <insert id="insert" parameterType="RechargeHistory"  useGeneratedKeys="true" keyColumn="id"  keyProperty="id">
+    	insert into recharge_history(dis_user_no,rmoney,omoney,af_balance,status,discount_text,pay_money,
+    	             lied,gather_no,gather_no_type,operator,create_time,last_update_time,note,source) values (
+    	          	#{disUserNo},#{rmoney},#{omoney},#{afBalance},#{status},#{discountText},#{payMoney},
+    	          	#{lied},#{gatherNo},#{gatherNoType},#{operator},#{createTime},#{lastUpdateTime},#{note},#{source})
+    </insert>
+    
+   
+
+
+</mapper>

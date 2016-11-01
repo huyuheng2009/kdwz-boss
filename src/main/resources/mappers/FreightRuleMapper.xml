@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="FreightRule">  
+	
+	 <insert id="saveRule"   parameterType="com.yogapay.boss.domain.FreightRule" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+    	insert into freight_rule(vpay,create_time,create_name,fmoney,fdistance,step_distance,step_distance_money,fweight,step_weight,step_weight_money,freight_text) 
+values (#{vpay},#{create_time},#{create_name},#{fmoney},#{fdistance},#{step_distance},#{step_distance_money},#{fweight},#{step_weight},#{step_weight_money},#{freight_text})
+    </insert>
+	
+   <insert id="batchTtype" parameterType="java.util.List" >
+    	insert into freight_rule_ttype(rid,time_type) values 
+    	<foreach collection="list" item="item" index="index" separator="," >  
+           (#{item.rid},#{item.ttype})
+      </foreach> 
+   </insert>
+   
+   <insert id="batchItype" parameterType="java.util.List" >
+    	insert into freight_rule_itype(rid,itype) values 
+    	<foreach collection="list" item="item" index="index" separator="," >  
+           (#{item.rid},#{item.itype})
+      </foreach> 
+   </insert>			
+	
+	<select id="list" resultType="java.util.HashMap">  
+	select * from (
+select r1.*, GROUP_CONCAT(frt.time_type) AS ttype
+  from freight_rule r1 left join freight_rule_ttype frt on r1.id=frt.rid 
+   <where>
+		1=1
+		<if test="ttype!=null and ttype!=''"> and frt.time_type=#{ttype}</if>
+  </where>
+group by r1.id) t1   left join (
+select r2.id as id2,GROUP_CONCAT(fri.itype) AS itype
+  from freight_rule r2 left join freight_rule_itype fri on r2.id=fri.rid group by r2.id) t2 
+  on t1.id = t2.id2 
+        order by id desc
+    </select>
+    
+    <select id="getById" resultType="java.util.HashMap">  
+        select * from freight_rule  <where>id=#{id}</where>
+    </select>
+    
+    
+    <select id="getRuleByParams"  resultType="map">
+     select null as ':ENTITY(FreightRule)',r.*,frt.time_type,fri.itype  from freight_rule r 
+       left join freight_rule_ttype frt on r.id = frt.rid
+       left join freight_rule_itype fri on r.id = fri.rid
+       where 1=1 
+		<if test="itype!=null and itype!=''"> and fri.itype=#{itype}</if>
+		<if test="timeType!=null and timeType!=''"> and frt.time_type=#{timeType}</if>
+		order by r.id desc
+    </select>
+    
+    <select id="getRuleTtype"  resultType="map">
+       select * from freight_rule_ttype where rid=#{rid}
+    </select>
+
+   <select id="getRuleItype"  resultType="map">
+       select * from freight_rule_itype where rid=#{rid}
+    </select>
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from freight_rule where id=#{id}
+    </delete>
+    
+    <delete id="delTtypeById" parameterType="Integer">
+    	delete from freight_rule_ttype where rid=#{id}
+    </delete>
+    
+    <delete id="delItypeById" parameterType="Integer">
+    	delete from freight_rule_itype where rid=#{id}
+    </delete>
+
+</mapper>

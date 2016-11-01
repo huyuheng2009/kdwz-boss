@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="City">  
+
+   <resultMap type="City" id="City">
+		<id property="id" column="id" jdbcType="INTEGER"/> 
+		<result property="level"  column="level" />
+		<result property="name"  column="name" />
+		<result property="parentId"  column="parent_id" />
+	</resultMap>
+
+	<sql id="Condition">
+		<if test="id!=null and id!=''">
+			and id=#{id,jdbcType=INTEGER}
+		</if>
+		<if test="level!=null and level!=''">
+			and level=#{level,jdbcType=INTEGER}
+		</if>
+		<if test="name!=null and name!=''">
+			and name=#{name,jdbcType=VARCHAR}
+		</if>
+		<if test="parentId!=null and parentId!=''">
+			and parent_id=#{parentId,jdbcType=INTEGER}
+		</if>
+	</sql>
+	<select id="list" resultMap="City">
+		select * from city
+		<where>
+			1=1
+			<include refid="Condition" />
+			order by id desc
+		</where>
+	</select>
+	
+	   <select id="getById" resultMap="City" parameterType="java.lang.Integer">  
+        select * from city
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+	   <select id="getByParaId" resultMap="City" parameterType="java.lang.Integer">  
+        select * from city
+        <where>
+			parent_id= #{id}
+		</where>
+    </select>
+	
+	<select id="getByParentId" resultMap="City">
+		select * from city
+		<where>
+		parent_id=#{parentId,jdbcType=INTEGER}
+			order by id desc
+		</where>
+	</select>
+
+    <insert id="insert" parameterType="City" useGeneratedKeys="true" keyColumn="id">
+    	insert into city(level,name,parent_id) values (#{level},#{name},#{parentId})
+    </insert>
+    
+    	<update id="update" parameterType="City"  useGeneratedKeys="true" keyColumn="id">
+		update city set name=#{name}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	<delete id="delete" parameterType="Integer">
+		delete from city
+		<where>
+			id=#{id}
+		</where>
+	</delete>
+    
+    
+      <select id="queryByParentId0" resultMap="City">
+        SELECT * FROM city WHERE parent_id = 0
+    </select>  
+	
+    <select id="queryByParentId" parameterType="int" resultMap="City">
+        SELECT * FROM city WHERE parent_id = #{parentId}
+    </select> 
+   
+</mapper>

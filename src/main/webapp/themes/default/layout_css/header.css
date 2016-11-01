@@ -1,0 +1,30 @@
+
+
+/************** h e a d e r **************/
+
+.header{ height:110px; overflow:auto; zoom:1;}
+/* .logo{ float:left; height:90px; width:213px; border-right:1px solid #4f96d8; display:block; padding:10px 25px;} */
+.logo{ float:left; height:90px; width:213px;  display:block; padding:20px 0 0 55px;}
+.my_info{ overflow:auto; zoom:1; float: right; width:330px; padding-top:5px;}
+.myinfo_img{ height:83px; width:83px; background-color:rgba(255,255,255,0.2); float:left;margin-right:5px;margin-top:3px; padding:3px;}
+.myinfo_pic{ background:#ccc;}
+.myinfo_cont{ float:left; width:230px;}
+.myinfo_cont a{ display:block; color:#fff; text-decoration:none;  margin-bottom:1px;}
+.myinfo_tit{ height:22px; line-height:22px;}
+.myinfo_li{ background-color:rgba(255,255,255,0.2); padding:2px 5px;}
+
+
+
+.loading{border:0; width: 100%;height: 100%;background: rgba(0,0,0,0.3); 
+position: fixed; top:0; left:0; z-index:99;border-collapse: collapse;}
+
+
+
+
+
+
+
+
+
+
+

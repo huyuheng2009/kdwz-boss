@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ScanStatics">
+	<select id="allSubstation" resultType="java.util.HashMap">
+		select CURDATE()
+		scanTime,substation_no substationNo,substation_name
+		substationName from
+		substation
+	</select>
+	<insert id="insertTimeInfo" parameterType="java.util.Map">
+		insert into substation_scan_account(scan_time,sub_no,sub_nam )
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			( #{item.scanTime}, #{item.substationNo},
+			#{item.substationName} )
+		</foreach>
+	</insert>
+	<select id="selectScanInfo" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select s1.scan_time scanTime,s1.sub_no subNo,s2.substation_name subNam,s2.inner_no sinnerNo
+		from substation_scan_account s1 left join substation s2 on s1.sub_no=s2.substation_no
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="substationNo!=null and substationNo!=''">
+				AND s1.sub_no in (${substationNo})
+			</if>
+			<if test="beginTime!=null and beginTime!=''">
+				AND s1.scan_time>=#{beginTime}
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				AND #{endTime}>=s1.scan_time
+			</if>
+		</trim>
+	</select>
+	<select id="takeCount" parameterType="java.util.Map" resultType="java.util.Map">
+		select count(o.id) acount from order_info o WHERE
+		o.take_order_time>= #{scanTime} and o.take_order_time&lt;#{scanTimeEnd}
+		AND
+		sub_station_no =#{subNo} and o.status !=1
+	</select>
+
+	<select id="sendCount" parameterType="java.util.Map" resultType="java.util.Map">
+		select count(o.id) acount from order_info o WHERE
+		o.send_order_time>= #{scanTime} and o.send_order_time&lt;#{scanTimeEnd} 
+		AND
+		send_substation_no =#{subNo} and o.status =3
+	</select>
+
+	<select id="daozhanpiaoshu" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select count(orderNo) acount from(
+		select o.order_no orderNo
+		from order_track
+		o
+		WHERE o.order_time>= #{scanTime} and o.order_time&lt;#{scanTimeEnd}  
+		AND cur_no =	#{subNo}
+		AND  o.pre_type ='S'
+		group by o.order_no
+		) n
+	</select>
+	<select id="chuzhanpiaoshu" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select count(orderNo) acount from(
+		select o.order_no orderNo
+		from order_track o
+		WHERE o.order_time>= #{scanTime} and o.order_time&lt;#{scanTimeEnd}
+		AND cur_no = #{subNo} 
+		AND  o.next_type='S' 
+		GROUP BY o.order_no) n
+	</select>
+	<select id="wentijian" parameterType="java.util.Map" resultType="java.util.Map">
+		select  count(a.id) acount
+		from order_info a,pro_order b,pro_deal_status c,pro_order_reason d
+		where a.order_no = b.order_no and b.deal_status = c.id and d.id = b.pro_reason
+		and b.create_time>= #{scanTime} and b.create_time&lt;#{scanTimeEnd}
+		and
+		(a.sub_station_no=#{subNo}  OR
+		a.send_substation_no=#{subNo}    )
+	</select>
+	<select id="qianshoupiaoshu" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select count(o.id) acount from order_info o
+		where
+		o.send_substation_no = #{subNo} and o.`status`=3
+		and
+		o.send_order_time>= #{scanTime} and o.send_order_time&lt;#{scanTimeEnd} 
+	</select>
+	<select id="inAndOut" parameterType="java.util.Map" resultType="java.util.Map">	
+	select count(a.id) acount from (
+	select  ot.id   from order_track ot 
+	where
+ 	ot.next_type='S' and ot.pre_type='S' 
+ 	and ot.cur_no=#{subNo}
+	and ot.order_time>= #{scanTime} and ot.order_time&lt;#{scanTimeEnd}
+ 	group by ot.order_no
+) a	
+	</select>
+
+	<select id="inNotOut" parameterType="java.util.Map" resultType="java.util.Map">
+	select count(o.id) acount from order_track o 
+	where o.pre_type='S' 
+	AND
+	o.cur_no = #{subNo}
+	AND  o.order_time>= #{scanTime} and o.order_time&lt;#{scanTimeEnd}
+	and o.order_no not in ( 
+	  select  ot.order_no  from order_track ot 
+	  	where
+ 		ot.next_type='S' and ot.pre_type='S' 
+		and ot.cur_no=#{subNo}
+		and ot.order_time>= #{scanTime} and ot.order_time&lt;#{scanTimeEnd}
+   	 )	
+   	 and o.order_no not in (
+   	  select  ot.order_no  from order_track ot 
+	  where
+    	ot.next_type='C' 
+    	and ot.cur_no=#{subNo}
+		and ot.order_time>= #{scanTime} and ot.order_time&lt;#{scanTimeEnd}	
+ 	) 
+	</select>
+
+
+
+	<select id="noInhaveOut" parameterType="java.util.Map"	resultType="java.util.Map">
+		select count(orderNo1) acount from
+		(select o.order_no orderNo1 from order_track o
+		where o.cur_no =#{subNo} 
+		and o.order_time>= #{scanTime} and o.order_time&lt;#{scanTimeEnd}
+		and o.pre_no is null)
+		a,
+		(select o1.order_no orderNo2 from order_track o1
+		where o1.pre_no =	#{subNo} 
+		) b
+		where a.orderNo1 = b.orderNo2
+	</select>
+	<select id="noInhaveOutSend" parameterType="java.util.Map"	resultType="java.util.Map">
+			select count(o.id) acount 
+			from order_info o where o.send_substation_no =#{subNo}  
+			and o.send_courier_no is not null  
+			and o.send_order_time>= #{scanTime} and o.send_order_time&lt;#{scanTimeEnd} 
+			and o.order_no not in (
+			select ot.order_no orderNo from order_track ot where ot.cur_no =#{subNo}  
+			and ot.pre_type = 'S'
+			group by ot.order_no
+		)	
+	</select>
+	<select id="inNotSend" parameterType="java.util.Map" resultType="java.util.Map">		
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	</select>
+	<select id="checkOrder" parameterType="java.lang.String" resultType="java.util.Map">		
+	   select o.send_substation_no   sendSubstationNo from order_info o where o.order_no = #{orderNo} 
+	</select>
+	
+	<update id="saveOrderNote" parameterType="java.util.Map">
+			update order_info set month_note = #{note}
+			where lgc_order_no = #{lgcOrderNo}	
+	</update>
+</mapper>

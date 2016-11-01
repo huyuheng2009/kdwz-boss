@@ -1,0 +1,57 @@
+﻿.note_c{width: 40%;margin-left: 2%;float: left;border: 1px;border-style: solid;border-color: grey;min-height: 300px;}
+.note_c ul{}
+.note_c ul li{width:40%;  float: left;padding: 2px 1px ;}
+
+
+* {
+-webkit-text-size-adjust: none;
+margin: 0 auto ;
+}
+
+.result-info2 {
+width: 100%;
+border: 1px solid #90bfff;
+}
+table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+
+tr {
+display: table-row;
+vertical-align: inherit;
+border-color: inherit;
+}
+
+.result-info2 .row1 {
+width: 140px;
+text-align: right;
+}
+.result-info2 .status {
+width: 30px;
+background: url("${ctx}/themes/default/images/ico_status.gif") -50px center no-repeat #fbfbfb;
+}
+
+.result-info2 .status-first {
+background: url("${ctx}/themes/default/images/ico_status.gif") 0px center no-repeat #fbfbfb;
+}
+
+.result-info2 .last td {
+color: #FF8c00;
+border-bottom: none;
+background-color: #ffffff !important;
+}
+
+.result-info2 .status-onway {
+background: url("${ctx}/themes/default/images/ico_status.gif") -100px center no-repeat #fbfbfb;
+}
+
+.result-info2 .status-check {
+background: url("${ctx}/themes/default/images/ico_status.gif") -150px center no-repeat #fbfbfb;
+}
+.result-info2 td {
+padding: 10px;
+color: #878787;
+border-bottom: 1px solid #d8d8d8 !important;
+background-color: #fbfbfb !important;
+}

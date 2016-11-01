@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="WeightConfig">  
+
+	<update id="update">
+		update weight_config  set rev_minv = #{rev_minv},warehouse_minv = #{warehouse_minv},select_v = #{select_v}
+	</update>
+	<select id="selectOne" resultType="java.util.Map">
+		select id,rev_minv,create_time ,warehouse_minv,select_v from weight_config 
+	</select>
+	
+	<insert id="insert">
+	insert into weight_config (rev_minv,create_time,warehouse_minv,select_v) values 
+	(#{rev_minv},now(),#{warehouse_minv},#{select_v})
+	</insert>
+</mapper>

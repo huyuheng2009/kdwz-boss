@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MonthUserSettle">  
+	
+	<select id="list" resultType="java.util.HashMap" parameterType="LgcPayType">  
+    select DATE_FORMAT(d.settle_month,'%Y-%m') as settleMonth,t.name as tname,c.inner_no as cno,s.inner_no as sno,c.real_name as cname,s.substation_name as sname,u.month_sname,d.* 
+  from month_user_settle d left join settle_type t on d.settle_type=t.`key`
+  left join month_settle_user u on d.month_no=u.month_settle_no
+  left join courier c  on u.courier_no=c.courier_no left join substation s on u.substation_no=s.substation_no
+     where 1=1 
+      <if test="sno!=null and sno!=''"> and (s.substation_no in 
+             <foreach collection="sno" index="index" item="item" open="(" separator="," close=")">  
+                       #{item}   
+              </foreach> or s.substation_no is null)
+      </if>
+       <if test="createTimeBegin != null and createTimeBegin !=''"> and d.settle_month&gt;=#{createTimeBegin}</if>
+       <if test="createTimeEnd != null and createTimeEnd !=''"> and d.settle_month&lt;=#{createTimeEnd}</if>
+       <if test="settleTimeBegin != null and settleTimeBegin !=''"> and d.settle_time&gt;=#{settleTimeBegin}</if>
+       <if test="settleTimeEnd != null and settleTimeEnd !=''"> and d.settle_time&lt;=#{settleTimeEnd}</if>
+       <if test="courierNo!=null and courierNo!=''"> and c.real_name=#{courierNo,jdbcType=VARCHAR}</if>
+       <if test="monthSettleNo!=null and monthSettleNo!=''"> and d.month_no=#{monthSettleNo,jdbcType=VARCHAR}</if>
+       <if test="settleType!=null and settleType!=''"> and d.settle_type=#{settleType,jdbcType=VARCHAR}</if>
+       <if test="settleStatus != null and settleStatus !=''"> and d.settle_status=#{settleStatus}</if>
+        <if test="examineStatus != null and examineStatus !=''"> and d.examine_status=#{examineStatus}</if>
+       order by d.settle_month desc
+    </select>
+    
+    
+      <update id="batchpay"  parameterType="java.util.HashMap">
+        update month_user_settle set settle_count=#{settleCount},settle_status=1,settle_time=#{settleTime},settle_name=#{settleName},
+           settle_type=#{settleType},note=#{note}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+   <update id="batchpayCount"  parameterType="java.util.HashMap">
+        update month_user_settle set settle_count=month_count,settle_status=1,settle_time=#{settleTime},settle_name=#{settleName},
+           settle_type=#{settleType},note=#{note}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+        <update id="nopay"  parameterType="java.util.HashMap">
+        update month_user_settle set `settle_status`=0,`settle_count`=0,`settle_time`=NULL,`settle_name`=NULL,
+           `settle_type`=NULL,note=NULL,examine_status=0,examiner=NULL,examine_time=NULL
+        <where>
+            id in (${ids})
+        </where>
+      </update>
+    
+    <update id="batchExamine"  parameterType="java.util.HashMap">
+        update month_user_settle set examine_status=1,examiner=#{examiner},examine_time=#{examineTime}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+     <update id="noExamine"  parameterType="java.util.HashMap">
+        update month_user_settle set examine_status=0,examiner=NULL,examine_time=NULL
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+    
+    
+    
+    <insert id="insert" parameterType="MonthUserSettle"  useGeneratedKeys="true" keyColumn="id">
+    	insert into month_user_settle(ctime,month_no,settle_month,month_count,sum_count,create_time,creater) values
+    	 (#{ctime},#{monthNo},#{settleMonth},#{monthCount},#{sumCount},#{createTime},#{creater})  
+    </insert>
+   
+    
+    <insert id="batchInsert" parameterType="java.util.HashMap" >
+    	insert into month_user_settle(ctime,month_no,settle_month,month_count,sum_count,create_time,creater) values
+    	<foreach collection="list" item="item" index="index" separator="," >  
+        (#{item.ctime},#{item.monthNo},#{item.settleMonth},#{item.monthCount},#{item.sumCount},#{item.createTime},#{item.creater})  
+      </foreach> 
+   </insert>
+    
+    <delete id="delByCtime" parameterType="java.util.HashMap">
+    	delete from month_user_settle where ctime in  
+    	   <foreach collection="ctime" index="index" item="item" open="(" separator="," close=")">  
+                       #{item}   
+           </foreach> 
+    </delete>
+
+  <select id="getById" resultType="java.util.HashMap" parameterType="java.lang.Integer">  
+        select *,DATE_FORMAT(settle_month,'%Y-%m') as settleMonth from month_user_settle
+        <where>
+			id= #{id}
+		</where>
+    </select>
+
+</mapper>

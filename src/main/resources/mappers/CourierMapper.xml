@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Courier"> 
+	<resultMap type="Courier" id="Courier">
+		<id property="id" column="id" jdbcType="INTEGER"/> 
+		<result property="userName"  column="user_name" />
+		<result property="passWord"  column="pass_word" />
+		<result property="realName"  column="real_name" />
+		<result property="substationNo"  column="substation_no" />
+		<result property="idCard"  column="id_card" />
+		<result property="phone"  column="phone"/>
+		<result property="courierNo"  column="courier_no" />
+		<result property="queueName"  column="queue_name" />
+		<result property="headImage"  column="head_image" />
+		<result property="registTime"  column="regist_time" />
+		<result property="innerNo"  column="inner_no" />
+		<result property="innerPhone"  column="inner_phone" />
+		<result property="sarea"  column="sarea" />
+		<result property="status"  column="status" />
+	</resultMap>
+	<sql id="Condition">
+		<if test="id!=null and id!=''">
+			and id=#{id,jdbcType=INTEGER}
+		</if>
+		<if test="userName!=null and userName!=''">
+			and user_name=#{userName,jdbcType=VARCHAR}
+		</if>
+		<if test="realName!=null and realName!=''">
+			and real_name=#{realName,jdbcType=VARCHAR}
+		</if>
+		
+		 <if test="lgcNo != null and lgcNo !=''">
+		    and lgc_no in (${lgcNo})
+        </if>
+		
+	</sql>
+	<select id="list" resultType="java.util.HashMap">
+		select c.*,s.substation_name from courier c left join substation s on c.substation_no=s.substation_no
+		<where>
+			1=1
+		<if test="userName!=null and userName!=''">
+			and c.user_name=#{userName,jdbcType=VARCHAR}
+		</if>
+		<if test="courierNo!=null and courierNo!=''">
+			and c.courier_no=#{courierNo,jdbcType=VARCHAR}
+		</if>
+		<if test="innerNo!=null and innerNo!=''">
+			and c.inner_no=#{innerNo,jdbcType=VARCHAR}
+		</if>
+		  <if test="substationName!=null and substationName!=''">
+			and s.substation_name like  CONCAT(CONCAT('%', #{substationName}),'%')
+		</if>
+		<if test="realName!=null and realName!=''">
+			and c.real_name like  CONCAT(CONCAT('%', #{realName}),'%')
+		</if>
+		
+		<if test="sarea!=null and sarea!=''">
+			and c.sarea like  CONCAT(CONCAT('%', #{sarea}),'%')
+		</if>
+		
+		 <if test="lgcNo != null and lgcNo !=''">
+		    and s.lgc_no in (${lgcNo})
+        </if>
+        <if test="substationNo != null and substationNo !=''">
+		    and s.substation_no in (${substationNo})
+        </if>
+         <if test="cstatus != null and cstatus !=''">
+		   and c.`status`=#{cstatus}
+        </if>
+       
+			order by c.status desc,c.id desc
+		</where>
+	</select>
+	
+	<select id="asignList" resultType="java.util.HashMap">
+select *  from (select concat('S',s.substation_no) sno,s.substation_no, s.substation_name,'' courier_name,s.inner_no phone,s.sarea,'1' t from substation s  where s.`status`=1
+union 
+select concat('C',c.courier_no),s1.substation_no,s1.substation_name,c.real_name,c.phone,c.sarea,'2' from courier c left join substation s1 on c.substation_no=s1.substation_no where c.`status`=1) tmp
+<where>
+			1=1 
+		 <if test="substationName!=null and substationName!=''">
+			and tmp.substation_name like  CONCAT(CONCAT('%', #{substationName}),'%')
+		</if>
+		<if test="realName!=null and realName!=''">
+			and tmp.courier_name like  CONCAT(CONCAT('%', #{realName}),'%')
+		</if>
+		 <if test="substationNo != null and substationNo !=''">
+		    and tmp.substation_no in (${substationNo})
+        </if>
+		<if test="sarea!=null and sarea!=''">
+			and tmp.sarea like  CONCAT(CONCAT('%', #{sarea}),'%')
+		</if>
+		<if test="mode!=null and mode!=''">
+			and tmp.t=#{mode}
+		</if>
+		</where>
+	</select>
+	
+	
+	
+	<select id="ccount" resultType="java.util.HashMap">
+	select s.substation_name,c.user_name,c.real_name,
+	(select sum(IF(o.`status` IN (2,3,5,6) AND c.courier_no=o.take_courier_no,1,0)) from order_info o where 1=1
+	<if test="createTimeBegin != null and createTimeBegin !=''">
+		and o.create_time&gt;=#{createTimeBegin}
+	</if>
+	<if test="createTimeEnd != null and createTimeEnd !=''">
+		and o.create_time&lt;#{createTimeEnd}
+	</if>) takeCount,
+	(select sum(IF(o.`status` IN (2,3,5,6) AND c.courier_no=o.take_courier_no,o.tnpay,0)) from order_info o where 1=1
+	<if test="createTimeBegin != null and createTimeBegin !=''">
+		and o.create_time&gt;=#{createTimeBegin}
+	</if>
+	<if test="createTimeEnd != null and createTimeEnd !=''">
+		and o.create_time&lt;#{createTimeEnd}
+	</if>) tnpay,
+	(select sum(IF(o.`status` IN (3) AND c.courier_no=o.send_courier_no,1,0)) from order_info o where 1=1
+	<if test="createTimeBegin != null and createTimeBegin !=''">
+		and o.create_time&gt;=#{createTimeBegin}
+	</if>
+	<if test="createTimeEnd != null and createTimeEnd !=''">
+		and o.create_time&lt;#{createTimeEnd}
+	</if>) sendCount,
+	(select sum(IF(o.`status` IN (3) AND c.courier_no=o.send_courier_no,o.snpay,0)) from order_info o where 1=1
+	<if test="createTimeBegin != null and createTimeBegin !=''">
+		and o.create_time&gt;=#{createTimeBegin}
+	</if>
+	<if test="createTimeEnd != null and createTimeEnd !=''">
+		and o.create_time&lt;#{createTimeEnd}
+	</if>) snpay
+	from courier c left join substation s on c.substation_no=s.substation_no
+ <where>
+			1=1
+		<if test="userName!=null and userName!=''">
+			and c.user_name=#{userName,jdbcType=VARCHAR}
+		</if>
+		<if test="realName!=null and realName!=''">
+			and c.real_name=#{realName,jdbcType=VARCHAR}
+		</if>
+        <if test="substationNo != null and substationNo !=''">
+		    and s.substation_no in (${substationNo})
+        </if>
+		</where>
+	</select>
+	
+	<select id="listBySubStation" resultType="java.util.HashMap">
+		select c.*,s.substation_name from courier c left join substation s on c.substation_no=s.substation_no
+		<where>1=1 and c.substation_no=#{substationNo,jdbcType=VARCHAR}</where>
+	</select>
+	
+	<select id="getByUserName" resultMap="Courier" parameterType="java.lang.String">  
+        select * from courier
+        <where>
+			user_name= #{userName}
+		</where>
+    </select>
+    
+    <select id="getByNo" resultMap="Courier" parameterType="java.lang.String">  
+        select * from courier
+        <where>
+			courier_no= #{courierNo}
+		</where>
+    </select>
+    
+    <select id="getById" resultMap="Courier" parameterType="java.lang.Integer">  
+        select * from courier
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+	<insert id="insert" parameterType="Courier"  useGeneratedKeys="true" keyColumn="id">
+		insert into courier (user_name,pass_word,real_name,substation_no,id_card,phone,courier_no,queue_name,head_image,regist_time,create_operator,inner_no,inner_phone,sarea)
+		values (#{userName},#{passWord},#{realName},#{substationNo},#{idCard},#{phone},#{courierNo},#{queueName},#{headImage},now(),#{createOperator},#{innerNo},
+		#{innerPhone},#{sarea})
+	</insert>
+	<update id="update" parameterType="Courier"  useGeneratedKeys="true" keyColumn="id">
+		update courier set user_name=#{userName},real_name=#{realName},substation_no=#{substationNo},
+		id_card=#{idCard},phone=#{phone},courier_no=#{courierNo},head_image=#{headImage},inner_no=#{innerNo},inner_phone=#{innerPhone}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	
+	<update id="creset" parameterType="Courier"  useGeneratedKeys="true" keyColumn="id">
+		update courier set pass_word=#{passWord}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	<update id="updateSarea" parameterType="Courier"  useGeneratedKeys="true" keyColumn="id">
+		update courier set sarea=#{sarea}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	<delete id="delete" parameterType="Integer">
+		delete from courier
+		<where>
+			id=#{id}
+		</where>
+	</delete>
+	
+		<update id="expireCourier" parameterType="Courier" >
+		update courier_session set expiry_time=create_time
+		<where>
+			user_no=#{courierNo}
+		</where>
+	</update>
+	
+	
+	   
+    <update id="cancelCourierOrder" parameterType="Courier">
+    	update order_info set take_courier_no=null 
+    	<where>
+    		take_courier_no=#{courierNo} and status=1
+    	</where>
+    </update>
+    
+    
+      <select id="isChange" resultType="java.util.HashMap" parameterType="Courier">  
+        select o.id,o.order_no from order_info o 
+        <where>
+		  o.take_courier_no=#{courierNo} OR send_courier_no = #{courierNo}
+		</where>
+    </select>
+    
+    <select id="isChangeSno" resultType="java.util.HashMap">  
+        select o.id,o.order_no from order_info o 
+        <where>
+		  (o.take_courier_no=#{courierNo} and o.`status` in (${takeStatus})) OR (o.send_courier_no = #{courierNo} and o.`status` in (${sendStatus}))
+		</where>
+    </select> 
+	
+</mapper>

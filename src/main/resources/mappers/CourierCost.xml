@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CourierCost">  
+	
+    
+    <insert id="insert" parameterType="CourierCost"  useGeneratedKeys="true" keyColumn="id">
+    	insert into courier_cost(courier_no,cost_month,cost_name,cost_amount,batch_id,create_time,operator) 
+    	              values (#{courier_no},#{cost_month},#{cost_name},#{cost_amount},#{batch_id},#{create_time},#{operator})
+    </insert>
+    
+      <insert id="batchInsert" parameterType="java.util.List" >
+    	insert into courier_cost(courier_no,cost_month,cost_name,cost_amount,batch_id,create_time,operator)  values 
+    	<foreach collection="list" item="item" index="index" separator="," >  
+       (#{item.courier_no},#{item.cost_month},#{item.cost_name},#{item.cost_amount},#{item.batch_id},#{item.create_time},#{item.operator})
+      </foreach> 
+   </insert>
+    
+   	
+	<select id="list" resultType="java.util.Map" parameterType="java.util.Map">
+            select s.substation_name,c.inner_no,c.real_name,cc.cost_month,cc.create_time,cc.operator,cc.batch_id
+            ${nameSql}
+     FROM courier_cost cc left join courier c on cc.courier_no=c.courier_no left join substation s on c.substation_no=s.substation_no
+     where 1=1
+          <if test="sno!=null and sno!=''"> and c.substation_no =#{sno}</if>
+          <if test="cno!=null and cno!=''"> and c.courier_no=#{cno}</if>
+           <if test="createTimeBegin != null and createTimeBegin !=''"> and cc.create_time&gt;=#{createTimeBegin}</if>
+          <if test="createTimeEnd != null and createTimeEnd !=''"> and cc.create_time&lt;#{createTimeEnd}</if>
+	  group by cc.batch_id 
+	  order by cc.id desc
+   </select>
+    
+    
+    <select id="getByBid" resultType="java.util.Map" parameterType="java.util.Map">
+            select s.substation_name,c.inner_no,c.real_name,cc.courier_no,cc.cost_month,cc.create_time,cc.operator,cc.batch_id
+            ${nameSql}
+     FROM courier_cost cc left join courier c on cc.courier_no=c.courier_no left join substation s on c.substation_no=s.substation_no
+      where cc.batch_id=#{batch_id}
+	  group by cc.batch_id
+   </select>
+    
+     <select id="getByCm" resultType="java.util.Map" parameterType="CourierCost">
+        select *  from  courier_cost cc where cc.courier_no=#{courier_no} and cc.cost_month=#{cost_month}
+   </select>
+   
+    
+    <delete id="deleteByBid" parameterType="String">
+		delete from courier_cost
+		<where>
+			batch_id=#{batch_id}
+		</where>
+	</delete>
+
+
+</mapper>

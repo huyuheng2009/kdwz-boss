@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Monitor">  
+	
+	<select id="iolist" resultType="java.util.HashMap">  
+select t1.order_time,o.lgc_order_no,s1.inner_no as curNo,s1.substation_name as curName,
+        s2.inner_no as nextNo,s2.substation_name as nextName,t1.opname
+  from (select id from order_track
+  where order_status='SEND'  and  cur_no is not null and  next_no is not null and next_type='S' 
+  
+     <if test="createTimeBegin != null and createTimeBegin !=''"> and order_time&gt;=#{createTimeBegin}</if>
+     <if test="createTimeEnd != null and createTimeEnd !=''"> and order_time&lt;=#{createTimeEnd}</if>
+      <if test="curOrNext != null and curOrNext ==1"> 
+            <if test="substationNo != null and substationNo != ''"> and cur_no in (0,${substationNo})  </if>
+     </if> 
+     <if test="curOrNext != null and curOrNext ==2"> 
+            <if test="substationNo != null and substationNo != ''"> and next_no in (0,${substationNo})  </if>
+     </if> 
+     <if test="curNo != null and curNo !=''"> and cur_no=#{curNo}</if>
+     <if test="nextNo != null and nextNo !=''"> and next_no=#{nextNo}</if>
+     <if test="opname != null and opname !=''"> and opname=#{opname}</if>
+  order by id desc) tt
+  left join order_track t1 on tt.id=t1.id
+  left join order_track t2 on t1.order_no=t2.order_no and t1.next_no=t2.cur_no and t2.order_status='rev'
+  left join order_info o on t1.order_no=o.order_no
+  left join substation s1 on t1.cur_no=s1.substation_no
+  left join substation s2 on t1.next_no=s2.substation_no
+  where t2.id is null
+    <if test="orderNos != null and orderNos !=''"> and o.lgc_order_no in (${orderNos})</if>
+group by t1.order_no,t1.cur_no
+    </select>
+   
+
+
+</mapper>

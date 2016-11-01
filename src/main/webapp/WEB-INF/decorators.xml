@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<decorators defaultdir="/WEB-INF/layouts/">
+	<excludes>
+		<pattern>/images/*</pattern>
+		<pattern>/scripts/*</pattern>
+		<pattern>/thems/*</pattern>
+		<pattern>/FusionCharts/*</pattern>
+		<pattern>/hipay/viewsign*</pattern>
+		<pattern>/html/layout*.html</pattern>
+		<pattern>*.xls</pattern>
+		<!-- <pattern>/*layout=no*</pattern> -->
+	</excludes>
+	
+	<decorator name="default" page="default_02.jsp">
+		<pattern>/*</pattern>
+	</decorator>
+	
+	<decorator name="default_01" page="default.jsp"/>
+	<decorator name="layout_no" page="layout_no.jsp"/>
+	
+	<decorator name="login" page="login.jsp">
+		<pattern>/login*</pattern>
+	</decorator>
+	
+<!-- 	<decorator name="no" page="layout_no.jsp">
+		<pattern>/*layout=no*</pattern>
+	</decorator> -->
+	
+</decorators>

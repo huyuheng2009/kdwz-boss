@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="RequireType">  
+	<resultMap type="RequireType" id="RequireType">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="code"  column="code"  jdbcType="VARCHAR"/>
+		<result property="describe"  column="describe"  jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from require_type
+        <where>
+			1=1
+			<if test="describe!=null and describe!=''">and `describe` like  CONCAT(CONCAT('%', #{describe}),'%')</if>
+		</where>
+		order by id asc
+    </select>
+    
+  
+    
+    <select id="getById" resultMap="RequireType" parameterType="java.lang.Integer">  
+        select * from require_type
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="RequireType"  useGeneratedKeys="true" keyColumn="id">
+    	insert into require_type(code,desc) values (#{code},#{desc})
+    </insert>
+    <update id="update" parameterType="RequireType"  useGeneratedKeys="true" keyColumn="id">
+    	update require_type set code=#{code},desc=#{desc}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from require_type where id=#{id}
+    </delete>
+
+</mapper>

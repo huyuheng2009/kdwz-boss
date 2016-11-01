@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Substation"> 
+	<resultMap type="Substation" id="Substation">
+		<id property="id" column="id" jdbcType="INTEGER"/> 
+		<result property="substationNo"  column="substation_no" />
+		<result property="substationName"  column="substation_name" />
+		<result property="substationAddr"  column="substation_addr" />
+		<result property="phone"  column="phone" />
+		<result property="location"  column="location" />
+		<result property="lgcNo"  column="lgc_no"/>
+		<result property="exchange"  column="exchange" />
+		<result property="nextCno"  column="next_cno" />
+		<result property="innerNo"  column="inner_no" />
+		<result property="sarea"  column="sarea" />
+		<result property="substationType"  column="substation_type" />
+		<result property="subType"  column="sub_type" />
+		<result property="status"  column="status" />
+	</resultMap>
+	<sql id="Condition">
+		<if test="id!=null and id!=''">
+			and id=#{id,jdbcType=INTEGER}
+		</if>
+		 <if test="substationNo != null and substationNo != ''"> 
+		  and substation_no in (0,${substationNo})
+		</if>
+		<if test="innerNo != null and innerNo != ''"> 
+		  and inner_no=#{innerNo}
+		</if>
+		<if test="substationName!=null and substationName!=''">
+			and substation_name like  CONCAT(CONCAT('%', #{substationName}),'%')
+		</if>
+		 <if test="lgcNo != null and lgcNo !=''">
+		    and lgc_no in (${lgcNo})
+        </if>
+	</sql>
+	<select id="list" resultType="java.util.HashMap">
+		select * from substation
+		<where>
+			1=1
+			<include refid="Condition" />
+			order by `status` desc,id desc
+		</where>
+	</select>
+	
+	<select id="tlist" resultType="java.util.HashMap">
+		select s.substation_type,s.status,s.inner_no,s.sarea,s.id,s.substation_no,s.phone,s.lgc_no,s.substation_addr,CONCAT(s.substation_name,CONCAT('(',CONCAT(l.name,')'))) substation_name,count(c.id) cc
+		from substation s inner join lgc l on s.lgc_no=l.lgc_no left join courier c on s.substation_no=c.substation_no 
+		<where>
+			1=1
+		 <if test="substationNo != null and substationNo != ''"> 
+		  and s.substation_no in (0,${substationNo})
+		</if>
+		<if test="innerNo != null and innerNo != ''"> 
+		  and s.inner_no=#{innerNo}
+		</if>
+		 <if test="lgcNo != null and lgcNo !=''">
+		    and s.lgc_no in (${lgcNo})
+        </if>
+        <if test="substationName!=null and substationName!=''">
+			and s.substation_name like  CONCAT(CONCAT('%', #{substationName}),'%')
+		</if>
+		 <if test="substation_type!=null and substation_type=='ZZ'">
+			and (s.substation_type='Z' or s.substation_type is null)
+		</if>
+		<if test="substation_type!=null and substation_type=='JJ'">
+			and s.substation_type='J' 
+		</if>
+		group by s.substation_no
+			order by  s.`status` desc,s.id desc
+		</where>
+	</select>
+	
+	
+	<select id="ulist" resultType="java.util.HashMap">
+		select s.id,s.substation_no,s.phone,s.lgc_no,CONCAT(s.substation_name,CONCAT('(',CONCAT(l.name,')'))) substation_name,substation_name sname ,s.`status`
+		from substation s inner join lgc l on s.lgc_no=l.lgc_no
+		<where>
+			1=1
+		 <if test="substationNo != null and substationNo != ''"> 
+		  and s.substation_no in (0,${substationNo})
+		</if>
+		<if test="innerNo != null and innerNo != ''"> 
+		  and s.inner_no=#{innerNo}
+		</if>
+		 <if test="lgcNo != null and lgcNo !=''">
+		    and s.lgc_no in (${lgcNo})
+        </if>
+			order by s.id desc
+		</where>
+	</select>
+	
+	<select id="alist" resultType="java.util.HashMap">
+	select s.substation_no,s.substation_name,s.substation_addr,l.lgc_no,l.name from substation s left join lgc l on s.lgc_no = l.lgc_no
+		<where>
+			1=1
+			<if test="lgcNo != null and lgcNo !=''"> and l.lgc_no=#{lgcNo}</if>
+			 <if test="substationNo != null and substationNo != ''"> and s.substation_no in (0,${substationNo})</if>
+			 <if test="innerNo != null and innerNo != ''">  and s.inner_no=#{innerNo}</if>
+			<if test="substationName != null and substationName !=''"> 
+			and (s.substation_name like  CONCAT(CONCAT('%', #{substationName}),'%') or s.substation_addr like  CONCAT(CONCAT('%', #{substationName}),'%'))
+			</if>
+			order by s.id desc
+		</where>
+	</select>
+	
+	<select id="getBySubstationName" resultMap="Substation" parameterType="java.lang.String">  
+        select * from substation
+        <where>
+			substation_name= #{substationName} and lgc_no=#{lgcNo}
+		</where>
+    </select>
+    
+    <select id="getStationByLgcArea" resultMap="Substation">  
+        select * from substation
+        <where>
+         1=1
+         <if test="lgcNo != null and lgcNo !=''"> and lgc_no=#{lgcNo}</if>
+         <if test="sarea != null and sarea !=''"> and sarea= #{sarea}</if>
+		</where>
+    </select>
+    
+    
+    	<select id="getBySno" resultMap="Substation" parameterType="java.lang.String">  
+        select * from substation
+        <where>
+			substation_no= #{sno}
+		</where>
+    </select>
+    
+     	<select id="getSubstationByCourierNo" resultMap="Substation" parameterType="java.lang.String">  
+        select s.* from substation s left join courier c on s.substation_no=c.substation_no where c.courier_no=#{cno}
+     </select>
+    
+    <select id="getById" resultMap="Substation" parameterType="java.lang.Integer">  
+        select * from substation
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+	<insert id="insert" parameterType="Substation"  useGeneratedKeys="true" keyColumn="id">
+		insert into substation (substation_no,substation_name,substation_addr,phone,location,lgc_no,exchange,next_cno,inner_no,sarea,substation_type,sub_type)
+		values (#{substationNo},#{substationName},#{substationAddr},#{phone},#{location},#{lgcNo},#{exchange},#{nextCno},#{innerNo},#{sarea},#{substationType},#{subType})
+	</insert>
+	<update id="update" parameterType="Substation"  useGeneratedKeys="true" keyColumn="id">
+		update substation set substation_no=#{substationNo},substation_name=#{substationName},substation_addr=#{substationAddr},
+		phone=#{phone},location=#{location},lgc_no=#{lgcNo},inner_no=#{innerNo},sarea=#{sarea},sub_type=#{subType}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	<delete id="delete" parameterType="Integer">
+		delete from substation
+		<where>
+			id=#{id}
+		</where>
+	</delete>
+	
+	    <update id="nextCno" parameterType="Substation"  useGeneratedKeys="true" keyColumn="id">
+    	update substation set next_cno=next_cno+1 
+    	<where>
+    		substation_no=#{substationNo}
+    	</where>
+    </update>
+    
+    	<select id="getByName" resultType="java.util.HashMap" parameterType="map">     
+		<choose>
+			<when test="substation not in {null,''} and courier not in {null,''}">			
+				select c.courier_no as courierNo,c.real_name as realName,s.substation_no as substationNo,s.substation_name as substationName from courier c inner join substation s on c.substation_no=s.substation_no
+				where c.real_name = #{courier} and s.substation_name = #{substation}				
+			</when>
+			<when test="substation not in {null,''}">
+				select c.courier_no as courierNo,c.real_name as realName,s.substation_no as substationNo,s.substation_name as substationName from substation s left join courier c  on c.substation_no=s.substation_no
+				where s.substation_name = #{substation} group by s.id
+			</when>
+			<when test="courier not in {null,''}">
+				select c.courier_no as courierNo,c.real_name as realName,s.substation_no as substationNo,s.substation_name as substationName from courier c left join substation s on c.substation_no=s.substation_no
+				where c.real_name = #{courier}
+			</when>		
+			<otherwise></otherwise>	
+		</choose>
+	</select>
+    
+    
+      <select id="getSname"  resultType="java.util.HashMap" parameterType="java.lang.Integer">  
+        select s.substation_no,concat(concat(concat(concat(s.substation_name,'('),s.inner_no),')'),IF(s.substation_type='J','  加盟','  直营')) AS sname 
+        from substation s where s.`status`=1
+    </select>
+    
+     <select id="queryBalance"  resultType="java.util.HashMap" >  
+        select substation_no,cur_balance from join_substation_acount  where substation_no=#{sno}
+    </select>
+    
+     <select id="queryShutBalance"  resultType="java.util.HashMap" >  
+        select substation_no,cur_balance from join_substation_acount  where substation_no=#{sno} and cur_balance>warning_balance 
+    </select>
+	
+</mapper>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="FranchiseOrder">  
+	
+    <insert id="saveOrder" parameterType="com.yogapay.boss.domain.FranchiseOrder"  useGeneratedKeys="true" keyColumn="id" >
+    	insert into franchise_order(order_no,lgc_order_no,take_substation_no,send_substation_no,item_type,item_weight,money_type,create_time) 
+values (#{order_no},#{lgc_order_no},#{take_substation_no},#{send_substation_no},#{item_type},#{item_weight},#{money_type},#{create_time})
+    </insert>
+
+<select id="getListByIds" resultType="java.util.HashMap">
+select f.* from franchise_order f where f.id in 
+<foreach index="index" collection="array"  item="item" open="(" close=")" separator=",">
+			${item}
+</foreach>
+</select>	
+
+<select id="pidaiIds" resultType="java.util.HashMap">
+select id from franchise_order where settle_status='SUCCESS' and id in 
+<foreach index="index" collection="array"  item="item" open="(" close=")" separator=",">
+			${item}
+</foreach>
+</select>	
+
+
+
+
+
+<select id="list" resultType="java.util.HashMap">   
+select f.*,s1.substation_name AS tsname,s2.substation_name AS ssname,c1.inner_no AS tcno,c1.real_name AS tcname,c2.inner_no AS scno,c2.real_name AS scname,
+ o.take_order_time,o.item_count,o.send_order_time,o.`status`
+from franchise_order f
+   left join order_info o on f.order_no=o.order_no
+    left join substation s1 on f.take_substation_no=s1.substation_no
+    left join substation s2 on f.send_substation_no=s2.substation_no
+     left join courier c1 on o.take_courier_no=c1.courier_no
+     left join courier c2 on o.send_courier_no=c2.courier_no
+   <where>
+		1=1 and o.zid=0
+		  <if test="lgcOrderNos != null and lgcOrderNos != ''">
+           and f.lgc_order_no in (${lgcOrderNos})
+        </if>
+       <if test="createTimeBegin != null and createTimeBegin !=''"> 
+                 <if test="ttype != null and ttype =='SSS'">
+                     and o.take_order_time&gt;=#{createTimeBegin}
+                 </if>
+                 
+                  <if test="ttype != null and ttype =='RRR'">
+                     and o.send_order_time&gt;=#{createTimeBegin}
+                 </if>
+                  <if test="ttype != null and ttype =='PPP'">
+                     and f.settle_time&gt;=#{createTimeBegin}
+                 </if>
+                   <if test="ttype != null and ttype =='QQQ'">
+                     and f.confirm_time&gt;=#{createTimeBegin}
+                 </if>
+            </if>
+            <if test="createTimeEnd != null and createTimeEnd !=''">
+             <if test="ttype != null and ttype  eq 'SSS'">
+                     and o.take_order_time&lt;#{createTimeEnd}
+                 </if>
+                  <if test="ttype != null and ttype eq 'RRR'">
+                     and o.send_order_time&lt;#{createTimeEnd}
+                 </if>
+                  <if test="ttype != null and ttype eq 'PPP'">
+                     and f.settle_time&lt;#{createTimeEnd}
+                 </if>
+                  <if test="ttype != null and ttype eq 'QQQ'">
+                     and f.confirm_time&lt;#{createTimeEnd}
+                 </if>
+            </if> 
+  
+        <if test="take_substation_no != null and take_substation_no != ''"> and f.take_substation_no in (0,${take_substation_no}) </if>
+        <if test="send_substation_no != null and send_substation_no != ''"> and f.send_substation_no in (0,${send_substation_no}) </if> 
+        <if test="moneyType!=null and moneyType!=''"> and f.money_type=#{moneyType}</if>
+		<if test="tno!=null and tno!=''"> and f.take_substation_no=#{tno}</if>
+		<if test="sno!=null and sno!=''"> and f.send_substation_no=#{sno}</if>
+		<if test="itype!=null and itype!=''"> and f.`item_type`=#{itype}</if>
+		<if test="ctno!=null and ctno!=''"> and o.take_courier_no=#{ctno}</if>
+		<if test="csno!=null and csno!=''"> and o.send_courier_no=#{csno}</if>
+		<if test="settleStatus!=null and settleStatus=='SUCCESS'"> and f.settle_status='SUCCESS'</if>
+		<if test="settleStatus!=null and settleStatus=='NONE'"> and (f.settle_status!='SUCCESS' or f.settle_status is null)</if>
+		<if test="confirmStatus!=null and confirmStatus=='SUCCESS'"> and f.confirm_status='SUCCESS'</if>
+		<if test="confirmStatus!=null and confirmStatus=='NONE'"> and (f.confirm_status!='SUCCESS' or f.confirm_status is null)</if>
+		 <if test="status != null and status !=''"> and o.`status`=#{status}</if>
+   </where>
+        order by f.id desc
+    </select>
+    
+    
+     <select id="getById"  resultType="java.util.Map" parameterType="java.lang.Integer">  
+        select * from franchise_order
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+       <update id="settleStatus"  useGeneratedKeys="true" keyColumn="id">
+        update franchise_order set  settle_status='SUCCESS',settle_time=#{settleTime},settle_name=#{settleName},settle_money=#{settleMoney}
+        <where>
+            id=#{id}
+        </where>
+    </update>
+    
+    <select id="curBalance" resultType="java.util.Map">
+		select cur_balance from join_substation_acount where `status`=1 and substation_no=#{substationNo}
+	</select>
+    
+      <update id="addBalance"  useGeneratedKeys="true" keyColumn="id">
+        update join_substation_acount set  cur_balance=cur_balance+#{balance}
+        <where>
+           substation_no=#{substationNo}
+        </where>
+    </update>
+    
+    <update id="subBalance"  useGeneratedKeys="true" keyColumn="id">
+        update join_substation_acount set  cur_balance=cur_balance-#{balance}
+        <where>
+           substation_no=#{substationNo}
+        </where>
+    </update>
+    
+    <update id="updateSendSno"  useGeneratedKeys="true" keyColumn="id">
+        update franchise_order set  lgc_order_no=#{lgcOrderNo},send_substation_no=#{sendSno}
+        <where>
+           money_type='Z' and order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <update id="updateSendSnoIfnull"  useGeneratedKeys="true" keyColumn="id">
+        update franchise_order set send_substation_no=#{sendSno}
+        <where>
+           money_type='Z' and length(IFNULL(send_substation_no,''))&lt;1 and order_no=#{orderNo}
+        </where>
+    </update>
+    
+    <insert id="saveRecord"  useGeneratedKeys="true" keyColumn="id" >
+    	insert into substation_acount_bill(substation_no,create_time,lgc_order_no,type,pay_type,before_balance,use_balance,after_balance,source,operater) 
+values (#{substation_no},#{create_time},#{lgc_order_no},#{type},#{pay_type},#{before_balance},#{use_balance},#{after_balance},#{source},#{operater})
+    </insert>
+    
+       <update id="batchUpdate"  useGeneratedKeys="true" keyColumn="id">
+        update franchise_order set  last_update_name=#{last_update_name},last_update_time=#{last_update_time}
+        <if test="tno!=null and tno!=''">,take_substation_no=#{tno}</if>
+		<if test="sno!=null and sno!=''">,send_substation_no=#{sno}</if>
+		<if test="itype!=null and itype!=''">,`item_type`=#{itype}</if>
+		<if test="weight!=null and weight!=''"> ,item_weight=#{weight}</if>
+		<if test="settleMoney!=null and settleMoney!=''">,settle_money=#{settleMoney}</if>
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+    <update id="updateById"  useGeneratedKeys="true" keyColumn="id">
+    	 update franchise_order set  last_update_name=#{last_update_name},last_update_time=#{last_update_time}
+        <if test="tno!=null and tno!=''">,take_substation_no=#{tno}</if>
+		<if test="sno!=null and sno!=''">,send_substation_no=#{sno}</if>
+		<if test="itype!=null and itype!=''">,`item_type`=#{itype}</if>
+		<if test="weight!=null and weight!=''"> ,item_weight=#{weight}</if>
+		<if test="settleMoney!=null and settleMoney!=''">,settle_money=#{settleMoney}</if>
+        <where>
+            id =#{id}
+        </where>
+    </update>
+    
+     <update id="batchQueren"  useGeneratedKeys="true" keyColumn="id">
+        update franchise_order set  confirm_status=#{confirm_status},confirm_time=#{confirm_time},confirm_name=#{confirm_name},confirm_real_name=#{confirm_real_name}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+
+	<update id="updateJiaMengWeight">
+   		 update franchise_order set item_weight=#{item_weight} where 1=1
+    	<if test="order_no !=null and order_no !='' ">
+    		and order_no=#{order_no}
+    	</if>
+    	<if test="id !=null and id !='' ">
+    		and id=#{id}
+    	</if>
+    	<if test="lgcOrderNo !=null and lgcOrderNo !='' ">
+    		and lgc_order_no=#{lgcOrderNo}
+    	</if>
+    </update>
+
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="UserManager">  
+
+<update id="sstop" parameterType="java.lang.String">
+     update substation set status = '0'
+     where id = #{id}   
+</update>
+<update id="sstart" parameterType="java.lang.String">
+     update 	substation set status = '1'
+     where id = #{id}   
+</update>
+<update id="mstop" parameterType="java.lang.String">
+     update month_settle_user set status = '0'
+     where id = #{id}   
+</update>
+<update id="mstart" parameterType="java.lang.String">
+     update 	month_settle_user set status = '1'
+     where id = #{id}   
+</update>
+<update id="cstop" parameterType="java.lang.String">
+     update 	courier set status = '0'
+     where id = #{id}   
+</update>
+<update id="cstart" parameterType="java.lang.String">
+     update 	courier set status = '1'
+     where id = #{id}   
+</update>
+<update id="cpwd" parameterType="java.lang.String">
+     update  courier set pass_word ='e10adc3949ba59abbe56e057f20f883e'
+     where id = #{id}   
+</update>
+<select id="gSubByID" parameterType="java.lang.String" resultType="java.lang.String">
+select substation_no substationNo from substation where id = #{id}
+</select>
+<select id="gOrderBySub" parameterType="java.lang.String"  resultType="java.util.Map">
+	select id from order_info o where o.sub_station_no = #{substationNo} OR o.send_substation_no = #{substationNo}
+</select>
+
+
+<select id="gMonthNo" parameterType="java.lang.String" resultType="java.lang.String">
+select month_settle_no monthNo from month_settle_user where id = #{id}
+</select>
+<select id="gOrderByMonthNo" parameterType="java.lang.String"  resultType="java.util.Map">
+	select id from order_info o where o.month_settle_no = #{monthNo}
+</select>
+
+<select id="gCodNo" parameterType="java.lang.String" resultType="java.lang.String">
+		select cod_no codNo from cod_settle_user where id = #{id}
+</select>
+<select id="gOrderByCodNo" parameterType="java.lang.String"  resultType="java.util.Map">
+	select id from order_info o where o.cod_card_no = #{codNo}
+</select>
+
+
+
+
+   
+</mapper>

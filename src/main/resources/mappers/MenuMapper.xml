@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Menu">  
+      
+    
+   
+    <select id="getMenuList" resultType="java.util.HashMap">  
+        select * from boss_menu where status=1 order by order_no 
+    </select>  
+    
+    <select id="getMenuByUri" resultType="java.util.HashMap">  
+        select * from boss_menu where status=1 and menu_uri=#{0}
+    </select>  
+    
+    <select id="getMenu2ById" resultType="java.util.HashMap">  
+        select * from boss2_menu where id=#{0}
+    </select>  
+    
+</mapper>  

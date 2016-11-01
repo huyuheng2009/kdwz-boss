@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ProjectDs">  
+
+   <resultMap type="MDataSource" id="MDataSource">
+		<id property="id" column="id" jdbcType="INTEGER"/> 
+		<result property="key"  column="key" />
+		<result property="lgcNo"  column="lgc_no" />
+			<result property="host"  column="host" />
+		<result property="proKey"  column="pro_key" />
+		<result property="dbUrl"  column="db_url" />
+		<result property="dbUsername"  column="db_username" />
+		<result property="dbPassword"  column="db_password" />
+		<result property="minIdle"  column="min_idle" />
+		<result property="maxActive"  column="max_active" />
+		<result property="initialSize"  column="initial_size" />
+		<result property="maxWait"  column="max_wait" />
+		<result property="timeBetweenEvictionRunsMillis"  column="time_between_eviction_runs_millis" />
+		<result property="minEvictableIdleTimeMillis"  column="min_evictableIdle_time_millis" />
+		<result property="maxPoolPreparedStatementPerConnectionSize"  column="max_pool_prepared_statement_per_connection_size" />
+		<result property="note"  column="note" />
+		
+		
+	</resultMap>
+
+	   <select id="getByProKey" resultMap="MDataSource" parameterType="java.lang.String">  
+       select * from project_ds 
+        <where>
+			pro_key= #{0}
+		</where>
+    </select>
+	
+	<select id="getByKey" resultMap="MDataSource" parameterType="java.lang.String">  
+       select * from project_ds 
+        <where>
+			`key`= #{0}
+		</where>
+    </select>
+
+   
+</mapper>

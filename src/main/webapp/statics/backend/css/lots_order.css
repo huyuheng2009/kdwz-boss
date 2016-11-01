@@ -1,0 +1,26 @@
+﻿
+
+/**批量下单**/
+.lotsorder{ width:100%; margin:0 auto;}
+.lots_order{ margin-top:10px;}
+.lots_o_tit{ padding-left:20px; height:50px;}
+.lots_o_tit span{ line-height:50px; font-weight:bold; font-size:15px; margin-right:10px;}
+.lots_o_tit label{ margin:0 0 0 40px; line-height:50px;}
+.lots_o_tit label input{ position:absolute; margin:20px 0 0 -20px;}
+.lots_input{ height:20px; padding:4px 10px; border:1px solid #dfdfdf; margin:4px;}
+
+.lots_o_cont{}
+.lots_ji_li{ overflow:auto; zoom:1; margin-bottom:14px;}
+.lots_ji_name{ float:left; height:38px; line-height:38px; width:95px; text-align:right;}
+.lots_ji_name b{ color:red;}
+.lots_ji_input{ float: left; margin:0 20px;}
+.lots_ji_input .lots_input{ width:300px;}
+.lots_ji_input .lots_input.bg_arr{ background: url(../images/arr.jpg) no-repeat right rgb(255,255,255); cursor:pointer;}
+.lots_ji_butt{}
+.lots_ji_butt button{ height:30px; color:#fff; background:#0866c6; padding:0 20px; margin:4px;}
+.lots_o_cont{}
+.lots_o_right{ float:right;}
+.lots_o_right button{ height:30px; color:#fff; background:#0866c6; padding:0 20px; margin:4px; margin-right:20px;}
+
+
+

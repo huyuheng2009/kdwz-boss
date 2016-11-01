@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SubstationAccount">  
+	
+    <insert id="insert" parameterType="SubstationAccount"  useGeneratedKeys="true" keyColumn="id">
+    	insert into substation_account(courier_no,fcount,settle_time,ccount,ocount,hcount,month_no,mcount,mtype,
+    	msettle_date,mcontact,mphome,memail,liced,create_time,operator,acount,note,examine_status,rtype) values
+    	  (#{courierNo},#{fcount},#{settleTime},#{ccount},#{ocount},#{hcount},#{monthNo},#{mcount},#{mtype},
+    	  #{msettleDate},#{mcontact},#{mphome},#{memail},#{liced},#{createTime},#{operator},#{acount},#{note},#{examineStatus},#{rtype})
+    </insert>
+    
+    
+    <select id="list" resultType="java.util.HashMap">
+		select s.*,c.substation_no,c.real_name,m.month_settle_no from substation_account s 
+		left join courier c on s.courier_no=c.courier_no left join month_settle_user m on s.month_no=m.month_no
+		<where>
+			1=1
+        <if test="substationNo != null and substationNo !=''">
+		    and c.substation_no in (${substationNo})
+        </if>
+         <if test="substationNo == null or substationNo ==''">
+		    and 1=2
+        </if>
+        <if test="courierNo!=null and courierNo!=''">
+			and c.courier_no=#{courierNo,jdbcType=VARCHAR}
+		</if>
+		
+		  <if test="settleTimeBegin != null and settleTimeBegin !=''"> and s.settle_time&gt;=#{settleTimeBegin}</if>
+         <if test="settleTimeEnd != null and settleTimeEnd !=''"> and s.settle_time&lt;#{settleTimeEnd}</if>
+		
+	<!-- 	<if test="settleTime!=null and settleTime!=''">
+			and s.settle_time=#{settleTime}
+		</if> -->
+		<if test="examineStatus!=null and examineStatus!=''">
+			and s.examine_status in (${examineStatus})
+		</if>
+		<if test="rtype!=null and rtype!=''">
+			and s.rtype in (${rtype})
+		</if>
+		<if test="mtype!=null and mtype!=''">
+			and s.mtype=#{mtype}
+		</if>
+		 <if test="createTimeBegin != null and createTimeBegin !=''"> and s.create_time&gt;=#{createTimeBegin}</if>
+         <if test="createTimeEnd != null and createTimeEnd !=''"> and s.create_time&lt;#{createTimeEnd}</if>
+		<if test="monthSettleNo!=null and monthSettleNo!=''">
+			and m.month_settle_no=#{monthSettleNo}
+		</if>
+			order by s.id desc
+		</where>
+	</select>
+    
+        <update id="examine"  useGeneratedKeys="true" keyColumn="id">
+		update substation_account set examine_status=#{examineStatus},examine_time=#{examineTime},examine_people=#{examinePeople}
+		<where>
+			id in (${ids})
+		</where>
+	</update>
+    
+    <select id="getById" resultType="java.util.HashMap"  parameterType="java.lang.Integer">  
+        select * from substation_account
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+     <update id="update" parameterType="SubstationAccount"  useGeneratedKeys="true" keyColumn="id">
+    	update substation_account set fcount=#{fcount},settle_time=#{settleTime},ccount=#{ccount},ocount=#{ocount},month_no=#{monthNo},mcount=#{mcount},hcount=#{hcount},
+    	mtype=#{mtype},msettle_date=#{msettleDate},acount=#{acount},note=#{note},rtype=#{rtype}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    
+    
+    
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ItemType">  
+	<resultMap type="ItemType" id="ItemType">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="itemText"  column="item_text"  jdbcType="VARCHAR"/>
+		<result property="note"  column="note"  jdbcType="VARCHAR"/>
+		<result property="defaultItem"  column="default_item"  jdbcType="INTEGER"/>
+		
+	</resultMap>
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from item_type
+        <where>
+			1=1
+			<if test="itemText!=null and itemText!=''">and item_text like  CONCAT(CONCAT('%', #{itemText}),'%')</if>
+		</where>
+		order by id desc
+    </select>
+    
+     <select id="getByItemText" parameterType="java.lang.String" resultType="map">
+        select it.id from item_type it where it.item_text= #{itemText} limit 0,1
+    </select>
+    
+    <select id="getByItemStatus"  resultType="map">
+        select it.item_text itemText from item_type it where it.default_item=1  order by it.id desc limit 0,1
+    </select>
+    
+    <select id="getById" resultMap="ItemType" parameterType="java.lang.Integer">  
+        select * from item_type
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="ItemType"  useGeneratedKeys="true" keyColumn="id">
+    	insert into item_type(item_text,note) values (#{itemText},#{note})
+    </insert>
+    <update id="update" parameterType="ItemType"  useGeneratedKeys="true" keyColumn="id">
+    	update item_type set item_text=#{itemText},note=#{note}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    <update id="defaultItem" parameterType="ItemType"  useGeneratedKeys="true" keyColumn="id">
+    	update item_type set default_item=1
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    <update id="notDefaultItem" parameterType="ItemType"  useGeneratedKeys="true" keyColumn="id">
+    	update item_type set default_item=0
+    </update>
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from item_type where id=#{id}
+    </delete>
+
+</mapper>

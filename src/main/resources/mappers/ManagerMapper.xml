@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Manager">  
+
+      <select id="getLgcConfig" resultType="java.util.HashMap">  
+        select * from lgc_config
+        <where>
+			lgc_key= #{lgcKey}
+		</where>
+    </select>
+    
+    <select id="getIndexPic" resultType="java.util.HashMap">
+       select * from common_config where k='index_pic'
+    </select>
+    
+</mapper>

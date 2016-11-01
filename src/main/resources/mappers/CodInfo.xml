@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CodInfo">  
+	
+    
+    <insert id="insert" parameterType="CodInfo"  useGeneratedKeys="true" keyColumn="id">
+    	insert into cod_info(order_no,cod_no,cod_price,pay_status,pay_time,pay_type,pay_name,note) 
+    	values (#{orderNo},#{codNo},#{codPrice},#{payStatus},#{payTime},#{payType},#{payName},#{note})
+    </insert>
+    
+      <insert id="batchInsert" parameterType="java.util.List" >
+    	insert into cod_info(order_no,cod_no,cod_price,pay_status,pay_time,pay_type,pay_name,note) values 
+    	<foreach collection="list" item="item" index="index" separator="," >  
+       (#{item.orderNo},#{item.codNo},#{item.codPrice},#{item.payStatus},#{item.payTime},#{item.payType},#{item.payName},#{item.note})
+      </foreach> 
+   </insert>
+    
+    <update id="nopay"  parameterType="Integer">
+        update cod_info set pay_status=0,pay_time=NULL,pay_type=NULL,pay_name=NULL
+        <where>
+            id=#{id}
+        </where>
+    </update>
+    
+    <delete id="delete" parameterType="String">
+		delete from cod_info
+		<where>
+			order_no in (${orderNos})
+		</where>
+	</delete>
+
+
+  
+    <update id="cpayRate"  parameterType="Integer">
+        update order_info set cpay=good_price*#{rate}
+        <where> order_no in  <foreach collection="nos" item="item" index="index" open="(" separator="," close=")" >#{item}</foreach> 
+        </where>
+    </update>
+
+</mapper>

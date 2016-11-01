@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="Generator" content="EditPlus®">
+<meta name="Author" content="">
+<meta name="Keywords" content="">
+<meta name="Description" content="">
+<title>Document</title>
+<script src="js/plupload.full.min.js"></script>
+
+</head>
+<body>
+	<div id="container">
+		<a id="browse" href="javascript:;">选择文件</a>
+		<a id="start-upload" href="javascript:;">开始上传</a>
+	</div>
+	<div id="abd"></div>
+	<script type="text/javascript">
+		var uploader = new plupload.Uploader({
+			runtimes : "html5,flash,silverlight,html4",
+			browse_button : 'browse', // this can be an id of a DOM element or the DOM element itself
+			url : 'upload.php',
+			filters : {
+				mime_types : [ {
+					title : "Image files",
+					extensions : "jpg,gif,png"
+				}, {
+					title : "Zip files",
+					extensions : "zip"
+				} ]
+			},
+			filesAdded : function() {
+				console.log(arguaments);
+			}
+
+		});
+		uploader.init();
+		uploader.bind("Init", function() {
+			console.log(arguments);
+		});
+		var a;
+		uploader.bind("filesAdded", function(up, files) {
+			a = arguments;
+			plupload.each(files,function(file,i){
+				console.log(arguments);
+				var ext = o.Mime.getFileExtension(file.name);
+				var img = new mOxie.Image();
+
+				img.onload = function() {
+					this.embed(document.getElementById("abd"), {
+						width : 100,
+						height : 60,
+						crop : false
+
+					});
+					
+				}
+				img.load(file.getSource());
+	
+			});
+		});
+	</script>
+</body>
+</html>

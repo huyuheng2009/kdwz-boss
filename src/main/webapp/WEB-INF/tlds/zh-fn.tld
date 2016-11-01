@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+  version="2.0">
+    
+  <description>JSTL 1.1 functions library</description>
+  <display-name>JSTL functions</display-name>
+  <tlib-version>1.1</tlib-version>
+  <short-name>fn2</short-name>
+  <uri>/zh-fn</uri>
+
+  <function>
+    <name>toString</name>
+    <function-class>com.yogapay.hhwl.tags.Functions</function-class>
+    <function-signature>String toString(int)</function-signature>
+    <example>
+      ${fn2:toString(1)}
+    </example>
+  </function>
+  
+  <function>
+    <name>toInt</name>
+    <function-class>com.yogapay.hhwl.tags.Functions</function-class>
+    <function-signature>int toInt(java.lang.String)</function-signature>
+    <example>
+      ${fn2:toInt('123')}
+    </example>
+  </function>
+  
+  
+  <function>
+    <name>encoder</name>
+    <function-class>com.yogapay.hhwl.tags.Functions</function-class>
+    <function-signature>String encoder(java.lang.String,java.lang.String)</function-signature>
+    <example>
+      ${fn2:encoder('test','utf-8')}
+    </example>
+  </function>
+  
+   <function>
+    <name>decoder</name>
+    <function-class>com.yogapay.hhwl.tags.Functions</function-class>
+    <function-signature>String decoder(java.lang.String,java.lang.String)</function-signature>
+    <example>
+     ${fn2:decoder('test','utf-8')}
+    </example>
+  </function>
+  
+  <function>
+    <name>concat</name>
+    <function-class>com.yogapay.hhwl.tags.Functions</function-class>
+    <function-signature>String concat(java.lang.String,java.lang.String)</function-signature>
+    <example>
+     ${fn2:concat('a','b')}
+    </example>
+  </function>
+  
+  <function>
+    <name>stringContains</name>
+    <function-class>com.yogapay.hhwl.tags.Functions</function-class>
+    <function-signature>String stringContains(java.lang.String,java.lang.String)</function-signature>
+    <example>
+     ${fn2:stringContains('a','b')}
+    </example>
+  </function>
+  
+  <function>
+    <name>compareDate</name>
+    <function-class>com.yogapay.hhwl.tags.Functions</function-class>
+    <function-signature>int compareDate(java.util.Date,java.util.Date,boolean)</function-signature>
+    <example>
+     ${fn2:compareDate(Date date1,Date date2)}
+    </example>
+  </function>
+  
+  <function>
+    <name>fmtIp</name>
+    <function-class>com.yogapay.hhwl.tags.Functions</function-class>
+    <function-signature>String fmtIp(java.lang.String)</function-signature>
+    <example>
+     ${fn2:fmtIp('127000000001')}
+    </example>
+  </function> 
+  
+  
+  <function>
+    <name>toJson</name>
+    <function-class>com.yogapay.hhwl.tags.Functions</function-class>
+    <function-signature>Object toJson(java.lang.String)</function-signature>
+    <example>
+     ${fn2:toJson('{}')}
+    </example>
+  </function>
+  
+</taglib>

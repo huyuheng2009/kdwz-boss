@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Wages">  
+	
+<select id="list" resultType="java.util.Map" parameterType="java.util.Map">
+	select tab1.*,TRUNCATE((${nameSumSql}),2) AS costAmount,
+	#{dateMonth} as ccmonth from (select tmp.*,
+TRUNCATE((tmp.take_sum_freight+tmp.take_sum_weight+tmp.take_sum_count+tmp.take_sum_freight+tmp.take_sum_weight
+          +tmp.take_sum_count+tmp.send_sum_freight+tmp.send_sum_weight+tmp.send_sum_count),2) AS courier_sum,
+TRUNCATE((tmp.take_sum_freight+tmp.take_sum_weight+tmp.take_sum_count),2) AS take_sum,
+TRUNCATE((tmp.send_sum_freight+tmp.send_sum_weight+tmp.send_sum_count),2) AS send_sum,
+TRUNCATE((tmp.for_sum_freight+tmp.for_sum_weight+tmp.for_sum_count),2) AS for_sum,
+pay.create_time as pay_time,pay.courier_tc_way ${nameSql} from 
+(select x.substation_name,x.substation_no,x.inner_no,x.courier_no,x.real_name,
+TRUNCATE(IFNULL(x.take_tcf/100,0),2) as take_tcf,TRUNCATE(IFNULL(x.take_tcw,0),2) as take_tcw,TRUNCATE(IFNULL(x.take_tcc,0),2) as take_tcc,TRUNCATE(IFNULL(x.send_tcf/100,0),2) as send_tcf,
+TRUNCATE(IFNULL(x.send_tcw,0),2) as send_tcw,TRUNCATE(IFNULL(x.send_tcc,0),2) as send_tcc,TRUNCATE(IFNULL(x.for_tcf/100,0),2) as for_tcf,TRUNCATE(IFNULL(x.for_tcw,0),2) as for_tcw,TRUNCATE(IFNULL(x.for_tcc,0),2) as for_tcc,
+IFNULL(TRUNCATE(t1.take_sum_freight,2),0) AS take_sum_freight,IFNULL(TRUNCATE(t1.take_sum_weight,2),0) AS take_sum_weight,IFNULL(TRUNCATE(t1.take_sum_count,2),0) AS take_sum_count,
+IFNULL(TRUNCATE(t1.take_freight,2),0) AS take_freight,IFNULL(TRUNCATE(t1.take_weight,2),0) AS take_weight,IFNULL(TRUNCATE(t1.take_count,2),0) AS take_count,
+IFNULL(TRUNCATE(t1.for_sum_freight,2),0) AS for_sum_freight,IFNULL(TRUNCATE(t1.for_sum_weight,2),0) AS for_sum_weight,IFNULL(TRUNCATE(t1.for_sum_count,2),0) AS for_sum_count,
+IFNULL(TRUNCATE(t1.for_freight,2),0) AS for_freight,IFNULL(TRUNCATE(t1.for_weight,2),0) AS for_weight,IFNULL(TRUNCATE(t1.for_count,2),0) AS for_count,
+IFNULL(TRUNCATE(x.send_freight,2),0) AS send_freight,IFNULL(TRUNCATE(x.send_weight,2),0) AS send_weight,IFNULL(TRUNCATE(x.send_count,2),0) AS send_count,
+IFNULL(TRUNCATE(x.send_sum_freight,2),0) AS send_sum_freight,IFNULL(TRUNCATE(x.send_sum_weight,2),0) AS send_sum_weight,IFNULL(TRUNCATE(x.send_sum_count,2),0) AS send_sum_count
+from (SELECT o.take_courier_no AS tno, 
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0)*ct.take_tcf/100 ELSE 0 END) take_sum_freight,
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0) ELSE 0 END) take_freight,
+
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN (IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0))*ct.take_tcw ELSE 0 END) take_sum_weight,
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN (IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0)) ELSE 0 END) take_weight, 
+ 
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN IF((IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})&lt;1,1,(IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT}))*ct.take_tcc ELSE 0 END) take_sum_count, 
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN IF((IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})&lt;1,1,(IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})) ELSE 0 END) take_count, 
+
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0)*ct.for_tcf/100 ELSE 0 END) for_sum_freight, 
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0) ELSE 0 END) for_freight, 
+
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN (IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0))*ct.for_tcw ELSE 0 END) for_sum_weight, 
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN (IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0)) ELSE 0 END) for_weight, 
+
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN IF((IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})&lt;1,1,(IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT}))*ct.for_tcc ELSE 0 END) for_sum_count,
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN IF((IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})&lt;1,1,(IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})) ELSE 0 END) for_count
+FROM order_info o 
+ <if test="tcDay != null and tcDay !=''">LEFT JOIN courier_tc ct ON (o.take_courier_no=ct.courier_no)</if> 
+ <if test="tcDay == null or tcDay ==''">LEFT JOIN courier_day_tc ct ON (o.take_courier_no=ct.courier_no  AND DATE_FORMAT(o.take_order_time,'%Y-%m-%d')=ct.tc_date)</if> 
+ 
+WHERE o.deled=0 and o.status in (2,3,6,7,8) 
+ <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> 
+ <if test="cno!=null and cno!=''"> and o.take_courier_no=#{cno,jdbcType=VARCHAR}</if>
+ AND o.take_order_time>=concat(#{dateMonth},'-01') and concat(date_format(date_add(concat(#{dateMonth},'-15'),INTERVAL 20 DAY),'%Y-%m'),'-01')>o.take_order_time 
+group by o.take_courier_no) t1 right JOIN  
+
+(select c.real_name,c.courier_no,t2.* ,s.substation_name,c.inner_no,s.substation_no,
+tc.take_tcf,tc.take_tcw,tc.take_tcc,tc.send_tcf,tc.send_tcw,tc.send_tcc,tc.for_tcf,tc.for_tcw,tc.for_tcc
+from courier c left join substation s on c.substation_no=s.substation_no left join courier_tc tc on c.courier_no=tc.courier_no left join 
+ (SELECT o.send_courier_no AS sno, 
+SUM(IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0)*ct.send_tcf/100) send_sum_freight, 
+SUM((IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0))*ct.send_tcw ) send_sum_weight, 
+SUM(IF((IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})&lt;1,1,(IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT}))*ct.send_tcc ) send_sum_count,
+SUM(IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0)) send_freight,
+SUM(IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0)) send_weight, 
+SUM(IF((IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})&lt;1,1,(IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT}))) send_count
+from order_info o 
+<if test="tcDay != null and tcDay !=''">LEFT JOIN courier_tc ct ON (o.send_courier_no=ct.courier_no)</if> 
+ <if test="tcDay == null or tcDay ==''">LEFT JOIN courier_day_tc ct ON (o.send_courier_no=ct.courier_no AND DATE_FORMAT(o.send_order_time,'%Y-%m-%d')=ct.tc_date)</if> 
+WHERE o.deled=0 
+ <if test="reportExam != null and reportExam eq 'YY'"> and o.sign_examine_status='PASS' </if> 
+ <if test="cno!=null and cno!=''"> and o.send_courier_no=#{cno,jdbcType=VARCHAR}</if>
+ AND o.send_order_time>=concat(#{dateMonth},'-01') and concat(date_format(date_add(concat(#{dateMonth},'-15'),INTERVAL 20 DAY),'%Y-%m'),'-01')>o.send_order_time 
+group by o.send_courier_no) t2 on c.courier_no=t2.sno where 1 <if test="WAGES_BASE_COURIER_STATUS !=null and WAGES_BASE_COURIER_STATUS ==1"> and c.`status`=1 </if>) x on t1.tno=x.sno) tmp 
+  LEFT JOIN courier_cost cc ON tmp.courier_no=cc.courier_no AND cc.cost_month=#{dateMonth}
+  left join courier_salary_pay pay on tmp.courier_no=pay.courier_no AND pay.cost_month=#{dateMonth}
+WHERE 1 
+          <if test="sno!=null and sno!=''"> and tmp.substation_no=#{sno}</if>
+          <if test="cno!=null and cno!=''"> and tmp.courier_no=#{cno,jdbcType=VARCHAR}</if>
+          <if test="tcDay != null and tcDay !=''">and not exists (select 1 from courier_salary_pay where courier_no=tmp.courier_no and cost_month=#{dateMonth} and courier_tc_way=2)</if>
+          <if test="tcDay == null or tcDay ==''">and not exists (select 1 from courier_salary_pay where courier_no=tmp.courier_no and cost_month=#{dateMonth} and courier_tc_way=1)</if>
+   GROUP BY tmp.courier_no,cc.batch_id) tab1 where 1 and (courier_sum>0 or cost_sum_amount>0 )
+ <if test="orderBy != null and orderBy ==1"> order by inner_no desc </if> 	
+ <if test="orderBy != null and orderBy ==2"> order by inner_no asc </if> 	 
+ <if test="orderBy != null and orderBy ==3"> order by substation_no desc </if> 
+ <if test="orderBy != null and orderBy ==4"> order by substation_no asc </if>
+
+</select>
+
+
+
+<select id="listTotal" resultType="java.util.Map" parameterType="java.util.Map">
+	select count(0) totalCount,sum(take_sum) total_take_sum,sum(send_sum) total_send_sum,sum(for_sum) total_for_sum,
+	sum(take_freight) total_take_freight,sum(send_freight) total_send_freight,sum(for_freight) total_for_freight,
+	sum(take_count) total_take_count,sum(send_count) total_send_count,sum(for_count) total_for_count,
+	sum(take_weight) total_take_weight,sum(send_weight) total_send_weight,sum(for_weight) total_for_weight,
+	sum(TRUNCATE((${nameSumSql}),2)) total_cost from (select tmp.*,
+TRUNCATE((tmp.take_sum_freight+tmp.take_sum_weight+tmp.take_sum_count+tmp.take_sum_freight+tmp.take_sum_weight
+          +tmp.take_sum_count+tmp.send_sum_freight+tmp.send_sum_weight+tmp.send_sum_count),2) AS courier_sum,
+TRUNCATE((tmp.take_sum_freight+tmp.take_sum_weight+tmp.take_sum_count),2) AS take_sum,
+TRUNCATE((tmp.send_sum_freight+tmp.send_sum_weight+tmp.send_sum_count),2) AS send_sum,
+TRUNCATE((tmp.for_sum_freight+tmp.for_sum_weight+tmp.for_sum_count),2) AS for_sum,
+	#{dateMonth} as ccmonth ${nameSql} from 
+(select x.substation_no,x.inner_no,x.courier_no,x.real_name,
+TRUNCATE(IFNULL(x.take_tcf/100,0),2) as take_tcf,TRUNCATE(IFNULL(x.take_tcw,0),2) as take_tcw,TRUNCATE(IFNULL(x.take_tcc,0),2) as take_tcc,TRUNCATE(IFNULL(x.send_tcf/100,0),2) as send_tcf,
+TRUNCATE(IFNULL(x.send_tcw,0),2) as send_tcw,TRUNCATE(IFNULL(x.send_tcc,0),2) as send_tcc,TRUNCATE(IFNULL(x.for_tcf/100,0),2) as for_tcf,TRUNCATE(IFNULL(x.for_tcw,0),2) as for_tcw,TRUNCATE(IFNULL(x.for_tcc,0),2) as for_tcc,
+IFNULL(TRUNCATE(t1.take_sum_freight,2),0) AS take_sum_freight,IFNULL(TRUNCATE(t1.take_sum_weight,2),0) AS take_sum_weight,IFNULL(TRUNCATE(t1.take_sum_count,2),0) AS take_sum_count,
+IFNULL(TRUNCATE(t1.take_freight,2),0) AS take_freight,IFNULL(TRUNCATE(t1.take_weight,2),0) AS take_weight,IFNULL(TRUNCATE(t1.take_count,2),0) AS take_count,
+IFNULL(TRUNCATE(t1.for_sum_freight,2),0) AS for_sum_freight,IFNULL(TRUNCATE(t1.for_sum_weight,2),0) AS for_sum_weight,IFNULL(TRUNCATE(t1.for_sum_count,2),0) AS for_sum_count,
+IFNULL(TRUNCATE(t1.for_freight,2),0) AS for_freight,IFNULL(TRUNCATE(t1.for_weight,2),0) AS for_weight,IFNULL(TRUNCATE(t1.for_count,2),0) AS for_count,
+IFNULL(TRUNCATE(x.send_freight,2),0) AS send_freight,IFNULL(TRUNCATE(x.send_weight,2),0) AS send_weight,IFNULL(TRUNCATE(x.send_count,2),0) AS send_count,
+IFNULL(TRUNCATE(x.send_sum_freight,2),0) AS send_sum_freight,IFNULL(TRUNCATE(x.send_sum_weight,2),0) AS send_sum_weight,IFNULL(TRUNCATE(x.send_sum_count,2),0) AS send_sum_count
+from (SELECT o.take_courier_no AS tno, 
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0)*ct.take_tcf/100 ELSE 0 END) take_sum_freight,
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0) ELSE 0 END) take_freight,
+
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN (IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0))*ct.take_tcw ELSE 0 END) take_sum_weight,
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN (IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0)) ELSE 0 END) take_weight, 
+ 
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN IF((IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})&lt;1,1,(IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT}))*ct.take_tcc ELSE 0 END) take_sum_count, 
+SUM(CASE WHEN (1=1 AND LENGTH(IFNULL(o.for_no,''))&lt;1) THEN 1 ELSE 0 END) take_count, 
+
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0)*ct.for_tcf/100 ELSE 0 END) for_sum_freight, 
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0) ELSE 0 END) for_freight, 
+
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN (IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0))*ct.for_tcw ELSE 0 END) for_sum_weight, 
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN (IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0)) ELSE 0 END) for_weight, 
+
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN IF((IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})&lt;1,1,(IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT}))*ct.for_tcc ELSE 0 END) for_sum_count,
+SUM(CASE WHEN (1=1 AND LENGTH(o.for_no)&gt;1 ) THEN 1 ELSE 0 END) for_count
+FROM order_info o 
+ <if test="tcDay != null and tcDay !=''">LEFT JOIN courier_tc ct ON (o.take_courier_no=ct.courier_no)</if> 
+ <if test="tcDay == null or tcDay ==''">LEFT JOIN courier_day_tc ct ON (o.take_courier_no=ct.courier_no AND DATE_FORMAT(o.take_order_time,'%Y-%m-%d')=ct.tc_date)</if> 
+ 
+WHERE o.deled=0 and o.status in (2,3,6,7,8) 
+ <if test="reportExam != null and reportExam eq 'YY'"> and o.examine_status='PASS' </if> 
+ <if test="cno!=null and cno!=''"> and o.take_courier_no=#{cno,jdbcType=VARCHAR}</if>
+AND o.take_order_time>=concat(#{dateMonth},'-01') and concat(date_format(date_add(concat(#{dateMonth},'-15'),INTERVAL 20 DAY),'%Y-%m'),'-01')>o.take_order_time 
+group by o.take_courier_no) t1 right JOIN  
+
+(select c.real_name,c.courier_no,t2.*,c.inner_no,c.substation_no,
+tc.take_tcf,tc.take_tcw,tc.take_tcc,tc.send_tcf,tc.send_tcw,tc.send_tcc,tc.for_tcf,tc.for_tcw,tc.for_tcc
+from courier c left join courier_tc tc on c.courier_no=tc.courier_no left join 
+ (SELECT o.send_courier_no AS sno, 
+SUM(IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0)*ct.send_tcf/100) send_sum_freight, 
+SUM((IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0))*ct.send_tcw ) send_sum_weight, 
+SUM(IF((IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT})&lt;1,1,(IF(LENGTH(IFNULL(o.item_count,''))=0,1,IFNULL(o.item_count,1))-${WAGES_BASE_COUNT}))*ct.send_tcc ) send_sum_count,
+SUM(IF((o.freight-${WAGES_BASE_FREIGHT})>0,(o.freight-${WAGES_BASE_FREIGHT}),0)) send_freight,
+SUM(IF((o.item_weight-${WAGES_BASE_WEIGHT})>0,(o.item_weight-${WAGES_BASE_WEIGHT}),0)) send_weight, 
+SUM(1) send_count
+from order_info o 
+<if test="tcDay != null and tcDay !=''">LEFT JOIN courier_tc ct ON (o.send_courier_no=ct.courier_no)</if> 
+ <if test="tcDay == null or tcDay ==''">LEFT JOIN courier_day_tc ct ON (o.send_courier_no=ct.courier_no AND DATE_FORMAT(o.send_order_time,'%Y-%m-%d')=ct.tc_date)</if> 
+WHERE o.deled=0 
+ <if test="reportExam != null and reportExam eq 'YY'"> and o.sign_examine_status='PASS' </if> 
+ <if test="cno!=null and cno!=''"> and o.send_courier_no=#{cno,jdbcType=VARCHAR}</if>
+ AND o.send_order_time>=concat(#{dateMonth},'-01') and concat(date_format(date_add(concat(#{dateMonth},'-15'),INTERVAL 20 DAY),'%Y-%m'),'-01')>o.send_order_time 
+group by o.send_courier_no) t2 on c.courier_no=t2.sno where 1 <if test="WAGES_BASE_COURIER_STATUS !=null and WAGES_BASE_COURIER_STATUS ==1"> and c.`status`=1 </if>) x on t1.tno=x.sno) tmp 
+  LEFT JOIN courier_cost cc ON tmp.courier_no=cc.courier_no AND cc.cost_month=#{dateMonth}
+   left join courier_salary_pay pay on tmp.courier_no=pay.courier_no AND pay.cost_month=#{dateMonth}
+WHERE 1 
+          <if test="sno!=null and sno!=''"> and tmp.substation_no=#{sno}</if>
+          <if test="cno!=null and cno!=''"> and tmp.courier_no=#{cno,jdbcType=VARCHAR}</if>
+           <if test="tcDay != null and tcDay !=''">and not exists (select 1 from courier_salary_pay where courier_no=tmp.courier_no and cost_month=#{dateMonth} and courier_tc_way=2)</if>
+          <if test="tcDay == null or tcDay ==''">and not exists (select 1 from courier_salary_pay where courier_no=tmp.courier_no and cost_month=#{dateMonth} and courier_tc_way=1)</if>
+   GROUP BY tmp.courier_no,cc.batch_id) tab1 where 1 and (courier_sum>0 or cost_sum_amount>0 )
+
+</select>	
+	
+	<select id="list1" resultType="java.util.Map" parameterType="java.util.Map">
+	select x.courier_no,x.substation_name,x.inner_no,x.real_name,#{dateMonth} as ccmonth,
+     truncate((x.take_sum_freight+x.take_sum_weight+x.take_sum_count),2) as take_sum, 
+     truncate((x.send_sum_freight+x.send_sum_weight+x.send_sum_count),2) as send_sum, 
+     truncate((x.for_sum_freight+x.for_sum_weight+x.for_sum_count),2) as for_sum
+        ${nameSql}
+	   from (select s.substation_name,c.inner_no,c.real_name,c.courier_no,
+      sum(case when (1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if>  AND c.courier_no=o.take_courier_no and DATE_FORMAT(o.take_order_time,'%Y-%m')=#{dateMonth}  and length(ifnull(o.for_no,''))&lt;1  and DATE_FORMAT(o.take_order_time,'%Y-%m-%d')=ct.tc_date) then o.freight*ct.take_tcf/100 ELSE 0 end) take_sum_freight,
+	  sum(case when (1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if>  AND c.courier_no=o.take_courier_no and DATE_FORMAT(o.take_order_time,'%Y-%m')=#{dateMonth} and length(ifnull(o.for_no,''))&lt;1 and DATE_FORMAT(o.take_order_time,'%Y-%m-%d')=ct.tc_date) then (o.item_weight-1)*ct.take_tcw ELSE 0 end) take_sum_weight,
+	  sum(case when (1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if>  AND c.courier_no=o.take_courier_no and DATE_FORMAT(o.take_order_time,'%Y-%m')=#{dateMonth} and length(ifnull(o.for_no,''))&lt;1 and DATE_FORMAT(o.take_order_time,'%Y-%m-%d')=ct.tc_date) then ct.take_tcc ELSE 0 end) take_sum_count,
+	  
+	  sum(case when (1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.sign_examine_status='PASS' </if>  AND c.courier_no=o.send_courier_no and DATE_FORMAT(o.send_order_time,'%Y-%m')=#{dateMonth} and DATE_FORMAT(o.send_order_time,'%Y-%m-%d')=ct.tc_date) then o.freight*ct.send_tcf/100 ELSE 0 end) send_sum_freight,
+	  sum(case when (1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.sign_examine_status='PASS' </if> AND c.courier_no=o.send_courier_no and DATE_FORMAT(o.send_order_time,'%Y-%m')=#{dateMonth} and DATE_FORMAT(o.send_order_time,'%Y-%m-%d')=ct.tc_date) then (o.item_weight-1)*ct.send_tcw ELSE 0 end) send_sum_weight,
+	  sum(case when (1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.sign_examine_status='PASS' </if> AND c.courier_no=o.send_courier_no and DATE_FORMAT(o.send_order_time,'%Y-%m')=#{dateMonth} and DATE_FORMAT(o.send_order_time,'%Y-%m-%d')=ct.tc_date) then ct.send_tcc ELSE 0 end) send_sum_count,
+	  
+	  sum(case when (1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if>  AND c.courier_no=o.take_courier_no and DATE_FORMAT(o.take_order_time,'%Y-%m')=#{dateMonth}  and length(o.for_no)&gt;1 and DATE_FORMAT(o.take_order_time,'%Y-%m-%d')=ct.tc_date) then o.freight*ct.for_tcf/100 ELSE 0 end) for_sum_freight,
+	  sum(case when (1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if>  AND c.courier_no=o.take_courier_no and DATE_FORMAT(o.take_order_time,'%Y-%m')=#{dateMonth}  and length(o.for_no)&gt;1 and DATE_FORMAT(o.take_order_time,'%Y-%m-%d')=ct.tc_date) then (o.item_weight-1)*ct.for_tcw ELSE 0 end) for_sum_weight,
+	  sum(case when (1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if>  AND c.courier_no=o.take_courier_no and DATE_FORMAT(o.take_order_time,'%Y-%m')=#{dateMonth}  and length(o.for_no)&gt;1 and DATE_FORMAT(o.take_order_time,'%Y-%m-%d')=ct.tc_date) then ct.for_tcc ELSE 0 end) for_sum_count
+ from courier c
+     left join substation s on c.substation_no=s.substation_no
+      left join courier_day_tc ct on c.courier_no=ct.courier_no
+     left join order_info o on (c.courier_no=o.take_courier_no or c.courier_no=o.send_courier_no)
+     where  o.deled=0   
+       <if test="WAGES_BASE_COURIER_STATUS!=null and WAGES_BASE_COURIER_STATUS!=''"> and c.`status`=${WAGES_BASE_COURIER_STATUS} </if>
+         <if test="reportExam != null and reportExam eq 'YY'"> and (o.examine_status='PASS' or o.sign_examine_status='PASS') </if> 
+          <if test="sno!=null and sno!=''"> and c.substation_no =#{sno}</if>
+          <if test="cno!=null and cno!=''"> and c.courier_no=#{cno,jdbcType=VARCHAR}</if>
+     group by c.courier_no) x left join courier_cost cc on x.courier_no=cc.courier_no
+          where cc.cost_month=#{dateMonth} or cc.id is null
+       group by x.courier_no,cc.batch_id 
+	</select>
+	
+	
+	<select id="listCostName" resultType="java.util.Map" parameterType="java.util.Map">
+             SELECT * FROM cost_name where 1=1 
+             <if test="costIo!=null and costIo!=''"> and cost_io=#{costIo}</if>
+   </select>
+
+</mapper>

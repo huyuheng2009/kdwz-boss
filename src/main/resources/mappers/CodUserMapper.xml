@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CodUser">  
+
+    <select id="list" resultType="java.util.HashMap">  
+         select * from cod_settle_user where 1=1 
+          <if test="codNo != null and codNo !=''"> and cod_no=#{codNo}</if>
+          <if test="codName != null and codName !=''"> and (cod_name like CONCAT(CONCAT('%', #{codName}),'%') or cod_sname like CONCAT(CONCAT('%', #{codName}),'%'))</if>
+          <if test="createTimeBegin != null and createTimeBegin !=''"> and create_time&gt;=#{createTimeBegin}</if>
+          <if test="createTimeEnd != null and createTimeEnd !=''"> and create_time&lt;=#{createTimeEnd}</if>
+          <if test="substationNo != null and substationNo != '' ">
+             and substation_no in('',0,${substationNo})
+          </if>
+          order by id desc
+    </select> 
+
+       <insert id="saveCuser" parameterType="Cuser"  useGeneratedKeys="true" keyColumn="id">
+    	insert into cod_settle_user(cod_no,user_no,substation_no,cod_name,contact_name,contact_phone,biz_lic,id_card,settle_type,settle_bank,settle_card_no,
+    	bank_cpns,settle_date,email,create_time,note,cod_sname,contact_addr,settle_phone,courier_no,mark_name,liced,status,cstype) 
+    	values (
+    		#{codNo},#{userNo},#{substationNo},#{codName},#{contactName},#{contactPhone},#{bizLic},#{idCard},#{settleType},#{settleBank},#{settleCardNo},
+    		#{bankCpns},#{settleDate},#{email},#{createTime},#{note},#{codSname},#{contactAddr},#{settlePhone},#{courierNo},#{markName},#{liced},#{status},#{cstype})
+    </insert>
+    <update id="uCuser" parameterType="Cuser"  useGeneratedKeys="true" keyColumn="id">
+    	update cod_settle_user set cod_name=#{codName},contact_name=#{contactName},contact_phone=#{contactPhone},
+    	biz_lic=#{bizLic},id_card=#{idCard},settle_type=#{settleType},settle_bank=#{settleBank},settle_card_no=#{settleCardNo},
+    	bank_cpns=#{bankCpns},settle_date=#{settleDate},email=#{email},substation_no=#{substationNo},note=#{note},
+    	cod_sname=#{codSname},contact_addr=#{contactAddr},settle_phone=#{settlePhone},courier_no=#{courierNo},mark_name=#{markName},liced=#{liced},cstype=#{cstype}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+     <select id="getCuserById" resultType="java.util.HashMap" parameterType="java.lang.Integer">  
+        select * from cod_settle_user
+        <where>
+			id= #{id}
+		</where>
+    </select>
+
+    <update id="status" parameterType="Cuser">
+	   update cod_settle_user set status=#{status} where id=#{id}
+    </update> 
+    
+  <select id="getCuserByNo" resultType="java.util.HashMap">  
+        select * from cod_settle_user
+        <where>
+			cod_no= #{codNo}
+		</where>
+    </select>
+    
+     <delete id="delCuserById" parameterType="Integer">
+    	delete from cod_settle_user where id=#{id}
+    </delete>
+
+</mapper>  

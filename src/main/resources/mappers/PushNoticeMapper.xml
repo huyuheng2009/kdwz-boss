@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="PushNotice">  
+
+   <insert id="insert" parameterType="PushNotice" useGeneratedKeys="true" keyProperty="id">  
+     insert into push_notice(create_time,last_update_time,user_no,is_send,content,title,push_name,is_red_title,edit_name) values 
+     (#{createTime},#{lastUpdateTime},#{userNo},#{isSend},#{content},#{title},#{pushName},#{isRedTitle},#{editName})
+    </insert> 
+    
+    <select id="getList" resultType="java.util.HashMap">
+    	select id,create_time createTime,last_update_time lastUpdateTime,user_no userNo,is_send isSend,content,title,push_name pushName,is_red_title isRedTitle,edit_name editName from push_notice
+    	<where>
+    	    <if test="createTime !=null and createTime !=''">and create_time=#{createTime}</if>
+    	    <if test="lastUpdateTime !=null and lastUpdateTime !=''">and last_update_time=#{lastUpdateTime}</if>
+    		<if test="userNo !=null and userNo !=''">and user_no=#{userNo}</if>
+	        <if test="isSend !=null and isSend !=''">and is_send=#{isSend}</if>
+	        <if test="title !=null and title !=''">and title=#{title}</if>
+	        <if test="content !=null and content !=''">and content=#{content}</if>
+	        <if test="pushName !=null and pushName !=''">and push_name=#{pushName}</if>
+	        <if test="editName !=null and editName !=''">and edit_name=#{editName}</if>
+	        <if test="isRedTitle !=null and isRedTitle !=''">and is_red_title=#{isRedTitle}</if>
+	         <if test="type !=null and type !=''">and type=#{type}</if>
+    	</where>
+    	order by last_update_time desc
+    	<if test="limit != null and limit != ''"> limit 0,${limit}</if>
+    </select>
+    
+    <update id="updateById" parameterType="PushNotice">
+        update push_notice set last_update_time=#{lastUpdateTime}
+        <if test="userNo !=null and userNo !=''">,user_no=#{userNo}</if>
+        <if test="isSend !=null and isSend !=''">,is_send=#{isSend}</if>
+        <if test="title !=null and title !=''">,title=#{title}</if>
+        <if test="content !=null and content !=''">,content=#{content}</if>
+        <if test="pushName !=null and pushName !=''">,push_name=#{pushName}</if>
+        <if test="editName !=null and editName !=''">, edit_name=#{editName}</if>
+        <if test="isRedTitle !=null and isRedTitle !=''">,is_red_title=#{isRedTitle}</if>
+        where id=#{id}
+    </update>
+    
+    <delete id="deleteById" parameterType="java.lang.Long">
+       delete from push_notice where id=#{id}
+    </delete>
+    
+    <select id="findById" parameterType="java.lang.Long" resultType="PushNotice">
+    	select id,create_time createTime,last_update_time lastUpdateTime,user_no userNo,is_send isSend,content,title,push_name pushName,is_red_title isRedTitle,edit_name editName from push_notice where id=#{id}
+    </select>
+    
+     <select id="getLast"  resultType="PushNotice">
+    	select id,create_time createTime,last_update_time lastUpdateTime,user_no userNo,is_send isSend,content,title,push_name pushName,is_red_title isRedTitle,edit_name editName ,type
+from push_notice where type=1 and expire_time is not null and expire_time >now()
+    	order by id desc limit 0,1
+    </select>
+    
+    <select id="totalCount" resultType="java.lang.Integer">
+    	select count(0) from push_notice
+    	<where>
+    	    <if test="createTime !=null and createTime !=''">and create_time=#{createTime}</if>
+    	    <if test="lastUpdateTime !=null and lastUpdateTime !=''">and last_update_time=#{lastUpdateTime}</if>
+    		<if test="userNo !=null and userNo !=''">and user_no=#{userNo}</if>
+	        <if test="isSend !=null and isSend !=''">and is_send=#{isSend}</if>
+	        <if test="title !=null and title !=''">and title=#{title}</if>
+	        <if test="content !=null and content !=''">and content=#{content}</if>
+	        <if test="pushName !=null and pushName !=''">and push_name=#{pushName}</if>
+	        <if test="editName !=null and editName !=''">and edit_name=#{editName}</if>
+	        <if test="isRedTitle !=null and isRedTitle !=''">and is_red_title=#{isRedTitle}</if>
+	        <if test="type !=null and type !=''">and type=#{type}</if>
+    	</where>
+    </select>
+       
+</mapper>

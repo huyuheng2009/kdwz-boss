@@ -1,0 +1,45 @@
+
+
+/**********表格**********/
+.table{ width:100%; background:#fff;}
+.ta_header{overflow:auto; zoom:1; height:50px;}
+.button_2{ text-align:center; background: url(../images/butt_bg.jpg) repeat-x; color:#1c7ad8; padding:0 16px; border:1px solid #cdcdcd;border-radius:2px;-moz-border-radius:2px;} 
+.ta_butt{ float:left;overflow:auto; zoom:1; margin:9px 20px 0 0;}
+.ta_butt a{ float:left; display:block; margin-left:12px; height:30px; line-height:30px;}
+.ta_table{}
+.nohei{ max-height:none; border-right:1px solid #cdcdcd;}
+.ta_ta{}
+.ta_ta tr th{ height:40px; text-align:center; background:#e8e8e8; border:1px solid #cdcdcd; border-right:0; padding:0 3px;color: black;}
+.ta_ta tr td{ text-align:center; border-left:1px solid #cdcdcd; border-bottom:1px solid #cdcdcd; background:#f8f8f8;padding:0 3px;}
+.ta_ta tr th:first-child{ border-left:0;}
+.ta_ta tr td:first-child{ border-left:0;}
+.num_all{ overflow:auto; zoom:1;} 
+.num_all .re_check{ display:block; margin:12px 10px 0 13px;}
+.num_all strong{ float:left; line-height:40px; width:40px; text-align:center;}
+.ta_ta tr td strong{ font-weight:normal;}
+.ta_ta a{ color:#1c7ad8;}
+.ta_ta a:hover{ text-decoration:underline;}
+/*复选框*/
+.re_check{ position:relative; width:10px; float:left;}
+.re_check input{ color:#e32a38; border:0; outline:none; width:10px; height:10px;}
+.re_check label{ cursor:pointer; position: absolute; width: 14px; height: 14px; top: 0px; left: 0; background: #fff; border:1px solid #cdcdcd;}
+.re_check label:after{opacity: 0;	content: '';	position: absolute;	width: 6px;	height: 3px;	background: transparent;	top: 4px;	left: 3px;	border: 2px solid #1c7ad8;	border-top: none;	border-right: none; 	-webkit-transform: rotate(-45deg);	-moz-transform: rotate(-45deg);	-o-transform: rotate(-45deg);	-ms-transform: rotate(-45deg);	transform: rotate(-45deg);}
+/*复选框选中样式*/
+.re_check input[type=checkbox]:checked + label:after {	opacity: 1;}
+.remember b{ font-weight:normal; float:left; margin-top:4px; color:#fff;}
+
+.height02{ height:10px; background:#e5ebf2;}
+/******分页*******/
+.sx_page{ border-top:1px solid #cdcdcd; border:1px solid #cdcdcd; border-radius:5px;-moz-border-radius:5px; overflow:auto; zoom:1; height:50px; background:#fff;}
+.sx_page_p{ float:left; line-height:50px; margin:0 0 0 20px;}
+.sx_page_list{ float:right; margin:10px 30px 0 20px;}
+.sx_page_list ul{ zoom:1;}
+.sx_page_list ul li{ float:left; display:block; text-align:center; margin:0 10px 0 0; line-height:30px;}
+.sx_page_li{ width:28px; height:28px; display:block; border:1px solid #cdcdcd;color:#333; background:  url(../images/butt_bg.jpg) repeat-x; position:relative; border-radius:2px;-moz-border-radius:2px; line-height:28px;}
+.sx_page_li:hover{filter:alpha(opacity=70);-moz-opacity:0.7;opacity:0.7;}
+.sx_page_li_l:hover{filter:alpha(opacity=70);-moz-opacity:0.7;opacity:0.7;}
+.sx_page_list ul li > .li_on{ background:#1c7ad8; border:1px solid #1c7ad8; color:#fff;}
+.sx_page_list ul li > .li_on:hover{filter:alpha(opacity=1);-moz-opacity:1;opacity:1;}
+.sx_page_ex{width: 0px; height: 0px; border: 7px solid transparent; border-right-color: #4e4e4e; display:block; position:absolute; top:7px; left:4px; z-index:10;}
+.sx_page_ne{width: 0px; height: 0px; border: 7px solid transparent; border-left-color:#4e4e4e; display:block;top:7px; left:12px; z-index:10;position:absolute;}
+

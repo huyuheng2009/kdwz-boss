@@ -1,0 +1,35 @@
+
+
+
+.form_list {	overflow:auto;	zoom:1;  padding:20px;}
+.form_left {	float:left;	width:39%;margin-left: 3%;	}
+.form_list ul li {	overflow:auto;	zoom:1;}
+.yundan_b {	float:left;	width:150px;	text-align:right;	height:42px;	line-height:42px;	margin-right:5px; font-weight:normal;}
+.yundan_in {	float:left;}
+.yundan_input {	float:left;	width:190px;	height:30px;	line-height:30px;	border:1px solid #bcbcbc;	padding:0 3px;	color:#333;	margin:5px 0 0 10px;}
+/*.yundan_radio {	float:left;	margin:12px 0 0 10px;}
+.yundan_radio input {	float:left;	margin:4px 5px 0 0;}
+.yundan_radio span {	float:left;}*/
+.yundan_inputlong {	width:260px;}
+.yundan_inputst{ width:125px;}
+.yundan_onb {	font-weight:normal;}
+
+.yundan_a {	margin:12px 0 0 10px;	float:left;}
+
+.form_right {	float:left;	width:48%;	padding-left:2%;overflow:auto;	zoom:1;border-left:1px solid #bcbcbc; margin-bottom:20px;}
+.button_form{ margin:20px 0 20px 30%; display:block;float: left;}
+
+.form_top{ margin-left:2%; margin-bottom:20px;}
+.form_top ul{ overflow:auto; zoom:1;}
+.form_top ul li{ float:left; margin-right:40px;width: 100%;}
+.form_tit {	font-size:14px;	font-weight:bold;}
+.font_red{ color:red; margin:3px 3px 0 0; vertical-align:sub;}
+.margin_left{ margin-left:80px;}
+.border_form {	border-top:1px solid #bcbcbc;	margin:10px 20px 10px 0;}
+.line_block{ display:inline-block;float: left;}
+.form_bottom{ overflow:auto; zoom:1;}
+.form_bottom ul li{ float:left; margin:5px 50px 5px 10px; height:40px; line-height:40px;}
+.form_bottom input{	height:30px;	line-height:30px;	border:1px solid #bcbcbc;	padding:0 3px;	color:#333;}
+
+
+

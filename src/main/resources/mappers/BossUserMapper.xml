@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="BossUser">  
+  
+    <resultMap type="com.yogapay.boss.domain.BossUser" id="BossUser">
+	<id property="id" column="id" jdbcType="INTEGER"/>
+	<result property="userName" column="user_name" jdbcType="VARCHAR"/>
+	<result property="realName" column="real_name" jdbcType="VARCHAR"/>
+	<result property="email" column="email" jdbcType="VARCHAR"/>
+	<result property="status" column="status" jdbcType="VARCHAR"/>
+	<result property="password" column="password" jdbcType="VARCHAR"/>
+	<result property="createOperator" column="create_operator" jdbcType="VARCHAR"/> 
+	<result property="failTimes" column="fail_times"  jdbcType="INTEGER"/>
+	<result property="sno" column="sno"  jdbcType="VARCHAR"/>
+	<result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+	<result property="createTime" column="create_time" jdbcType="TIMESTAMP"/> 
+    </resultMap> 
+  
+    <insert id="saveUser" parameterType="com.yogapay.boss.domain.BossUser" useGeneratedKeys="true" keyProperty="id" keyColumn="id">  
+      insert into boss_user(user_name,real_name,email,status,password,create_operator,create_time,sno) 
+                     values(#{userName},#{realName},#{email},#{status},#{password},#{createOperator},#{createTime},#{sno})
+    </insert>  
+ 
+   <insert id="saveUserGroup" parameterType="java.util.List">  
+     insert into boss_user_group(user_id,group_id) values
+      <foreach collection="list" item="item" index="index" separator="," >  
+        (#{item.userId},#{item.groupId})  
+      </foreach>  
+    </insert>  
+
+    <select id="getByUserName" parameterType="java.util.HashMap" resultMap="BossUser">  
+         select * from boss_user where user_name=#{userName} and 1=1
+    </select>  
+    
+     <select id="getUserByPwd" resultMap="BossUser">  
+        <![CDATA[ 
+         select * from boss_user where user_name=#{userName} and password=#{pwd}
+        ]]>   
+    </select>  
+    
+      <update id="failTimes">  
+        update  boss_user set fail_times=fail_times+1 where user_name=#{0}
+     </update>  
+     
+         <update id="setfailTimes">  
+        update  boss_user set fail_times=#{t} where user_name=#{userName}
+     </update>  
+     
+      <update id="setInputTimes">  
+        update  boss_user set input_times=#{t} where user_name=#{userName}
+     </update>  
+    
+    <update id="status">  
+       update boss_user set status=#{status},fail_times=0 where user_name=#{userName}  
+    </update>  
+
+ <select id="getUserlist" resultType="java.util.HashMap">  
+           select u.*,s.substation_name,s.inner_no,e.group_names from boss_user u left join substation s on u.sno=s.substation_no 
+           left join (  select GROUP_CONCAT(d.group_name) group_names,c.user_id from boss_user_group c left join boss_group d on c.group_id=d.id group by c.user_id)e
+			on e.user_id=u.id
+           where 1=1 
+           <if test="root == null or root ==''"> and u.user_name!='admin'  and u.user_name!='root' and u.create_operator!='root'</if>
+          <if test="userName != null and userName !=''"> and u.user_name=#{userName}</if>
+          <if test="ustatus != null and ustatus !=''"> and u.status=#{ustatus}</if>
+           <if test="sno != null and sno !=''"> and u.sno=#{sno}</if>
+            <if test="substationNo != null and substationNo != ''">   and (u.sno in (${substationNo}) or LENGTH(IFNULL(u.sno,''))&lt;1  )	</if>
+          <if test="createOperator != null and createOperator !=''"> and (u.create_operator=#{createOperator} or u.user_name=#{createOperator})</if>
+          <if test="sv != null and sv !=''"> and ${sk} like  CONCAT(CONCAT('%', #{sv}),'%')</if>
+           order by u.status desc,u.id desc
+    </select>  
+
+   <select id="findByUserNameOrEmail" parameterType="com.yogapay.boss.domain.BossUser" resultType="java.util.HashMap">  
+      select * from boss_user where user_name=#{userName} 
+    </select>  
+
+   <update id="updateUser" parameterType="com.yogapay.boss.domain.BossUser">
+	update boss_user set update_time=#{updateTime},fail_times=-1
+	  <if test="password != null and password !=''">,password=#{password}</if>
+	  <if test="sno != null and sno !=''">,sno=#{sno}</if>
+	  <if test="realName != null and realName !=''">,real_name=#{realName}</if>
+	  <if test="email != null and email !=''">,email=#{email}</if>
+	  <if test="status != null and status !=''">,status=#{status}</if>
+      where user_name=#{userName}
+    </update> 
+    
+     <delete id="delUserGroup">  
+       delete from boss_user_group where user_id=#{0}  
+    </delete>  
+    
+    <delete id="delUserById">  
+      delete from boss_user where id =#{id} and user_name=#{userName}
+    </delete>  
+    
+     <select id="getUserLgcNo"  resultType="java.util.HashMap">  
+     select lgc_no from lgc_user where user_id=#{0}
+    </select> 
+    
+    <select id="getUserSubstationNo"  resultType="java.util.HashMap">  
+     select substation_no from substation_user where user_id=#{0}
+    </select> 
+    
+     <select id="getCurrentLgc"  resultType="java.util.HashMap">  
+      select * from lgc 
+      where 1=1
+       <if test="lgcNo != null and lgcNo !=''">
+         and lgc_no in (${lgcNo})
+      </if>
+    </select> 
+    
+    <select id="getCurrentSubstation"  resultType="java.util.HashMap">  
+    <if test="root != null and root ==1">
+      select * from substation where `status`=1
+      </if>
+      <if test="root == null or root ==''">
+       <if test="substationNo != null and substationNo !=''">
+        select * from substation where substation_no in (${substationNo}) and `status`=1
+        </if>
+        <if test="substationNo == null or substationNo ==''">
+         select * from substation where substation_no in (0)
+       </if>
+      </if>
+      
+      
+     
+    </select>
+    
+    <select id="getUserLgc"  resultType="java.util.HashMap">  
+      select lgc_no from lgc_user where user_id=#{userId} and lgc_no in (${lgcNo})
+    </select> 
+    
+    <select id="getUserSubstation"  resultType="java.util.HashMap">  
+      select substation_no from substation_user where user_id=#{userId} and substation_no=#{substationNo}
+    </select> 
+    
+     <select id="getUserSubstationByLgcNo"  resultType="java.util.HashMap">  
+      select substation_no from substation where lgc_no in (${lgcNo})
+    </select> 
+    
+     <insert id="saveLgcUser" parameterType="java.util.List">  
+       insert into lgc_user(user_id,lgc_no) values
+      <foreach collection="list" item="item" index="index" separator="," >  
+       (#{item.userId},#{item.lgcNo})
+      </foreach>  
+    </insert>  
+    
+    <insert id="saveSubstationUser" parameterType="java.util.List">  
+       insert into substation_user(user_id,substation_no) values
+      <foreach collection="list" item="item" index="index" separator="," >  
+       (#{item.userId},#{item.substationNo})
+      </foreach>  
+    </insert> 
+    
+      <delete id="delLgcUser">  
+        delete from lgc_user where user_id=#{0}
+      </delete>  
+      
+      <delete id="delSubstationUser">  
+        delete from substation_user where user_id=#{0}
+      </delete> 
+     
+<!--  <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyColumn="id">  
+       insert into t_user(name, age) values(#{name}, #{age})  
+    </insert>  
+     
+    <update id="updateUser" parameterType="User">  
+       update t_user set name=#{name}, age=#{age} where id=#{id}  
+    </update>  
+     
+    <select id="findById" parameterType="int" resultType="User">  
+       select * from t_user where id=#{id}  
+    </select>  
+     
+    <delete id="deleteUser" parameterType="int">  
+       delete from t_user where id=#{id}  
+    </delete>  --> 
+      
+</mapper>  

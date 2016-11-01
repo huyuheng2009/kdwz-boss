@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SubstationDayStatic">
+
+	<resultMap type="SubstationDayStatic" id="SubstationDayStatic">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="courierNo" column="courier_no" jdbcType="CHAR" />
+		<result property="revCount" column="rev_count" jdbcType="INTEGER" />
+		<result property="sendCount" column="send_count" jdbcType="INTEGER" />
+		<result property="fcount" column="fcount" jdbcType="VARCHAR" />
+		<result property="mcount" column="mcount" jdbcType="VARCHAR" />
+		<result property="ccount" column="ccount" jdbcType="VARCHAR" />
+		<result property="acount" column="acount" jdbcType="VARCHAR" />
+		<result property="staticDate" column="static_date" jdbcType="TIMESTAMP" />
+		<result property="createTime" column="create_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<select id="list" resultType="java.util.Map" parameterType="java.util.Map">
+		select
+		b.substation_no substationNo , b.substation_name substationName,
+		substr(a.static_date,1,10) staticDate ,a.rev_count revCount ,
+		a.send_count sendCount,
+		a.fcount fcount,a.mcount mcount,a.ccount
+		ccount,a.acount acount
+		from
+		substation_day_static a JOIN substation b
+		ON a.courier_no = b.substation_no
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="beginTime!=null and beginTime!=''">
+				AND substr(a.static_date,1,10)>=#{beginTime}
+			</if>
+			<if test="endTime!=null  and endTime!='' ">
+				AND #{endTime} >=SUBSTR(a.static_date,1,10)
+			</if>
+			<if test="substationNo!=null  and substationNo!=''">
+				AND b.substation_no =#{substationNo}
+			</if>
+		</trim>
+	</select>
+
+
+	<select id="substationDayAcount" resultType="java.util.Map"
+		parameterType="java.util.Map">
+
+	select
+	h.substationNo1 substationNo,
+	IF(ISNULL(h.count1),0,h.count1) takeCount,
+	IF(ISNULL(i.count2),0, i.count2) sendCount,
+	IF(ISNULL(h.sumPay+i.sumPay),0.00,(h.sumPay+i.sumPay)) sumpay ,
+	IF(ISNULL(h.sumMpay+i.sumMpay) ,0.00,(h.sumMpay+i.sumMpay)) sumMpay,
+	IF(ISNULL(i.sumGoodPrice),0.00,i.sumGoodPrice) sumGoodPrice ,
+	IF(ISNULL(h.sumTnpay+i.sumSnpay),0.00,(h.sumTnpay+i.sumSnpay)) sumMMpay
+	from
+	( select
+	f.substation_no substationNo1,
+	IF(ISNULL(e.count1),0,e.count1) count1,
+	IF(ISNULL(e.sumPay),0.00,e.sumPay) sumPay,
+	IF(ISNULL(e.sumMapy),0.00,e.sumMapy) sumMpay,
+	IF(ISNULL(e.sumTnpay),0.00,e.sumTnpay) sumTnpay
+	from
+	(select
+	b.sub_station_no substationNo1,
+	count(b.id) count1,
+	SUM(IF(b.freight_type IN(3,4),0.00,IF(b.freight_type=1,b.freight+b.cpay+b.vpay,b.cpay+b.vpay))) sumPay,	
+	SUM(IF(b.freight_type=3,b.mpay,0.00))sumMapy,
+    SUM(IF(ISNULL(b.tnpay),0.00,b.tnpay)) sumTnpay
+	from
+	order_info b
+	where
+	substr(b.take_order_time,1,10)=#{nowTime}
+	AND
+	b.status=3
+	AND
+	b.examine_status='PASS'
+	group by 	b.sub_station_no ) e
+	RIGHT JOIN
+	substation f
+	on f.substation_no=e.substationNo1
+	) h
+
+	JOIN
+
+	(
+	select
+	f.substation_no substationNo2,
+	IF(ISNULL(e.count2),0,e.count2) count2,
+	IF(ISNULL(e.sumPay),0.00,e.sumPay) sumPay,
+	IF(ISNULL(e.sumMpay),0.00,e.sumMpay) sumMpay,
+	IF(ISNULL(e.sumGoodPrice),0.00,e.sumGoodPrice) sumGoodPrice,
+	IF(ISNULL(e.sumSnpay),0.00,e.sumSnpay)sumSnpay
+	from
+	(select
+	b.send_substation_no substationNo2,
+	count(b.id) count2,
+	SUM(IF(b.freight_type IN(3,4),0.00,IF(b.freight_type=2,b.freight,0.00))) sumPay,
+	SUM(IF(b.freight_type=4,b.mpay,0.00)) sumMpay,
+	SUM(IF(ISNULL(b.good_price),0.00,b.good_price))	sumGoodPrice,
+	SUM(IF(ISNULL(b.snpay),0.00,b.snpay))	sumSnpay
+	from
+	order_info b
+	where substr(b.send_order_time,1,10)=#{nowTime}
+	and
+	b.status=3
+	AND 
+	b.examine_status='PASS'
+	group by b.send_substation_no
+	) e
+	RIGHT JOIN substation f
+	ON
+	f.substation_no = e.substationNo2
+	) i
+	on
+	h.substationNo1 = i.substationNo2
+	</select>
+<insert id="save" parameterType="java.util.Map" useGeneratedKeys="true" keyColumn="id">
+ insert into substation_day_static (courier_no,rev_count,send_count,fcount,mcount,ccount,acount,static_date,create_time)
+                     values( #{substationNo},
+           #{takeCount} ,
+           #{sendCount},
+           #{sumpay},
+           #{sumMpay},
+           #{sumGoodPrice},
+           #{sumMMpay},
+           #{staticDate},
+           #{createTime} 
+ )
+</insert>
+
+
+
+</mapper>

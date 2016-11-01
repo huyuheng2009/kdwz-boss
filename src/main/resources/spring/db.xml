@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd"
+	default-lazy-init="true">
+
+<!-- DBCP 管理员db连接池 -->
+	<bean id="managerDataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="url" value="#{config['master.url']}" />
+		<property name="username" value="#{config['master.username']}" />
+		<property name="password" value="#{config['master.password']}" />
+
+		<property name="filters" value="stat" />
+
+		<property name="minIdle" value="1" />
+		<property name="maxActive" value="50" />
+		<property name="initialSize" value="1" />
+		<property name="maxWait" value="10000" />
+
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		<property name="minEvictableIdleTimeMillis" value="1800000" />
+
+		<property name="validationQuery" value="SELECT 1" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="50" />
+	</bean>
+
+	 <!-- spring动态数据源  -->
+<!-- 	 <bean id="dynamicDataSource" class="com.yogapay.boss.dataSource.DynamicDataSource">  
+        <property name="targetDataSources">    
+              <map key-type="java.lang.String">    
+                 <entry key="manager" value-ref="managerDataSource"/>    
+                 <entry key="yx" value-ref="yxDataSource"/>   
+                 <entry key="qd" value-ref="qdDataSource"/>   
+                 <entry key="st" value-ref="stDataSource"/>    
+              </map>    
+                
+        </property>    
+        <property name="defaultTargetDataSource" ref="managerDataSource"/>    
+    </bean> 
+    -->
+
+	<!--  动态数据源切换，包含同步-->
+	<bean id="dynamicDataSourceHolder" class="com.yogapay.boss.dataSource.DynamicDataSourceHolder">
+	<property name="targetDataSources">    
+        <map key-type="java.lang.String">    
+			 <entry key="manager" value-ref="managerDataSource"/>    
+	   </map>    
+      </property>    	
+        <property name="defaultTargetDataSource" ref="managerDataSource"/>    	
+	</bean> 
+	
+	 <bean id="dsProxy" class="com.yogapay.boss.dataSource.DsProxy">
+	  <property name="dynamicDataSourceHolder" ref="dynamicDataSourceHolder"/>   
+	 </bean>
+	
+	 <bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+	 	<constructor-arg >
+          	<bean factory-bean="dsProxy" factory-method="newInstance"  />
+		</constructor-arg>
+	</bean> 
+
+	
+
+</beans>

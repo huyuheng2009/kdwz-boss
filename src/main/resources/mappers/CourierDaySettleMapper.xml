@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CourierDaySettle">  
+	
+	<select id="list" resultType="java.util.HashMap" parameterType="LgcPayType">  
+     select t.name as tname,c.inner_no as cno,s.inner_no as sno,c.real_name as cname,s.substation_name as sname,d.* from courier_day_settle d left join settle_type t on d.settle_type=t.`key`
+  left join courier c  on d.courier_no=c.courier_no left join substation s on c.substation_no=s.substation_no
+     where 1=1 
+      <if test="sno!=null and sno!=''"> and (s.substation_no in 
+             <foreach collection="sno" index="index" item="item" open="(" separator="," close=")">  
+                       #{item}   
+              </foreach>or s.substation_no is null)
+      </if>
+       <if test="createTimeBegin != null and createTimeBegin !=''"> and d.settle_date&gt;=#{createTimeBegin}</if>
+       <if test="createTimeEnd != null and createTimeEnd !=''"> and d.settle_date&lt;=#{createTimeEnd}</if>
+       <if test="settleTimeBegin != null and settleTimeBegin !=''"> and d.settle_time&gt;=#{settleTimeBegin}</if>
+       <if test="settleTimeEnd != null and settleTimeEnd !=''"> and d.settle_time&lt;=#{settleTimeEnd}</if>
+       <if test="courierNo!=null and courierNo!=''"> and c.real_name=#{courierNo,jdbcType=VARCHAR}</if>
+       <if test="settleType!=null and settleType!=''"> and d.settle_type=#{settleType,jdbcType=VARCHAR}</if>
+       <if test="settleStatus != null and settleStatus !=''"> and d.settle_status=#{settleStatus}</if>
+        <if test="examineStatus != null and examineStatus !=''"> and d.examine_status=#{examineStatus}</if>
+       order by d.settle_date desc
+    </select>
+    
+    
+      <update id="batchpay"  parameterType="java.util.HashMap">
+        update courier_day_settle set settle_count=#{settleCount},settle_status=1,settle_time=#{settleTime},settle_name=#{settleName},
+           settle_type=#{settleType},note=#{note}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+   <update id="batchpayCount"  parameterType="java.util.HashMap">
+        update courier_day_settle set settle_count=cash_count+good_count,settle_status=1,settle_time=#{settleTime},settle_name=#{settleName},
+           settle_type=#{settleType},note=#{note}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+        <update id="nopay"  parameterType="java.util.HashMap">
+        update courier_day_settle set `settle_status`=0,`settle_count`=0,`settle_time`=NULL,`settle_name`=NULL,
+           `settle_type`=NULL,note=NULL,examine_status=0,examiner=NULL,examine_time=NULL
+        <where>
+            id in (${ids})
+        </where>
+      </update>
+    
+    <update id="batchExamine"  parameterType="java.util.HashMap">
+        update courier_day_settle set examine_status=1,examiner=#{examiner},examine_time=#{examineTime}
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+     <update id="noExamine"  parameterType="java.util.HashMap">
+        update courier_day_settle set examine_status=0,examiner=NULL,examine_time=NULL
+        <where>
+            id in (${ids})
+        </where>
+    </update>
+    
+    
+    
+    
+    <insert id="insert" parameterType="CourierDaySettle"  useGeneratedKeys="true" keyColumn="id">
+    	insert into courier_day_settle(ctime,courier_no,settle_date,cash_count,month_count,good_count,create_time,creater) values
+    	 (#{time},#{courierNo},#{settleDate},#{cashCount},#{monthCount},#{goodCount},#{createTime},#{creater})  
+    </insert>
+   
+    
+    <insert id="batchInsert" parameterType="java.util.HashMap" >
+    	insert into courier_day_settle(ctime,courier_no,settle_date,cash_count,month_count,good_count,create_time,creater) values 
+    	<foreach collection="list" item="item" index="index" separator="," >  
+        (#{item.ctime},#{item.courierNo},#{item.settleDate},#{item.cashCount},#{item.monthCount},#{item.goodCount},#{item.createTime},#{item.creater})  
+      </foreach> 
+   </insert>
+    
+    <delete id="delByCtime" parameterType="java.util.HashMap">
+    	delete from courier_day_settle where ctime in (${ctime})
+    </delete>
+
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ProDealHistory">  
+
+	<select id="list"  resultType="java.util.HashMap">
+		select * from pro_deal_history
+		<where>
+			1=1
+		  <if test="proId != null and proId !=''"> and pro_id=#{proId} </if> 
+			order by id desc
+		</where>
+	</select>
+	
+
+    <insert id="insert" parameterType="ProDealHistory" useGeneratedKeys="true" keyColumn="id">
+    	insert into pro_deal_history(pro_id,deal_text,couier_no,substation_no,dealer,create_time,deal_status,reson,reson_text)
+    	 values (#{proId},#{dealText},#{couierNo},#{substationNo},#{dealer},#{createTime},#{dealStatus},#{reson},#{resonText})
+    </insert>
+    
+   
+</mapper>

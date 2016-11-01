@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Muser">
+	<resultMap type="Muser" id="MonthSettleUser">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="monthNo" column="month_no" jdbcType="CHAR" />
+	</resultMap>
+	<select id="list" resultType="java.util.Map" parameterType="java.util.Map">
+		select
+		month1.month_settle_no monthSettleNo,month1.month_sname monthSname,month1.settle_date
+		settleDate,
+		month1.courier_no courierNo,monthInfo.takeCount,monthInfo.sendCount,monthInfo.sumMoney,
+		mht.discount_text discountText,mht.discount discount,
+		month1.settle_type settleType,month1.settle_card_no settleCardNo
+		from
+		(
+		select
+		takeMonth.month_settle_no monthSettleNo,takeMonth.takeCount takeCount,
+		sendMonth.sendCount sendCount,(takeMonth.takeMoney+sendMonth.sendMoney) sumMoney
+		from
+		(select
+		mu1.month_settle_no,IF(ISNULL(a1.takeCount),0,a1.takeCount) takeCount,IF(ISNULL(a1.takeMoney),0.00,a1.takeMoney) takeMoney
+		from
+		(select mu.month_settle_no monthSettleNo,count(oi.id)
+		takeCount,sum(oi.freight+oi.vpay) takeMoney
+		from order_info oi, month_settle_user mu
+		where oi.month_settle_no = mu.month_settle_no
+		and oi.freight_type= 1 
+		and oi.`status`= 3 
+		and oi.pay_type='MONTH'
+		and
+		substr(oi.take_order_time,1,7) = #{nowDate}
+		group by mu.month_settle_no
+		) a1 right join month_settle_user mu1 on a1.monthSettleNo =
+		mu1.month_settle_no
+		) takeMonth ,(
+		select
+		mu1.month_settle_no,IF(ISNULL(a1.sendCount),0,sendCount) sendCount,
+		IF(ISNULL(a1.sendMoney),0.00,a1.sendMoney) sendMoney
+		from
+		(select mu.month_settle_no monthSettleNo,count(oi.id)	sendCount,
+		sum(oi.freight+oi.vpay) sendMoney
+		from
+		 order_info oi, month_settle_user mu
+		where
+		 oi.month_settle_no = mu.month_settle_no
+		and oi.freight_type= 2 
+		and oi.`status`= 3 
+		and oi.pay_type='MONTH'
+		and
+		substr(oi.send_order_time,1,7) = #{nowDate}
+		group by mu.month_settle_no
+		) a1 right join month_settle_user mu1 
+		on a1.monthSettleNo =	mu1.month_settle_no) sendMonth 
+		where takeMonth.month_settle_no = sendMonth.month_settle_no
+		) monthInfo ,month_settle_user month1 ,month_settle_type mht
+		where monthInfo.monthSettleNo = month1.month_settle_no AND month1.mstype =
+		mht.id
+	</select>
+	<insert id="save" parameterType="java.util.Map">
+		insert into month_user_static(
+		month_settle_no,
+		month_settle_name,
+		acount_month,
+		month_courier,
+		month_acount_time,
+		month_take_count,
+		month_send_count,
+		month_acount,
+		discount_text,
+		discount,
+		month_fact_acount,
+		pay_type,
+		user_name,
+		static_time,
+		create_time
+		)values(
+		#{monthSettleNo},
+		#{monthSname},
+		#{nowDate},
+		#{courierNo},
+		'',
+		#{takeCount},
+		#{sendCount},
+		#{sumMoney},
+		#{discountText},
+		#{discount},
+		#{discountBefore},
+		#{settleType},
+		#{settleCardNo},
+		#{newDate},
+		#{newDate}
+		)
+	</insert>
+	<delete id="delete">
+	delete from month_user_static where acount_month = #{nowDate}	
+	</delete>
+	
+	
+</mapper>

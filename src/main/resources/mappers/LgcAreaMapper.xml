@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="LgcArea">  
+	<resultMap type="LgcArea" id="LgcArea">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="addrArea"  column="addr_area"  jdbcType="VARCHAR"/>
+		<result property="baddr"  column="baddr"  jdbcType="VARCHAR"/>
+		<result property="naddr"  column="naddr"  jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from lgc_area
+        <where>
+			1=1
+			<if test="addrArea!=null and addrArea!=''">and addr_area like  CONCAT(CONCAT('%', #{addrArea}),'%')</if>
+		   <if test="baddr!=null and baddr!=''">and (baddr like  CONCAT(CONCAT('%', #{baddr}),'%') or naddr like  CONCAT(CONCAT('%', #{baddr}),'%'))</if>
+		</where>
+		order by id desc
+    </select>
+    
+  
+    
+    <select id="getById" resultMap="LgcArea" parameterType="java.lang.Integer">  
+        select * from lgc_area
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+     <select id="getByArea" resultMap="LgcArea">  
+        select * from lgc_area
+        <where>
+			addr_area=#{addrArea}
+		</where>
+    </select>
+    
+    
+    <insert id="insert" parameterType="LgcArea"  useGeneratedKeys="true" keyColumn="id">
+    	insert into lgc_area(addr_area,baddr,naddr) values (#{addrArea},#{baddr},#{naddr})
+    </insert>
+    <update id="update" parameterType="LgcArea"  useGeneratedKeys="true" keyColumn="id">
+    	update lgc_area set baddr=#{baddr},naddr=#{naddr}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from lgc_area where id=#{id}
+    </delete>
+
+</mapper>

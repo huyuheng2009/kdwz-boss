@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="OrderSubstation">  
+	
+    <select id="getByOId" resultType="java.util.HashMap" parameterType="java.lang.Integer">  
+        select * from order_substation
+        <where>
+			order_id= #{id}  and taked=1
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="OrderSubstation"  useGeneratedKeys="true" keyColumn="id">
+    	insert into order_substation(order_id,substation_no,taked) values (#{orderId},#{substationNo},1)
+    </insert>
+       
+    
+    <delete id="delByOId" parameterType="Integer">
+    	delete from order_substation where order_id=#{id}
+    </delete>
+    
+     <delete id="delByOIdSno" parameterType="OrderSubstation">
+    	delete from order_substation where order_id=#{orderId} and substation_no=#{substationNo}
+    </delete>
+
+    <update id="updateByOId" parameterType="java.util.HashMap">
+    	update  order_substation  set taked=#{taked} where order_id=#{id}
+    </update>
+
+</mapper>

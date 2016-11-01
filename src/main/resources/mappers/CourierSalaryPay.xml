@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CourierSalayPay"> 
+	<insert id="insert" parameterType="CourierSalayPay">
+		insert into courier_salary_pay(create_time,courier_no,cost_month,cost_amount,courier_tc_way) 
+		values(#{crateTime},#{courierNo},#{costMonth},#{costAmout},#{courierTcWay})
+	</insert>
+	
+	<select id="query"  resultType="CourierSalayPay">
+		select * from courier_salary_pay where 1=1
+		<if test="courierNo!=null and courierNo!=''">
+			and courier_no=#{courierNo}
+		</if>
+		<if test="costMonth!=null and costMonth!=''">
+			and cost_month=#{costMonth}
+		</if>
+		<if test="courierTcWay!=null and courierTcWay!=''">
+			and courier_tc_way=#{courierTcWay}
+		</if>
+	</select>
+	
+	<select id="batchQuery"  resultType="CourierSalayPay">
+		select id,create_time crateTime,courier_no courierNo ,cost_month costMonth ,cost_amount costAmout,courier_tc_way courierTcWay from courier_salary_pay where 1=1
+		<if test="courierNo!=null and courierNo!=''">
+			and courier_no in (${courierNo})
+		</if>
+		<if test="costMonth!=null and costMonth!=''">
+			and cost_month=#{costMonth}
+		</if>
+		<if test="courierTcWay!=null and courierTcWay!=''">
+			and courier_tc_way=#{courierTcWay}
+		</if>
+	</select>
+	
+	<select id="countSalary" resultType="java.util.Map">
+		select a.courier_no,cost_month,sum((a.cost_amount*b.cost_io)) as salary from courier_cost a left join cost_name b 
+		on a.cost_name=b.name where  a.cost_month=#{cost_month} and a.courier_no=#{courier_no}
+	</select>
+	
+	
+</mapper>

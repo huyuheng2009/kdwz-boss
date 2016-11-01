@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CodRateType">  
+	<resultMap type="CodRateType" id="CodRateType">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="name" column="name"  />
+		<result property="discount" column="discount"  />
+		<result property="discountText"  column="discount_text" />
+		<result property="note"  column="note" />
+	</resultMap>
+
+	<select id="list" resultType="java.util.HashMap">  
+        select * from cod_rate_type 
+        <where>
+             1=1
+		</where>
+		order by id desc
+    </select>
+    
+    <select id="getById" resultMap="CodRateType" parameterType="java.lang.Integer">  
+        select * from cod_rate_type
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="CodRateType"  useGeneratedKeys="true" keyColumn="id">
+    	insert into cod_rate_type(name,discount,discount_text,note) values (
+    		             #{name},#{discount},#{discountText},#{note})
+    </insert>
+    
+    <update id="update" parameterType="CodRateType"  useGeneratedKeys="true" keyColumn="id">
+    	update cod_rate_type set name=#{name},discount=#{discount},discount_text=#{discountText},note=#{note}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from cod_rate_type where id=#{id}
+    </delete>
+    
+</mapper>

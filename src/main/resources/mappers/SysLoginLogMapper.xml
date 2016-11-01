@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SysLog">  
+  
+    <resultMap type="com.yogapay.boss.domain.SysLoginLog" id="SysLoginLog">
+	<id property="id" column="id" />
+	<result property="sysName" column="sys_name" />
+	<result property="userId" column="user_id" />
+	<result property="userName" column="user_name" />
+	<result property="loginIp" column="login_ip" />
+	<result property="location" column="location" />
+	<result property="lastLoginTime" column="last_login_time" /> 
+	<result property="operation" column="operation" />
+    </resultMap> 
+  
+    <insert id="saveLog" parameterType="com.yogapay.boss.domain.SysLoginLog"  useGeneratedKeys="true" keyColumn="id">
+    insert into sys_login_log(sys_name,user_id,user_name,login_ip,location,operation,last_login_time) values 
+     (#{sysName},#{userId},#{userName},#{loginIp},#{location},#{operation},#{lastLoginTime})
+    </insert>
+      
+</mapper>  

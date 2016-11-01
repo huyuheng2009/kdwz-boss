@@ -1,0 +1,25 @@
+
+
+/************** h e a d e r **************/
+
+.header{ height:110px; overflow:auto; zoom:1;}
+.logo{ float:left; height:70px; width:163px; border-right:1px solid #4f96d8; display:block; padding:20px 50px;}
+.my_info{ overflow:auto; zoom:1; float: right; width:330px; padding-top:11px;}
+.myinfo_img{ height:83px; width:83px; background-color:rgba(255,255,255,0.2); float:left;margin-right:5px; padding:3px;}
+.myinfo_pic{ height:83px; width:83px; background:#ccc;}
+.myinfo_cont{ float:left; width:230px;}
+.myinfo_cont a{ display:block; color:#fff; text-decoration:none; font-size:12px; margin-bottom:1px;}
+.myinfo_tit{ font-size:14px; height:22px; line-height:22px;}
+.myinfo_li{ background-color:rgba(255,255,255,0.2); padding:2px 5px;}
+
+
+
+
+
+
+
+
+
+
+
+

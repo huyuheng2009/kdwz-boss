@@ -1,0 +1,75 @@
+﻿.soso_left.aa{ width:690px;}
+.soso_right.aa{ right:180px;}
+*{ font-size:12px;}
+
+@media screen and (min-width: 1201px) { 
+.soso_left.aa{ width:920px;}
+.soso_right.aa{ right:155px;}
+} 
+
+.soso_li{ margin-right:30px;}
+.soso_right02{ right:50px; padding:20px 0 0 0;}
+.soso_right02 p{ line-height:24px;}
+.soso_li .soso_input.bb{ margin:6px 0 0 38px;}
+.soso_li .soso_input label input{ width:16px; height:14px; margin:2px 0 0 0; text-align:left; vertical-align: top; border:0;}
+
+.xy_check_cont{ background:#fff; padding:1px 0;}
+.check_code{ overflow:auto; zoom:1; margin:8px 0 4px 10px;}
+.check_code_name{ float:left; height:36px; line-height:36px; font-size:14px;}
+.check_code input{ float:left; margin:3px 3px 3px 10px; height:24px; padding:2px 8px; width:393px; border:1px solid #dfdfdf;}
+.check_cont{ overflow:auto; zoom:1;}
+.check_cont_left{ float:left; margin:5px 10px 0 10px; padding:10px 10px 20px; background:#fafafa; border:1px solid #dfdfdf; width:455px;}
+.check_cont_left02{ width:455px;}
+.check_tit{ font-weight:bold; height:20px; line-height:20px; display:block; width:100px;}
+.check_li{ margin:17px 0 0 0; overflow:hidden; zoom:1; float:left;}
+.check_li.aa{ min-width:255px;}
+.check_li .soso_input{}
+.check_li .soso_input label{ display:inline-block; height:20px; margin:6px 15px 0 0;}
+.check_li .soso_input label input{ width:16px; height:14px; margin:2px 0 0 0; text-align:left; vertical-align: top; border:0;}
+.check_li .soso_input input{ width:174px; margin-right:10px;}
+.check_li .soso_input input.one{ width:127px;}
+.check_li .soso_input input.two{ width:370px;}
+.check_li .soso_input input.three{ width:25px;}
+.check_button{ margin:20px auto 30px;}
+.check_button input{ width:160px; margin:0 auto;  background:rgb(28,122,216); border:1px solid #1c7ad8; color:#fff;text-align:center; border:0; height:40px; line-height:40px;border-radius:4px;-moz-border-radius:4px; display:block; font-size:14px;}
+
+.check_cont_right{ margin-top:5px; padding-bottom:6px;}
+.check_cont_right .check_li{ margin:4px 0 3px 0;}
+
+
+@media screen and (min-width: 1201px) { 
+.soso_li{ margin-left:10px; margin-right:20px;}
+.check_cont_left{ width: 670px;}
+.check_code{ margin-left:20px;}
+.check_cont_left{ margin-left:18px; margin-right:0px;}
+.check_code input{ width:486px;}
+
+.check_li.aa{ min-width: 365px;}
+.check_li .soso_input input{ width: 283px;}
+.check_li .soso_input input.one{ width: 235px;}
+.check_li .soso_input input.two{ width: 283px;}
+.check_li .soso_input input.three{ width: 168px;}
+
+} 
+
+.check_cont_left02{ width:405px;}
+.check_cont_left02 .check_li .soso_input input{ width:174px; margin-right:10px;}
+.check_cont_left02 .check_li .soso_input input.one{ width:77px;}
+.check_cont_left02 .check_li .soso_input input.two{ width:320px;}
+.check_cont_left02 .check_li .soso_input input.three{ width:50px;}
+.check_cont_left02 .check_li.aa{ min-width:205px;}
+
+.check_cont_left03{ width:700px; height:282px;}
+
+.jiedit{overflow:auto; zoom:1;}
+.jiedit_left{float: left; width: 780px;}
+.check_cont_right02{ margin-top:5px; padding-bottom:7px; width: 422px;}
+.check_cont_right02 .check_li{ margin:4px 0 7px 0;}
+
+.jiedit_right{float: left; width: 500px; min-height:600px;}
+
+
+
+
+
+

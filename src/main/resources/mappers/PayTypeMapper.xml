@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="PayType">  
+
+      <select id="getByCode" resultType="java.util.HashMap">  
+        select * from pay_type
+        <where>
+			pay_code= #{payCode}
+		</where>
+    </select>
+      <select id="list" resultType="java.util.HashMap">  
+        select * from pay_type where `status`=1
+    </select>
+    
+</mapper>

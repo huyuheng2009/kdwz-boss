@@ -1,0 +1,19 @@
+﻿
+/*********后台说明**********/
+.xitong_tit{ height:60px; line-height:60px; padding-left:10px; font-size:16px; color:#333; font-weight:bold;}
+.xitong_cont{ overflow:auto; zoom:1;}
+.xitong_cont_left{ float:left; width:130px; margin:0 20px; font-size:16px;}
+.xitong_cont_left ul{}
+.xitong_cont_left ul li{ text-align:center; border-bottom:1px solid #5c95d8;}
+.xitong_li_a{ color:#fff; background:#0c5fbf; display:block; line-height:40px;}
+.xitong_li_a:hover{ background:#0a52a6;}
+.xitong_cont_right{ float:left; width:748px; padding:20px 40px; border:1px solid #e1e1e1; background:#fff;}
+.list_name{ height:50px; line-height:50px; color:#0e5ebd; font-size:16px; font-weight:bold; letter-spacing:2px;}
+.list_p{ color:#000; line-height:26px; font-size:14px;}
+.list_p img{ max-width:100%; height:auto; border:0; margin:10px 0 0 0;}
+
+.li_list{ background:#0c5fbf; position:absolute; margin:-40px 0 0 135px;display:none;}
+.li_list_li{ border-bottom:1px solid #5c95d8;}
+.li_list_li a{ padding:0 30px; line-height:40px; color:#fff; text-align:center; display:block;}
+.li_list_li a:hover{ background:#0a52a6;}
+

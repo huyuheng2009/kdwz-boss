@@ -1,0 +1,21 @@
+.Wdate{
+	height: 20px;
+	width: 186px;
+	/*float: left;[liuquan][2010-10-21][此处左浮动影响页面显示]*/
+	background-color: transparent;
+	padding-left: 2px;
+	padding-top: 2px;
+	cursor: pointer;
+	font-size: 12px;
+	background-image: url(datePicker.gif);
+	background-position: right top;
+	border: 1px solid #53a5d5;
+	background-repeat: no-repeat;
+	display:block;
+	float:left;
+}
+
+.WdateFmtErr{
+	font-weight:bold;
+	color:red;
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ForOrder">  
+
+   <insert id="save" parameterType="ForwardOrder"  useGeneratedKeys="true" keyColumn="id">
+    	insert into forward_order(order_no,forward_type,cur_no,cur_lgc_order_no,forward_time,scan_no,scan_name,io_lgc_order_no,io_name) values (
+    		#{orderNo},#{forwardType},#{curNo},#{curLgcOrderNo},#{forwardTime},#{scanNo},#{scanName},#{ioLgcOrderNo},#{ioName})
+    </insert>
+    
+    
+    	<select id="list" resultType="java.util.HashMap">  
+         select f.forward_time,f.scan_name,f.io_lgc_order_no,f.io_name,o.*
+          from forward_order f left join order_info o on f.order_no=o.order_no
+        <where>
+			1=1
+			<if test="ioName != null and ioName !=''"> and f.io_name like  CONCAT(CONCAT('%', #{ioName}),'%')</if>
+			<if test="substationNo != null and substationNo != ''">  and f.substation_no in (0,${substationNo})</if>
+			<if test="ioLgcOrderNo != null and ioLgcOrderNo != ''">  and (f.io_lgc_order_no =#{ioLgcOrderNo} or f.cur_lgc_order_no=#{ioLgcOrderNo} )</if>
+			<if test="forwardType != null and forwardType != ''">  and f.forward_type =#{forwardType}</if>
+			<if test="createTimeBegin != null and createTimeBegin !=''"> and f.forward_time&gt;=#{createTimeBegin}</if>
+          <if test="createTimeEnd != null and createTimeEnd !=''"> and f.forward_time&lt;#{createTimeEnd}</if>
+		</where>
+		order by f.id desc
+    </select>
+    
+    	<select id="getByOrderNo" resultType="java.util.HashMap">  
+         select * from forward_order where order_no=#{orderNo}
+       </select>
+    
+  <delete id="delByOrderNo" parameterType="java.util.HashMap">
+		delete from forward_order
+		<where>
+			order_no=#{orderNo}
+		</where>
+	</delete>
+
+
+</mapper>

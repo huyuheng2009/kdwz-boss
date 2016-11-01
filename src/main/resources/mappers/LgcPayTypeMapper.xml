@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="LgcPayType">  
+	
+	<select id="getLgcPayType" resultType="java.util.HashMap" parameterType="LgcPayType">  
+      select p.*,IF(p.id in (select pay_id from lgc_pay_type where lgc_no=#{lgcNo}),'Y','N') su
+          from pay_type p
+    </select>
+    
+    <insert id="insert" parameterType="LgcPayType"  useGeneratedKeys="true" keyColumn="id">
+    	insert into lgc_pay_type(lgc_no,pay_id) values (#{lgcNo},#{payId})
+    </insert>
+   
+    
+    <insert id="batchInsert" parameterType="java.util.List" >
+    	insert into lgc_pay_type(lgc_no,pay_id) values 
+    	<foreach collection="list" item="item" index="index" separator="," >  
+        (#{item.lgcNo},#{item.payId})  
+      </foreach> 
+   </insert>
+    
+    <delete id="delByLgcNo" parameterType="LgcPayType">
+    	delete from lgc_pay_type where lgc_no=#{lgcNo}
+    </delete>
+
+</mapper>

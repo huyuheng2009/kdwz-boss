@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ForCpn">  
+	<resultMap type="ForCpn" id="ForCpn">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="cpnName"  column="cpn_name"  jdbcType="VARCHAR"/>
+		<result property="note"  column="note"  jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from for_cpn
+        <where>
+			1=1
+			<if test="cpnName!=null and cpnName!=''">and cpn_name like  CONCAT(CONCAT('%', #{cpnName}),'%')</if>
+		</where>
+		order by id desc
+    </select>
+    
+    <select id="kdyblist" resultType="java.util.HashMap">  
+        select * from kdyb_cpn
+        <where>
+			1=1
+			<if test="name!=null and name!=''">and name like  CONCAT(CONCAT('%', #{name}),'%')</if>
+		</where>
+	
+    </select>
+    
+    <select id="kdybName" resultType="java.util.HashMap">  
+        select * from kdyb_cpn
+        <where>
+			1=1
+			<if test="name!=null and name!=''">and name=#{name}</if>
+		</where>
+	
+    </select>
+    
+    
+    <select id="getById" resultMap="ForCpn" parameterType="java.lang.Integer">  
+        select * from for_cpn
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="ForCpn"  useGeneratedKeys="true" keyColumn="id">
+    	insert into for_cpn(cpn_name,note) values (#{cpnName},#{note})
+    </insert>
+    <update id="update" parameterType="ForCpn"  useGeneratedKeys="true" keyColumn="id">
+    	update for_cpn set cpn_name=#{cpnName},note=#{note}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from for_cpn where id=#{id}
+    </delete>
+
+</mapper>

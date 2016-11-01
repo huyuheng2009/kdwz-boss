@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="LgcResource">  
+	
+	<select id="getLgcResource" resultType="java.util.HashMap" parameterType="LgcResource">  
+      select * from lgc_resource where lgc_no=#{lgcNo} and res_name=#{resName}
+    </select>
+    
+    <insert id="insert" parameterType="LgcResource"  useGeneratedKeys="true" keyColumn="id">
+    	insert into lgc_resource(lgc_no,res_name,res_desc,res_url,res_path) values (#{lgcNo},#{resName},#{resDesc},#{resUrl},#{resPath})
+    </insert>
+    
+    <update id="updateUrl"   parameterType="LgcResource">
+        update lgc_resource set res_url=#{resUrl},res_path=#{resPath}
+        <where>
+            id=#{id}
+        </where>
+    </update>
+    
+
+</mapper>

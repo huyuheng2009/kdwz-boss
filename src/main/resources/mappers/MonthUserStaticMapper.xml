@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MonthUserStatic">
+
+	<resultMap type="MonthUserStatic" id="MonthUserStatic">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="column2" column="Column_2" jdbcType="CHAR" />
+		<result property="column3" column="Column_3" jdbcType="INTEGER" />
+		<result property="column4" column="Column_4" jdbcType="VARCHAR" />
+		<result property="column5" column="Column_5" jdbcType="TIMESTAMP" />
+		<result property="createTime" column="create_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<select id="list" resultType="java.util.Map" parameterType="java.util.Map">
+
+		select b.*,s.substation_name substationName
+		from(
+		select a.*, msu.email,
+		msu.substation_no substationNo,
+		msu.contact_phone contactPhone
+		from
+		(select
+		m.id id,
+		m.month_settle_no monthSettleNo,
+		m.month_settle_name
+		monthSettleName,
+		m.acount_month acountMonth,
+		c.real_name realName,
+		m.month_acount_time monthAcountTime,
+		m.month_take_count monthTakeCount,
+		m.month_send_count monthSendCount,
+		(m.month_take_count
+		+m.month_send_count ) ACOUNT,
+		m.month_acount monthAcount,
+		m.discount_text discountText,
+		m.month_fact_acount monthFactAcount,
+		m.pay_type payType,
+		m.user_name userName
+		from month_user_static m LEFT
+		JOIN
+		courier c ON m.month_courier = c.courier_no
+		<where>
+			1=1
+			<if test="beginTime!=null and beginTime!=''">
+				AND m.acount_month=#{beginTime}
+			</if>
+			<if test="monthSettleNo!=null and monthSettleNo!=''">
+				AND m.month_settle_no = #{monthSettleNo}
+			</if>
+			<if test="courierNo!=null  and courierNo!=''">
+				AND m.month_courier =#{courierNo}
+			</if>
+
+		</where>
+		) a left join month_settle_user msu on a.monthSettleNo =
+		msu.month_settle_no
+		where 1=1
+		<if test="isEmail=='有邮箱'">
+			and length(msu.email) >0
+		</if>
+		<if test="isEmail=='无邮箱'">
+			and length(msu.email) =0
+		</if>
+		<if test="substationNo != null and substationNo !=''"> and (msu.substation_no in (${substationNo}) or
+			msu.substation_no is null)</if>
+		) b left join substation s on b.substationNo = s.substation_no
+
+		<if test="orderBy==null  or orderBy==''">order by b.id desc</if>
+		<if test="orderBy!=null  and orderBy== 1">order by b.monthSettleNo desc</if>
+		<if test="orderBy!=null  and orderBy== 2">order by b.monthSettleNo asc</if>
+		<if test="orderBy!=null  and orderBy== 3">order by b.monthAcount desc</if>
+		<if test="orderBy!=null  and orderBy== 4">order by b.monthAcount asc</if>
+
+	</select>
+
+	<select id="getTakeCountMonthSettle" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT COUNT(oi.id),msu.month_no
+		FROM month_settle_user
+		msu
+		LEFT JOIN order_info oi ON msu.month_settle_no=oi.month_settle_no
+		WHERE oi.freight_type=1 and msu.month_no=#{month_no}
+		GROUP BY
+		msu.month_no
+	</select>
+
+	<select id="getMonthUserRevList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		b.month_settle_no monthSettleNo,
+		b.month_name monthName,
+		c.substation_no substationNo,
+		c.substation_name substationName,
+		b.contact_name courierName,
+		IF(ISNULL(a.one_count+a.two_count+a.three_count+a.four_count+a.five_count+a.six_count+a.seven_count+a.eight_count+a.nine_count+a.ten_count+a.eleven_count+a.twelve_count),0,(a.one_count+a.two_count+a.three_count+a.four_count+a.five_count+a.six_count+a.seven_count+a.eight_count+a.nine_count+a.ten_count+a.eleven_count+a.twelve_count))
+		count,
+		IF(ISNULL(a.one_count ),0,a.one_count) oneCount,
+		IF(ISNULL(a.two_count),0,a.two_count) twoCount,
+		IF(ISNULL(a.three_count),0,a.three_count) threeCount,
+		IF(ISNULL(a.four_count),0,a.four_count) fourCount,
+		IF(ISNULL(a.five_count),0,a.five_count) fiveCount,
+		IF(ISNULL(a.six_count),0,a.six_count) sixCount,
+		IF(ISNULL(a.seven_count),0,a.seven_count) sevenCount,
+		IF(ISNULL(a.eight_count),0,a.eight_count) eightCount,
+		IF(ISNULL(a.nine_count),0,a.nine_count) nineCount,
+		IF(ISNULL(a.ten_count),0,a.ten_count) tenCount,
+		IF(ISNULL(a.eleven_count),0,a.eleven_count) elevenCount,
+		IF(ISNULL(a.twelve_count),0,a.twelve_count) twelveCount
+		from
+		month_user_year_static a
+		right JOIN month_settle_user b
+		ON a.
+		month_no=b.month_settle_no
+		JOIN
+		substation c
+		ON b.substation_no
+		=c.substation_no
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="beginTime!=null and beginTime!=''">
+				AND substr(a.static_time,1,4)=#{beginTime}
+			</if>
+			<if test="monthSettleNo!=null and monthSettleNo!=''">
+				AND b.month_settle_no = #{monthSettleNo}
+			</if>
+			<if test="substationNo!=null  and substationNo!=''">
+				AND b.substation_no =#{substationNo}
+			</if>
+		</trim>
+	</select>
+	<select id="getMonthDayOrMonth" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select d.*,round(sumMoney1,2) sumMoney,mus.id musid,
+		IF((IFNULL(TSALL,0)-IFNULL(mus.month_count,0))>0,'Y','N') as monthNew,
+		IF((IFNULL(sumCount,0)-IFNULL(mus.sum_count,0))>0,'Y','N') as sumNew
+		from 
+		(
+		select s.substation_name substationName,c1.real_name courierName,
+		c.*,
+		m.month_sname monthSname ,m.email,m.contact_phone contactPhone,m.settle_type
+		settleType,m.liced,m.note,
+		mt.discount,mt.discount_text discountText,((c.sumFreight*mt.discount/100)+ sumVpay ) sumMoney1 
+		from
+		month_settle_user m
+		left join
+		(
+		select
+		a.TmonthSettleNo ,(a.takeCount+b.sendCount) sumCount, a.takeCount,a.TALL,b.sendCount,b.SALL,(a.TALL+b.SALL) TSALL , (a.Tfreight+b.Sfreight)
+		sumFreight,	(a.Tvpay+b.Svpay) sumVpay,IF(ISNULL(a.tMonth),b.sctime,a.tctime)  AS ctime,IFNULL(a.tMonth,b.sMonth) AS settleMonth
+		from
+		(select m.month_settle_no TmonthSettleNo,IFNULL(a.takeCount,0) takeCount,a.tctime,a.tMonth,
+		IFNULL(a.Tfreight,0) Tfreight,
+		IFNULL(a.Tvpay,0) Tvpay,
+		IFNULL(A.Tfreight+Tvpay,0) TALL	
+		 from month_settle_user m
+		left join
+		(select o.month_settle_no monthSettleNo,count(o.id) takeCount,concat(o.month_settle_no,DATE_FORMAT(o.take_order_time,'%Y%m')) as tctime,DATE_FORMAT(o.take_order_time,'%Y-%m') as tMonth,
+		sum(if(isnull(o.freight),0,o.freight)) Tfreight,
+		sum(if(isnull(o.vpay),0,o.vpay)) Tvpay from order_info o
+		where  o.freight_type=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if>
+		and o.`status` != 1 
+		and	o.`status` != 9
+		and o.zid!=1
+		and o.`pay_type` = 'MONTH'
+		<if test="beginTime!=null and beginTime!=''">
+			AND o.take_order_time>=#{beginTime}
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			AND concat(#{endTime},' 23:59:59')>=o.take_order_time
+		</if>
+		<if test="beginTimeM!=null and beginTimeM!=''">
+			AND o.take_order_time>=concat(#{beginTimeM},'-01') and concat(date_format(date_add(concat(#{beginTimeM},'-15'),INTERVAL 20 DAY),'%Y-%m'),'-01')>o.take_order_time
+		</if>
+		group by o.month_settle_no) a on a.monthSettleNo = m.month_settle_no) a
+		join
+		(select m.month_settle_no SmonthSettleNo,IFNULL(a.sendCount,0) sendCount,a.sctime,a.sMonth,
+		IFNULL(a.Sfreight,0) Sfreight,
+		IFNULL(a.Svpay,0) Svpay ,
+		IFNULL(a.Sfreight+a.Svpay,0) SALL
+		from month_settle_user m
+		left join
+		(select o.month_settle_no monthSettleNo,count(o.id) sendCount,concat(o.month_settle_no,DATE_FORMAT(o.send_order_time,'%Y%m')) as sctime,DATE_FORMAT(o.send_order_time,'%Y-%m') as sMonth,
+		sum(if(isnull(o.freight),0,o.freight)) Sfreight,
+		sum(if(isnull(o.vpay),0,o.vpay)) Svpay from order_info o
+		where 1=1 <if test="reportExam != null and reportExam eq 'YY'"> AND o.sign_examine_status='PASS' </if>
+		and o.freight_type=2 
+		and o.`status` = 3
+		and o.zid!=1
+		and o.`pay_type` = 'MONTH'
+			<if test="beginTime!=null and beginTime!=''">
+			AND o.take_order_time>=#{beginTime}
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			AND concat(#{endTime},' 23:59:59')>=o.take_order_time
+		</if>
+		<if test="beginTimeM!=null and beginTimeM!=''">
+		AND o.take_order_time>=concat(#{beginTimeM},'-01') and concat(date_format(date_add(concat(#{beginTimeM},'-15'),INTERVAL 20 DAY),'%Y-%m'),'-01')>o.take_order_time
+		</if>
+		group by o.month_settle_no) a on a.monthSettleNo = m.month_settle_no
+		) b
+		on a.TmonthSettleNo = b.SmonthSettleNo
+		) c on m.month_settle_no = c.TmonthSettleNo
+		left join
+		month_settle_type mt on m.mstype = mt.id
+		left join
+		substation s on m.substation_no = s.substation_no
+		left join
+		courier c1 on m.courier_no = c1.courier_no
+		where  1=1
+		<if test="monthSettleNo!=null and monthSettleNo!=''">
+				AND m.month_settle_no = #{monthSettleNo}
+			</if>
+			<if test="courierNo!=null  and courierNo!=''">
+				AND (m.courier_no =#{courierNo} or c1.real_name = #{courierNo} OR c1.inner_no= #{courierNo})
+			</if>
+				<if test="isEmail=='有邮箱'">
+			and length(m.email) >0
+		</if>
+		<if test="isEmail=='无邮箱'">
+			and length(m.email) =0
+		</if>
+		<if test="beginTimeM!=null and beginTimeM!=''">
+			<if test="isNew !=null and isNew !='' ">
+					AND m.create_time>=concat(#{beginTimeM},'-01') and concat(date_format(date_add(concat(#{beginTimeM},'-15'),INTERVAL 20 DAY),'%Y-%m'),'-01')>m.create_time
+			</if>
+		</if>
+		<if test="substationNo != null and substationNo !=''"> and (m.substation_no in (${substationNo}) or
+			length(ifnull(m.substation_no,''))&lt;1)</if>
+		) d left join month_user_settle mus on d.ctime=mus.ctime where d.sumCount > 0
+		<if test="ctime != null and ctime !=''"> and d.ctime in 
+		   <foreach collection="ctime" index="index" item="item" open="(" separator="," close=")">  
+                       #{item}   
+              </foreach> 
+        </if>
+		<if test="orderBy!=null  and orderBy== 1">order by d.TmonthSettleNo desc</if>
+		<if test="orderBy!=null  and orderBy== 2">order by d.TmonthSettleNo asc</if>
+		<if test="orderBy!=null  and orderBy== 3">order by d.sumMoney1 desc</if>
+		<if test="orderBy!=null  and orderBy== 4">order by d.sumMoney1 asc</if>
+	</select>
+	<select id="monthUserStatic" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		a.month_settle_no monthSettleNo,
+		count(b.id) count,
+		IF(ISNULL(sum(b.mpay)),0.00, sum(b.mpay)) mpay
+		from
+		month_settle_user a
+		left Join
+		order_info b
+		on a.month_settle_no=b.month_settle_no
+		where
+		substr(b.complete_time,1,7)=#{nowTime}
+		and b.status=3
+		and
+		b.examine_status='PASS'
+		group by a.month_settle_no
+	</select>
+
+	<select id="getMonthUserStaticList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select * from month_user_static mus where
+		mus.create_time=#{create_time} and mus.Column_2=#{month_no}
+	</select>
+
+	<insert id="save" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_static(Column_2,Column_3,Column_4,Column_5,create_time)
+		values(#{monthSettleNo},#{count},#{mpay},#{staticDate},#{createTime}
+		)
+	</insert>
+
+	<select id="monthUserYearStatic" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		Column_2 monthSettleNo,Column_3 count,Column_4
+		acount,Column_5
+		staticDate,create_time createTime
+		from
+		month_user_static
+		where
+		substr(Column_5,1,7)=#{nowTime}
+	</select>
+
+	<select id="checkMonthUserYearStatic" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		*
+		from
+		month_user_year_static
+		where
+		month_no=#{monthSettleNo}
+		and substr(static_time,1,4)=#{year}
+	</select>
+
+	<insert id="saveOneMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		one_count,one_acount,static_time,create_time )
+		values(#{monthSettleNo}
+		, #{count} ,#{acount} ,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveTwoMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,two_count,two_acount,static_time,create_time
+		)
+		values(#{monthSettleNo} , #{count} ,#{acount}
+		,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveThreeMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		three_count,three_acount,static_time,create_time )
+		values(#{monthSettleNo} , #{count} ,#{acount}
+		,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveFourMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		four_count,four_acount,static_time,create_time )
+		values(#{monthSettleNo} , #{count} ,#{acount}
+		,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveFiveMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		five_count,five_acount,static_time,create_time )
+		values(#{monthSettleNo} , #{count} ,#{acount}
+		,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveSixMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		six_count,six_acount,static_time,create_time )
+		values(#{monthSettleNo}
+		, #{count} ,#{acount} ,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveSevenMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		seven_count,seven_acount,static_time,create_time )
+		values(#{monthSettleNo} , #{count} ,#{acount}
+		,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveEightMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		eight_count,eight_acount,static_time,create_time )
+		values(#{monthSettleNo} , #{count} ,#{acount}
+		,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveNineMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		nine_count,nine_acount,static_time,create_time )
+		values(#{monthSettleNo} , #{count} ,#{acount}
+		,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveTenMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		ten_count,ten_acount,static_time,create_time )
+		values(#{monthSettleNo}
+		, #{count} ,#{acount} ,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveElevenMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		eleven_count,eleven_acount,static_time,create_time )
+		values(#{monthSettleNo} , #{count} ,#{acount}
+		,#{staticDate},#{createTime})
+	</insert>
+	<insert id="saveTwelveMonthUserYearStatics" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		month_user_year_static(month_no,
+		twelve_count,twelve_acount,static_time,create_time )
+		values(#{monthSettleNo} , #{count} ,#{acount}
+		,#{staticDate},#{createTime})
+	</insert>
+
+
+	<update id="updateOneMonthUserYearStatics" parameterType="java.util.Map">
+		Update
+		month_user_year_static
+		set one_count = #{count},
+		one_acount=#{acount},
+		static_time=#{staticDate}
+		where month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateTwoMonthUserYearStatics" parameterType="java.util.Map">
+		Update
+		month_user_year_static
+		set two_count = #{count},
+		two_acount=#{acount},
+		static_time=#{staticDate}
+		where month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateThreeMonthUserYearStatics" parameterType="java.util.Map">
+		Update month_user_year_static
+		set three_count = #{count},
+		three_acount=#{acount},
+		static_time=#{staticDate}
+		where
+		month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateFourMonthUserYearStatics" parameterType="java.util.Map">
+		Update month_user_year_static
+		set four_count = #{count},
+		four_acount=#{acount},
+		static_time=#{staticDate}
+		where
+		month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateFiveMonthUserYearStatics" parameterType="java.util.Map">
+		Update month_user_year_static
+		set five_count = #{count},
+		five_acount=#{acount},
+		static_time=#{staticDate}
+		where
+		month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateSixMonthUserYearStatics" parameterType="java.util.Map">
+		Update
+		month_user_year_static
+		set six_count = #{count},
+		six_acount=#{acount},
+		static_time=#{staticDate}
+		where month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateSevenMonthUserYearStatics" parameterType="java.util.Map">
+		Update month_user_year_static
+		set seven_count = #{count},
+		seven_acount=#{acount},
+		static_time=#{staticDate}
+		where
+		month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateEightMonthUserYearStatics" parameterType="java.util.Map">
+		Update month_user_year_static
+		set eight_count = #{count},
+		eight_acount=#{acount},
+		static_time=#{staticDate}
+		where
+		month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateNineMonthUserYearStatics" parameterType="java.util.Map">
+		Update month_user_year_static
+		set nine_count = #{count},
+		nine_acount=#{acount},
+		static_time=#{staticDate}
+		where
+		month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateTenMonthUserYearStatics" parameterType="java.util.Map">
+		Update
+		month_user_year_static
+		set ten_count = #{count},
+		ten_acount=#{acount},
+		static_time=#{staticDate}
+		where month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateElevenMonthUserYearStatics" parameterType="java.util.Map">
+		Update month_user_year_static
+		set eleven_count = #{count},
+		eleven_acount=#{acount},
+		static_time=#{staticDate}
+		where
+		month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+	<update id="updateTwelveMonthUserYearStatics" parameterType="java.util.Map">
+		Update month_user_year_static
+		set twelve_count = #{count},
+		twelve_acount=#{acount},
+		static_time=#{staticDate}
+		where
+		month_no=#{monthSettleNo}
+		AND
+		substr(create_time,1,4)=#{year}
+	</update>
+</mapper>

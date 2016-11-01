@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="DiscountType">  
+	<resultMap type="DiscountType" id="DiscountType">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="name" column="name"  />
+		<result property="discount" column="discount"  />
+			<result property="minVal" column="min_val"  />
+			<result property="maxVal" column="max_val"  />
+		<result property="discountText"  column="discount_text" />
+		<result property="note"  column="note" />
+	</resultMap>
+
+	<select id="list" resultType="java.util.HashMap">  
+        select * from discount_type 
+        <where>
+             1=1
+		</where>
+		order by id desc
+    </select>
+    
+    <select id="getById" resultMap="DiscountType" parameterType="java.lang.Integer">  
+        select * from discount_type
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+        <select id="getByMoney" resultMap="DiscountType" >  
+         select * from discount_type where ${money}>=min_val and max_val>${money} order by discount asc limit 0,1
+       </select>
+    
+   
+    
+    <insert id="insert" parameterType="DiscountType"  useGeneratedKeys="true" keyColumn="id">
+    	insert into discount_type(name,discount,discount_text,note,min_val,max_val) values (
+    		             #{name},#{discount},#{discountText},#{note},#{minVal},#{maxVal})
+    </insert>
+    
+    <update id="update" parameterType="DiscountType"  useGeneratedKeys="true" keyColumn="id">
+    	update discount_type set name=#{name},discount=#{discount},discount_text=#{discountText},note=#{note},min_val=#{minVal},max_val=#{maxVal}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from discount_type where id=#{id}
+    </delete>
+    
+</mapper>

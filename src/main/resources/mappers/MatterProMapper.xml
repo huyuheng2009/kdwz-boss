@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MatterPro">  
+	<resultMap type="MatterPro" id="MatterPro">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="lgcNo"  column="lgc_no"  jdbcType="VARCHAR"/>
+		<result property="matterNo" column="matter_no"  jdbcType="VARCHAR" />
+		<result property="matterName" column="matter_name"   jdbcType="VARCHAR"/>
+		<result property="matterType" column="matter_type"  />
+		<result property="matterUnit" column="matter_unit"  />
+		<result property="matterPrice"  column="matter_price" />
+		<result property="matterSalePrice"  column="matter_sale_price" />
+		<result property="note"  column="note" />
+	</resultMap>
+
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select m.*,l.name from matter_pro m left join lgc l on m.lgc_no=l.lgc_no
+        <where>
+			1=1
+		<if test="lgcNo!=null and lgcNo!=''">
+			and m.lgc_no in (0,${lgcNo})
+		</if>
+		<if test="lgcNo==null or lgcNo==''">
+			and 1=2
+		</if>
+		<if test="matterNo!=null and matterNo!=''">
+			and m.matter_no=#{matterNo,jdbcType=VARCHAR}
+		</if>
+		<if test="matterName!=null and matterName!=''">
+			and m.matter_name=#{matterName,jdbcType=VARCHAR}
+		</if>
+		<if test="matterType!=null and matterType!=''">
+			and m.matter_type=#{matterType}
+		</if>
+		</where>
+		order by m.id desc
+    </select>
+    
+    <select id="getById" resultMap="MatterPro" parameterType="java.lang.Integer">  
+        select * from matter_pro
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+       <select id="getByNo" resultMap="MatterPro">  
+        select * from matter_pro
+        <where>
+				lgc_no= #{lgcNo} and matter_no= #{matterNo}
+		</where>
+    </select>
+    
+    
+       <select id="getByName" resultMap="MatterPro" >  
+        select * from matter_pro
+        <where>
+			lgc_no= #{lgcNo} and matter_name= #{matterName}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="MatterPro"  useGeneratedKeys="true" keyColumn="id">
+    	insert into matter_pro(lgc_no,matter_no,matter_name,matter_type,matter_unit,matter_price,matter_sale_price,note) values (
+    		#{lgcNo},#{matterNo},#{matterName},#{matterType},#{matterUnit},#{matterPrice},#{matterSalePrice},#{note})
+    </insert>
+    <update id="update" parameterType="Lgc"  useGeneratedKeys="true" keyColumn="id">
+    	update matter_pro set matter_name=#{matterName},matter_type=#{matterType},matter_unit=#{matterUnit},
+    	matter_price=#{matterPrice},matter_sale_price=#{matterSalePrice},note=#{note}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    <delete id="delById" parameterType="Integer">
+    	delete from matter_pro where id=#{id}
+    </delete>
+    
+</mapper>

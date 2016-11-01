@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="AsignOrder">  
+	
+	<select id="list" resultType="AsignOrder">  
+        select * from asign_order
+        <where>
+			1=1
+		</where>
+		order by id desc
+    </select>
+    
+    <select id="monitorDetailList"  resultType="java.util.HashMap">  
+       select a.*,o.lgc_order_no  
+   from asign_order a left join order_info o on a.order_no=o.order_no
+     where a.asign_no=#{asign_no}
+             <if test="noType != null and noType ==1"> 
+                     and  a.asing_date=#{asing_date}
+              </if> 
+              <if test="noType != null and noType ==2"> 
+                     and  a.order_date=#{asing_date}
+              </if> 
+    </select>
+    
+    
+   <select id="monitorList"  resultType="java.util.HashMap">  
+       select asing_date,order_date,asign_no,asign_name,count(0) AS asignCount,
+         ceil(avg(asign_duration)) as asignDuration from asign_order where 1=1 
+            <if test="noType != null and noType ==1"> 
+                     <if test="createTimeBegin != null and createTimeBegin !=''"> and asign_time&gt;=#{createTimeBegin}</if>
+                     <if test="createTimeEnd != null and createTimeEnd !=''"> and asign_time&lt;=#{createTimeEnd}</if>
+            </if> 	
+           <if test="noType != null and noType ==2"> 
+                     <if test="createTimeBegin != null and createTimeBegin !=''"> and order_time&gt;=#{createTimeBegin}</if>
+                     <if test="createTimeEnd != null and createTimeEnd !=''"> and order_time&lt;=#{createTimeEnd}</if>
+            </if> 
+             <if test="asignName != null and asignName !=''"> and asign_name=#{asignName}</if>
+              <if test="noType != null and noType ==1"> 
+                        group by asing_date,asign_no
+              </if> 
+              <if test="noType != null and noType ==2"> 
+                        group by order_date,asign_no
+              </if> 
+    </select>
+    
+    
+     <select id="monitorTotal"  resultType="java.util.HashMap">  
+       select count(0) AS asignCount,ceil(avg(asign_duration)) as asignDuration from asign_order  where 1=1 
+            <if test="noType != null and noType ==1"> 
+                     <if test="createTimeBegin != null and createTimeBegin !=''"> and asign_time&gt;=#{createTimeBegin}</if>
+                     <if test="createTimeEnd != null and createTimeEnd !=''"> and asign_time&lt;=#{createTimeEnd}</if>
+            </if> 	
+           <if test="noType != null and noType ==2"> 
+                     <if test="createTimeBegin != null and createTimeBegin !=''"> and order_time&gt;=#{createTimeBegin}</if>
+                     <if test="createTimeEnd != null and createTimeEnd !=''"> and order_time&lt;=#{createTimeEnd}</if>
+            </if> 
+             <if test="asignName != null and asignName !=''"> and asign_name=#{asignName}</if>
+    </select>
+    
+      <select id="takeMonitor"  resultType="java.util.HashMap">  
+  select DATE_FORMAT(o.take_order_time,'%Y-%m-%d') takeDate,s.inner_no as sno,s.substation_name,c.inner_no as cno,c.real_name,o.take_courier_no,
+    count(0) as takeCount,sum(IF(a.id is null,0,1)) as asignCount,
+	  ceil(sum((unix_timestamp(o.take_order_time)-unix_timestamp(IFNULL(a.asign_time,o.take_order_time))))/60) AS takeSum
+   from order_info o left join asign_order a on o.order_no=a.order_no
+     left join courier c on o.take_courier_no=c.courier_no
+     left join substation s on c.substation_no=s.substation_no
+     where o.`status` in (2,3,7,8) and length(IFNULL(o.take_order_time,''))>1 and length(IFNULL(o.take_courier_no,''))>1
+       and c.`status`=1 
+    
+           <if test="createTimeBegin != null and createTimeBegin !=''"> and o.take_order_time&gt;=#{createTimeBegin}</if>
+           <if test="createTimeEnd != null and createTimeEnd !=''"> and o.take_order_time&lt;=#{createTimeEnd}</if>
+           <if test="substationNo != null and substationNo != ''"> and o.sub_station_no in (0,${substationNo})  </if>
+           <if test="sno != null and sno !=''"> and o.sub_station_no=#{sno}</if>
+            <if test="cno != null and cno !=''"> and o.take_courier_no=#{cno}</if>
+              GROUP by o.take_courier_no,takeDate	
+    </select>
+    
+    
+     <select id="monitorTakeDetailList"  resultType="java.util.HashMap">  
+select o.lgc_order_no,ifnull(a.asign_time,'') as asign_time,o.take_order_time,c.inner_no,c.real_name,
+   ceil((unix_timestamp(o.take_order_time)-unix_timestamp(IFNULL(a.asign_time,o.take_order_time)))/60) AS takeSum
+   from order_info o left join asign_order a on o.order_no=a.order_no
+     left join courier c on o.take_courier_no=c.courier_no
+     where o.`status` in (2,3,7,8) and length(IFNULL(o.take_order_time,''))>1 and length(IFNULL(o.take_courier_no,''))>1
+       and c.`status`=1 
+           <if test="takeDate != null and takeDate !=''"> and DATE_FORMAT(o.take_order_time,'%Y-%m-%d')=#{takeDate}</if>
+            <if test="take_courier_no != null and take_courier_no !=''"> and o.take_courier_no=#{take_courier_no}</if>
+             <if test="sid != null and sid !=''"> and a.id is not null </if>
+    </select>
+   
+    
+ 
+    <select id="getById" resultType="AsignOrder" parameterType="java.lang.Integer">  
+        select * from asign_order
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="AsignOrder"  useGeneratedKeys="true" keyColumn="id">
+    	insert into asign_order(order_no,order_time,asign_time,asing_date,order_date,asign_no,asign_name,asign_duration) 
+    	values (#{order_no},#{order_time},#{asign_time},#{asing_date},#{order_date},#{asign_no},#{asign_name},#{asign_duration})
+    </insert>
+    
+    
+    <update id="update" parameterType="AsignOrder"  useGeneratedKeys="true" keyColumn="id">
+    	update asign_order set asign_time=#{asign_time},asing_date=#{asing_date},asign_no=#{asign_no}
+    	                   ,asign_name=#{asign_name},asign_duration=#{asign_duration}
+    	<where>
+    		order_no=#{order_no}
+    	</where>
+    </update>
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from asign_order where id=#{id}
+    </delete>
+    
+    <delete id="delByOrderNo" parameterType="String">
+    	delete from asign_order where order_no=#{order_no}
+    </delete>
+
+</mapper>

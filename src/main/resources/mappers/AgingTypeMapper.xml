@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="AgingType">  
+	<resultMap type="AgingType" id="AgingType">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="itemText"  column="item_text"  jdbcType="VARCHAR"/>
+		<result property="note"  column="note"  jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from aging_type
+        <where>
+			1=1
+			<if test="itemText!=null and itemText!=''">and item_text like  CONCAT(CONCAT('%', #{itemText}),'%')</if>
+		</where>
+		order by id desc
+    </select>
+    
+  
+    
+    <select id="getById" resultMap="AgingType" parameterType="java.lang.Integer">  
+        select * from aging_type
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="AgingType"  useGeneratedKeys="true" keyColumn="id">
+    	insert into aging_type(item_text,note) values (#{itemText},#{note})
+    </insert>
+    <update id="update" parameterType="AgingType"  useGeneratedKeys="true" keyColumn="id">
+    	update aging_type set item_text=#{itemText},note=#{note}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from aging_type where id=#{id}
+    </delete>
+
+</mapper>

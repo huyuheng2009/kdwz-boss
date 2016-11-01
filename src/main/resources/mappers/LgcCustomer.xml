@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="LgcCustomer">  
+	
+	<select id="list" resultType="LgcCustomer">  
+        select * from lgc_customer
+        <where>
+			1=1
+			<if test="cpn_sname!=null and cpn_sname!=''">and cpn_sname like  CONCAT(CONCAT('%', #{cpn_sname}),'%')</if>
+			<if test="concat_phone!=null and concat_phone!=''">and concat_phone=#{concat_phone}</if>
+			<if test="source!=null and source!=''">and source=#{source}</if>
+			<if test="createTimeBegin != null and createTimeBegin !=''"> and create_time&gt;=#{createTimeBegin}</if>
+		   <if test="createTimeEnd != null and createTimeEnd !=''"> and create_time&lt;=#{createTimeEnd}</if>
+		</where>
+		order by id desc
+    </select>
+  
+  	<select id="huifang" resultType="java.util.Map">  
+       select c.*,group_concat(h.huifang_text,';',h.create_time SEPARATOR  '&lt;/br&gt;') AS huifang
+from lgc_customer c left join customer_huifang h on c.id=h.cid
+        <where>
+			1=1
+			<if test="cpn_sname!=null and cpn_sname!=''">and c.cpn_sname like  CONCAT(CONCAT('%', #{cpn_sname}),'%')</if>
+			<if test="kefu_name!=null and kefu_name!=''">and c.kefu_name like  CONCAT(CONCAT('%', #{kefu_name}),'%')</if>
+			<if test="concat_phone!=null and concat_phone!=''">and c.concat_phone=#{concat_phone}</if>
+			<if test="source!=null and source!=''">and c.source=#{source}</if>
+			<if test="createTimeBegin != null and createTimeBegin !=''"> and c.create_time&gt;=#{createTimeBegin}</if>
+		   <if test="createTimeEnd != null and createTimeEnd !=''"> and c.create_time&lt;=#{createTimeEnd}</if>
+		</where>
+		 group by c.id
+		order by c.id desc
+    </select>
+    
+    
+    <select id="report" resultType="java.util.Map">  
+       select c.*,
+SUM(CASE WHEN date_format(o.take_order_time,'%Y-%m-%d')=#{curDay} THEN 1 ELSE 0 END) curDayCount,
+SUM(CASE WHEN date_format(o.take_order_time,'%Y-%m')=#{curMonth} THEN 1 ELSE 0 END) curMonthCount,
+SUM(CASE WHEN date_format(o.take_order_time,'%Y-%m')=#{lastMonth} THEN 1 ELSE 0 END) lastMonthCount
+from lgc_customer c left  join order_info o on c.concat_phone=o.send_phone
+      and  o.status IN (2, 3, 7, 8) AND o.deled = 0
+  and date_format(o.take_order_time,'%Y-%m') in (#{curDayMonth},#{curMonth},#{lastMonth})
+        <where> 1=1 
+			<if test="cpn_sname!=null and cpn_sname!=''">and c.cpn_sname like  CONCAT(CONCAT('%', #{cpn_sname}),'%')</if>
+			<if test="kefu_name!=null and kefu_name!=''">and c.kefu_name like  CONCAT(CONCAT('%', #{kefu_name}),'%')</if>
+			<if test="concat_phone!=null and concat_phone!=''">and c.concat_phone=#{concat_phone}</if>
+		</where>
+		 group by c.id
+		order by c.id desc
+    </select>
+    
+      	
+
+    
+    
+       <select id="getByCancatPhone" resultType="LgcCustomer" >  
+        select * from lgc_customer
+        <where>
+			 concat_phone=#{concatPhone}
+		</where>
+    </select>
+    
+    <select id="getById" resultType="LgcCustomer" parameterType="java.lang.Integer">  
+        select * from lgc_customer
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="LgcCustomer"  useGeneratedKeys="true" keyColumn="id">
+    	insert into lgc_customer(customer_no,concat_name,concat_phone,concat_addr,source,create_time) values (#{customer_no},#{concat_name},#{concat_phone},#{concat_addr},#{source},#{create_time})
+    </insert>
+    
+       <insert id="hfsave">
+    	insert into customer_huifang(cid,huifang_text,create_time) values (#{cid},#{huifang_text},#{create_time})
+    </insert>
+    
+    
+    <update id="update" parameterType="LgcCustomer"  useGeneratedKeys="true" keyColumn="id">
+    	update lgc_customer set cpn_sname=#{cpn_sname},cpn_name=#{cpn_name},concat_name=#{concat_name},concat_phone=#{concat_phone},cell_phone=#{cell_phone}
+    	                   ,concat_addr=#{concat_addr},substation_no=#{substation_no},courier_no=#{courier_no},kefu_name=#{kefu_name},month_no=#{month_no},note=#{note}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from lgc_customer where id=#{id}
+    </delete>
+
+</mapper>

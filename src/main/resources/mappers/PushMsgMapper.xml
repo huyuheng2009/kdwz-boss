@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="PushMsg">  
+
+   <insert id="save" parameterType="com.yogapay.boss.domain.PushMsg" useGeneratedKeys="true" keyProperty="id">  
+     insert into push_msg(user_no,user_type,msg_code,msg_content,msg_data,readed,create_time,expire_time) 
+                   values(#{userNo},#{userType},#{msgCode},#{msgContent},#{msgData},#{readed},#{createTime},#{expireTime})
+    </insert> 
+    
+</mapper>

@@ -1,0 +1,41 @@
+﻿/*重置（基础）*/
+*{font-family:"微软雅黑","Arial Narrow"; padding:0; margin:0;}
+body{font-size:12px;width:100%; color:#333;min-width:1000px; min-height:100%; height:100%; background:#e5ebf2;}
+html{ height:100%;}
+img{ border:0; line-height:0;}
+button{ border:0; cursor:pointer;}
+a{ text-decoration:none; cursor:pointer;}
+a > img {display: inline-block;}
+.error {color: red;}
+ul li{ list-style:none;}
+input{ outline:none; font-size:12px;}
+select{ outline:none; font-size:12px;}
+input[type=submit]{ cursor:pointer;}
+.font_blue{ color:#1c7ad8;}
+.font_s{ font-size:12px;}
+.font_b{ font-size:16px;}
+.font_gary{ color:#999;}
+
+
+.map{ width:100%; height:100%; background:#9FC; position:relative;} 
+.map_list{ height:92%; width:240px; border:1px solid #dfdfdf; background:#f8f8f8; display:block; position:absolute; top:3%; left:2%;}
+.map_list p{ text-align:center; height:30px; line-height:30px; margin:10px 0 0 0; font-size:16px;}
+.map_search{ margin:20px 0 0 0; overflow:auto; zoom:1;}
+.map_search input{width:174px;height:24px; padding:8px 8px; border:0; font-size:14px; display:block; float:left; background:#f8f8f8;}
+.map_search input[type=text]:focus{ border:0; box-shadow:none;}
+.map_search .button{ width:50px; height:40px; display:block; float:left; background:url(/themes/default/images/search.png) no-repeat #f5f5f5 center; outline:none;}
+
+.map_people{ padding:0 10px 0 15px;}
+.people_one{ color:#333; font-size:14px; position:relative; padding:0 0 0 18px; height:30px; line-height:30px;}
+.people_one button{ background:none; position:absolute; outline:none;}
+.people_one .people_one_on{ width: 0px; height: 0px; border: 5px solid transparent; border-top-color: #b7bcb6; display:inline-block; top:12px; left:0;}
+.people_one .people_one_off{width: 0px; height: 0px; border: 5px solid transparent; border-left-color: #b7bcb6; display:inline-block; top:9px; left:3px;}
+.people_two{ margin:0px 0 5px 18px;}
+.people_two ul li{ line-height:24px; color:#666; font-size:14px;}
+.people_two ul li a:hover{ text-decoration: underline;}
+.people_two ul li.people_no a{ color:#d2d2d2;}
+
+
+
+
+

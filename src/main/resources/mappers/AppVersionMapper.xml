@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="AppVersion">  
+
+    <resultMap type="AppVersion" id="AppVersion">
+		<id property="id" column="id" jdbcType="INTEGER"/> 
+		<result property="appCode"  column="app_code" />
+		<result property="platform"  column="platform" />
+		<result property="version"  column="version" />
+		<result property="publishTime"  column="publish_time" />
+		<result property="address"  column="address" />
+	    <result property="downloadAddress"  column="download_address" />
+	     <result property="ipaAddress"  column="ipa_address" />
+		<result property="status"  column="status" />
+		<result property="mupdate"  column="mupdate" />
+	</resultMap>
+
+	<select id="list" resultMap="AppVersion">
+		select * from app_version
+		<where>
+	    1=1
+	      <if test="appCode != null and appCode !=''"> and app_code=#{appCode}</if>
+	      <if test="platform != null and platform !=''"> and platform=#{platform}</if>
+	       <if test="status != null and status !=''"> and status=#{status}</if>
+			order by id desc
+		</where>
+	</select>
+	
+	 <select id="getById" resultMap="AppVersion" parameterType="java.lang.Integer">  
+        select * from app_version
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+     <select id="getLastVersion" resultMap="AppVersion" parameterType="java.util.HashMap">  
+        select t.* from (
+        select v.* from app_version v left join app_product p on v.app_code=p.app_code where 1=1 
+        and p.bname=#{bname} order by id desc
+        ) t group by t.platform
+    </select>
+    
+        <select id="getLastPlatVersion" resultMap="AppVersion" parameterType="java.util.HashMap">  
+       select v.id,v.app_code,v.version,v.publish_time,v.address,v.download_address,v.ipa_address,v.`status`,v.mupdate,p.app_name AS platform 
+       from app_version v left join app_product p on v.app_code=p.app_code 
+       where 1=1 
+        and p.bname=#{bname}  and platform=#{plat}  order by id desc 
+    </select>
+
+    <insert id="insert" parameterType="AppVersion" useGeneratedKeys="true" keyColumn="id">
+    	insert into app_version(app_code,platform,version,publish_time,address,download_address,ipa_address,status,mupdate) values 
+    	                       (#{appCode},#{platform},#{version},#{publishTime},#{address},#{downloadAddress},#{ipaAddress},#{status},#{mupdate})
+    </insert>
+    
+     	<update id="status" parameterType="AppVersion"  useGeneratedKeys="true" keyColumn="id">
+		update app_version set status=#{status}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+    
+    	<update id="update" parameterType="AppVersion"  useGeneratedKeys="true" keyColumn="id">
+		update app_version set mupdate=#{mupdate}
+		 <if test="appCode != null and appCode !=''">,app_code=#{appCode}</if>
+		 <if test="platform != null and platform !=''">,platform=#{platform}</if>
+	       <if test="version != null and version !=''">,version=#{version}</if>
+	        <if test="address != null and address !=''">,address=#{address}</if>
+	         <if test="downloadAddress != null and downloadAddress !=''">,download_address=#{downloadAddress}</if>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	   <update id="updateDownloadAddress" parameterType="AppVersion"  useGeneratedKeys="true" keyColumn="id">
+		update app_version set download_address=#{downloadAddress}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	<delete id="delById" parameterType="Integer">
+		delete from app_version
+		<where>
+			id=#{id}
+		</where>
+	</delete>
+	
+	<select id="listPayType" parameterType="Integer" resultType="java.util.HashMap">  
+      select p.*,IF(p.id in (select pid from version_pay where vid=#{vid}),'Y','N') su from pay_type p where p.status=1
+    </select> 
+    
+    <delete id="delPayTypeById" parameterType="Integer">
+		delete from version_pay
+		<where>
+			vid=#{vid}
+		</where>
+	</delete>
+    
+    <insert id="savePayType" parameterType="java.util.List">  
+     insert into version_pay(vid,pid) values 
+      <foreach collection="list" item="item" index="index" separator="," >  
+        (#{item.vid},#{item.pid})  
+      </foreach>  
+    </insert>  
+    
+  </mapper>

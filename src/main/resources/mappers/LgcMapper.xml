@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Lgc">  
+	<resultMap type="Lgc" id="Lgc">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="lgcNo"  column="lgc_no"  jdbcType="VARCHAR"/>
+		<result property="name" column="name"  jdbcType="VARCHAR" />
+		<result property="pingyin" column="pingyin"   jdbcType="VARCHAR"/>
+		<result property="contact" column="contact"   jdbcType="VARCHAR"/>
+		<result property="website" column="website"   jdbcType="VARCHAR"/>
+		<result property="logo"  column="logo"  jdbcType="VARCHAR"/>
+		<result property="hotOrderNo"  column="hot_order_no"   jdbcType="INTEGER"/>
+		<result property="priceOrderNo"  column="price_order_no" jdbcType="INTEGER" />
+		<result property="accessTime"  column="access_time"  jdbcType="TIMESTAMP"/>
+		<result property="nextSno"  column="next_sno"  jdbcType="VARCHAR"/>
+		<result property="cbname"  column="cbname"  jdbcType="VARCHAR"/>
+		<result property="ubname"  column="ubname"  jdbcType="VARCHAR"/>
+		<result property="webTitle"  column="web_title"  jdbcType="VARCHAR"/>
+		<result property="defaultCity"  column="default_city"  jdbcType="VARCHAR"/>
+		<result property="defaultAcpt"  column="default_acpt"  jdbcType="VARCHAR"/>
+		<result property="reportExam"  column="report_exam"  jdbcType="VARCHAR"/>
+		
+	</resultMap>
+	<sql id="Condition">
+		<if test="id!=null and id!=''">
+			and id=#{id,jdbcType=INTEGER}
+		</if>
+		<if test="lgcNo!=null and lgcNo!=''">
+			and lgc_no in (0,${lgcNo})
+		</if>
+		<if test="name!=null and name!=''">
+			and name=#{name,jdbcType=VARCHAR}
+		</if>
+		<if test="createTimeBegin != null and createTimeBegin !=''"> and access_time&gt;=#{createTimeBegin}</if>
+         <if test="createTimeEnd != null and createTimeEnd !=''"> and access_time&lt; #{createTimeEnd}</if>
+	</sql>
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from lgc
+        <where>
+			1=1
+			<include refid="Condition" />
+		</where>
+		order by id desc
+    </select>
+    
+    <select id="getById" resultMap="Lgc" parameterType="java.lang.Integer">  
+        select * from lgc
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+     <select id="getByName" resultMap="Lgc" parameterType="java.lang.String">  
+        select * from lgc
+        <where>
+			name= #{name}
+		</where>
+    </select>
+    
+      <select id="getByLgcNo" resultMap="Lgc" parameterType="java.lang.String">  
+        select * from lgc
+        <where>
+			lgc_no= #{lgcNo}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="Lgc"  useGeneratedKeys="true" keyColumn="id">
+    	insert into lgc(lgc_no,name,pingyin,contact,website,logo,hot_order_no,price_order_no,access_time,next_sno,track_src) values (
+    		#{lgcNo},#{name},#{pingyin},#{contact},#{website},#{logo},#{hotOrderNo},#{priceOrderNo},#{accessTime},#{nextSno},#{trackSrc}
+    	)
+    </insert>
+    <update id="update" parameterType="Lgc"  useGeneratedKeys="true" keyColumn="id">
+    	update lgc set name=#{name},pingyin=#{pingyin},contact=#{contact},default_city=#{defaultCity}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    <update id="nextSno" parameterType="Lgc"  useGeneratedKeys="true" keyColumn="id">
+    	update lgc set next_sno=next_sno+1 
+    	<where>
+    		lgc_no=#{lgcNo}
+    	</where>
+    </update>
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from lgc where id=#{id}
+    </delete>
+    
+      <select id="getLgcNos"  resultType="java.util.HashMap">  
+     select lgc_no from lgc 
+    </select> 
+    
+     <select id="getLgcVrate" resultType="java.util.HashMap">
+        select v.rate_type rateType,v.rate rate,v.latter,v.top,v.minv,v.maxv from valuation_rule v  where status = 1 order by id desc limit 0,1
+    </select>
+    
+    
+</mapper>

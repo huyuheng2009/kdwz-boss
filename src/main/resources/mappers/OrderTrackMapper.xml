@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="OrderTrack">  
+<resultMap type="OrderTrack" id="OrderTrack">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="orderNo"  column="order_no"  jdbcType="VARCHAR"/>
+		<result property="orderTime" column="order_time"  jdbcType="TIMESTAMP"/>
+		<result property="context" column="context"   jdbcType="VARCHAR"/>
+		<result property="completed" column="completed"   jdbcType="VARCHAR"/>
+		<result property="preNo" column="pre_no"   jdbcType="VARCHAR"/>
+		<result property="preType"  column="pre_type"  jdbcType="VARCHAR"/>
+		<result property="curNo"  column="cur_no"   jdbcType="VARCHAR"/>
+		<result property="curType"  column="cur_type" jdbcType="VARCHAR" />
+		<result property="nextNo"  column="next_no"   jdbcType="VARCHAR"/>
+		<result property="nextType"  column="next_type" jdbcType="VARCHAR" />
+		<result property="orderStatus"  column="order_status"   jdbcType="VARCHAR"/>
+		<result property="parentId"  column="parent_id"  />
+		<result property="isLast"  column="is_last"   jdbcType="VARCHAR"/>
+		<result property="scanIno"  column="scan_ino" jdbcType="VARCHAR" />
+		<result property="scanIname"  column="scan_iname"   jdbcType="VARCHAR"/>
+		<result property="scanOno"  column="scan_ono" jdbcType="VARCHAR" />
+		<result property="scanOname"  column="scan_oname" jdbcType="VARCHAR" />
+		<result property="opname"  column="opname" jdbcType="VARCHAR" />
+	</resultMap>
+ 
+    <select id="scanList" resultType="java.util.HashMap">  
+         select t.*,o.create_time,o.lgc_order_no,o.pro_order from order_track t left join order_info o on t.order_no=o.order_no where 1=1 and (o.pro_order!='Y' or o.pro_order is NULL)
+          <if test="orderStatus != null and orderStatus =='INIT'"> 
+          and t.next_type='S' and t.order_status='SEND' and t.is_last='Y'
+           <if test="substationNo != null and substationNo != ''"> 
+             and t.next_no in (0,${substationNo})
+          </if>
+           <if test="substationNo == null or substationNo == ''"> 
+             and 1=2
+          </if>
+          </if>
+          
+           <if test="orderStatus != null and orderStatus =='REV'"> 
+          and t.cur_type='S' and t.order_status='REV' and t.is_last='Y'
+           <if test="substationNo != null and substationNo != ''"> 
+             and t.cur_no in (0,${substationNo})
+          </if>
+           <if test="substationNo == null or substationNo == ''"> 
+             and 1=2
+          </if>
+          </if>
+          
+           <if test="orderStatus != null and orderStatus =='SEND'"> 
+            and t.cur_type='S' and t.order_status='SEND'
+           <if test="substationNo != null and substationNo != ''"> 
+             and t.next_no in (0,${substationNo})
+          </if>
+          <if test="substationNo == null or substationNo == ''"> 
+             and 1=2
+          </if>
+          </if>
+         <if test="createTimeBegin != null and createTimeBegin !=''"> and o.create_time&gt;=#{createTimeBegin}</if>
+         <if test="createTimeEnd != null and createTimeEnd !=''"> and o.create_time&lt;#{createTimeEnd}</if>
+         <if test="lgcOrderNo != null and lgcOrderNo !=''"> and o.lgc_order_no=#{lgcOrderNo}</if>
+         order by t.id desc
+    </select> 
+
+
+   <insert id="save" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="id">  
+    insert into order_track (order_no,order_time,context,completed) values  (#{orderNo},#{orderTime},#{context},#{check}) 
+    </insert> 
+    
+     <insert id="save1" parameterType="OrderTrack" useGeneratedKeys="true" keyProperty="id">  
+    insert into order_track (order_no,order_time,context,completed,pre_no,pre_type,cur_no,cur_type,next_no,next_type,order_status,parent_id,is_last,scan_ino,scan_iname,scan_ono,scan_oname,opname) 
+    values  (#{orderNo},#{orderTime},#{context},#{completed},#{preNo},#{preType},#{curNo},#{curType},#{nextNo},#{nextType},#{orderStatus},#{parentId},#{isLast},#{scanIno},#{scanIname},#{scanOno},#{scanOname},#{opname}) 
+    </insert> 
+    
+    
+    <select id="getSignScan"  resultType="java.util.HashMap">  
+        select  c.real_name,s.substation_name,t.*,o.lgc_order_no,o.create_time,o.send_order_time,o.sign_name,o.freight_type,o.pay_type,o.freight,o.good_price,o.`status`
+from order_track t  left join order_info o on t.order_no=o.order_no left join courier c on o.send_courier_no=c.courier_no left join substation s on c.substation_no=s.substation_no
+  where t.order_status='SIGNING' 
+     <if test="substationName != null and substationName !=''"> and s.substation_name=#{substationName}</if>
+      <if test="substationNo != null and substationNo !=''"> and s.substation_no in (${substationNo})</if>
+      <if test="courier != null and courier !=''"> and c.real_name=#{courier}</if>
+       <if test="signed != null and signed !=''"> and o.`status` in (2,8) </if>
+     <if test="createTimeBegin != null and createTimeBegin !=''"> and t.order_time&gt;=#{createTimeBegin}</if>
+     <if test="createTimeEnd != null and createTimeEnd !=''"> and t.order_time&lt;#{createTimeEnd}</if>
+  group by t.order_no order by t.id desc 
+    </select>
+    
+    <select id="getLastOrderTrack" resultMap="OrderTrack">  
+       select * from order_track where order_no=#{orderNo} order by id desc limit 0,1
+    </select>
+    
+    <select id="getByOrderNo" resultType="java.util.HashMap">  
+       select order_time time,'' ftime,'' location,context from  order_track  where order_no=#{orderNo} 
+		 <if test="orderby != null and orderby !=''">order by id desc</if>
+    </select>
+    
+    <delete id="delByOrderNo" parameterType="OrderTrack">
+    	delete from order_track where order_no=#{orderNo} and order_status='INIT'
+    </delete>
+    
+     <update id="unLastTrack" parameterType="OrderTrack"  useGeneratedKeys="true" keyColumn="id">
+    	update order_track set is_last='N' 
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    
+</mapper>

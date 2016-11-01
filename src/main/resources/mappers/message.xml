@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Message">
+    <select id="queryMessageCount" parameterType="map" resultType="map">
+        select c.lgc_no as lgcNo,c.message_cost as messageCost,c.message_count as messagecount,p.descb as realName from manager_lgc.message_count c left join manager_lgc.project_ds p on c.lgc_no = p.lgc_no where c.lgc_no=#{lgcNo}
+    </select>
+    
+     <select id="msgCount" parameterType="map" resultType="map">
+        select c.message_count as messagecount from manager_lgc.message_count c where c.lgc_no=#{lgcNo}
+    </select>
+    
+    <select id="queryMessageInfo" parameterType="map" resultType="map">
+        select * from manager_lgc.message_info where lgc_no=#{lgcNo} 
+        <if test="rescode not in {null,''}"> and rescode= #{rescode}</if>
+        <if test="beginTimeText not in {null,''}"> and substr(create_time,1,10) >= #{beginTimeText}</if>
+        <if test="endTimeText not in {null,''}"> and #{endTimeText} >= substr(create_time,1,10) </if>
+        order by id desc
+        <if test="limit"> LIMIT #{offset},#{len}</if>
+    </select>
+    
+    <select id="queryMessgeRecharge" parameterType="map" resultType="map">
+        SELECT
+        <choose>
+            <when test="is_count">Count(0) 'paginated_count'</when>
+            <otherwise>r.*,p.lgc_no as lgcNo,p.status as name,u.username as userName</otherwise>
+        </choose>
+        from manager_lgc.recharge r left join manager_lgc.project_ds p on r.lgcNo = p.lgc_no left join manager_lgc.user u on r.userId = u.id where r.lgcNo=#{lgcNo}
+        <if test="beginTimeText not in {null,''}"> and substr(r.createTime,1,10) >= #{beginTimeText}</if>
+        <if test="endTimeText not in {null,''}"> and #{endTimeText} >= substr(r.createTime,1,10)</if>
+        order by r.id desc
+        <if test="limit"> LIMIT #{offset},#{len}</if>
+    </select>
+</mapper>

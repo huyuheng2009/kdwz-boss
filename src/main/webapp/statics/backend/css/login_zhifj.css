@@ -1,0 +1,36 @@
+/*重置（基础）*/
+*{font-family:"微软雅黑","Arial Narrow"; padding:0; margin:0;}
+body{font-size:12px;width:100%; color:#333; height:100%; background:#e5ebf2;}
+html{ height:100%;}
+img{ border:0; line-height:0;}
+button{ border:0; cursor:pointer;}
+a{ text-decoration:none; cursor:pointer;}
+a > img {display: inline-block; vertical-align:middle;}
+.error {color: red;}
+ul li{ list-style:none;}
+input{ outline:none; font-size:12px;}
+select{ outline:none; font-size:12px;}
+input[type=submit]{ cursor:pointer;}
+
+
+.login_table{ width:100%; height:100%; border-collapse:collapse;}
+.login_table tr td{}
+.login{ width:800px; margin:auto; position:relative;}
+.login_bg{}
+.login_bg img{ width:100%; height:auto;}
+.login_cont{ width:560px; position:absolute; top:250px; left:120px;}
+.login_li{ overflow:auto; zoom:1; margin-bottom:24px;}
+.login_li_left{ color:#2a2a2a; float:left; width:146px; text-align:right; line-height:36px; font-size:16px; margin-right:14px; letter-spacing:1px;}
+.login_li_left b{ color:red; font-weight:normal;}
+.login_li_right{ float:left; overflow: hidden; zoom:1;}
+.login_li_right input{ width:312px; height:24px; line-height:24px; font-size:16px; padding:5px 5px 6px; border:0; border-bottom:1px solid #7f7f7f;}
+.login_li_right input.b{ width:148px; float:left; display:block;}
+.scode{ float:left; display:block; width:150px; height:34px; border:1px solid #7f7f7f; margin-left:12px;}
+.scode img{ border:0; width:100%; height:34px;}
+.login_button{ width:60%; margin:0 auto 0; padding-top:26px;}
+.login_button input{ width:100%; height:50px; line-height:50px; border:0; background:#0071bf; color:#fff; font-size:16px; font-weight:bold; letter-spacing:2px; border-radius:5px;-moz-border-radius:5px;}
+
+
+
+
+

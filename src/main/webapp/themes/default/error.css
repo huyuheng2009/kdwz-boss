@@ -1,0 +1,16 @@
+#error {
+	
+	width: 793px;
+	margin: 0 auto;
+	height: 300px;
+	margin-top:90px;
+}
+#error ul,#error li{
+list-style: none;
+float: left;
+margin-right: 14px;
+}
+#error a{
+	text-decoration: none;
+	color: #066231;
+}

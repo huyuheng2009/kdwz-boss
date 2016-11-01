@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CourierDayStatic">
+
+	<select id="list" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select c.substation_no substationNo,c.substation_name substationName,
+		c.courier_no courierNo,	c.courier_name courierName,
+		c.rev_count revCount,c.send_count sendCount,
+		c.fcount ,c.mcount,c.ccount,c.hcount,
+		c.acount,c.cash_count cashCount,
+		c.static_date staticDate
+		from courier_day_static c
+          	<where>
+	 				1=1 
+			<if test="beginTime!=null and beginTime!=''" >
+				AND SUBSTR(c.static_date,1,10)>=#{beginTime}
+			</if>
+			<if test="endTime!=null  and endTime!='' ">
+				AND #{endTime} >=SUBSTR(c.static_date,1,10)
+			</if>
+			<if test="courierNo!=null and courierNo!=''">
+				AND c.courier_no = #{courierNo}
+			</if>
+			<if test="substationNo!=null  and substationNo!=''">
+				AND c.substation_no =#{substationNo}
+			</if>
+		</where>
+		<if test="orderBy==null  or orderBy==''">order by c.id desc</if>
+		<if test="orderBy!=null  and orderBy== 1">order by c.substation_name desc</if>
+		<if test="orderBy!=null  and orderBy== 2">order by c.substation_name asc</if>
+		<if test="orderBy!=null  and orderBy== 3">order by c.courier_name desc</if>
+		<if test="orderBy!=null  and orderBy== 4">order by c.courier_name asc</if>
+		<if test="orderBy!=null  and orderBy== 5">order by c.static_date desc</if>
+		<if test="orderBy!=null  and orderBy== 6 ">order by c.static_date asc</if>		
+		<if test="orderBy!=null  and orderBy== 7">order by c.acount desc</if>		
+		<if test="orderBy!=null  and orderBy== 8 ">order by c.acount asc</if>		
+		<if test="orderBy!=null  and orderBy== 9">order by c.cash_count desc</if>		
+		<if test="orderBy!=null  and orderBy== 10 ">order by c.cash_count asc</if>		
+	</select>
+	<select id="acount" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select
+		k.substation_no substationNo,k.substation_name
+		substationName,
+		m.courierNo courierNo,l.real_name realName,
+		m.sendCount
+		,m.takeCount,
+		m.cash,
+		m.month,
+		m.goodPrice,
+		m.huiyuan,
+		m.ssnpay,
+		m.sumCash
+		from
+		(
+		select
+		g.sendCourierNo courierNo,
+		g.sendCount sendCount,
+		h.takeCount takeCount,
+		g.cash1+h.cash2 cash,
+		g.month1+h.month2 month,
+		g.goodPrice goodPrice,
+		g.huiyuan1+h.huiyuan2 huiyuan,
+		g.snpay+h.tnpay	ssnpay,
+		g.sumCash1+h.sumCash2 sumCash
+		from
+		(select
+		f.courier_no
+		sendCourierNo ,
+		IF(ISNULL(c.sendCount),0,c.sendCount) sendCount,
+		IF(ISNULL(c.cash1),0.00,c.cash1) cash1,
+		IF(ISNULL(c.month1),0.00,c.month1) month1,
+		IF(ISNULL(c.goodPrice),0.00,c.goodPrice) goodPrice,
+		IF(ISNULL(c.huiyuan1),0.00,c.huiyuan1) huiyuan1,
+		IF(ISNULL(c.snpay),0.00,c.snpay) snpay ,
+		IF(ISNULL(c.cash1),0.00,c.cash1)+IF(ISNULL(c.goodPrice),0.00,c.goodPrice)
+		sumCash1
+		from
+		( select
+		b.send_courier_no sendCourierNo,
+		count(*)
+		sendCount,
+		sum(IF(b.freight_type=2,IF(b.pay_type='CASH',b.snpay-b.good_price,0.00),0.00))
+		cash1,
+		sum(IF(b.freight_type=2,IF(b.pay_type='MONTH',b.snpay-b.good_price,0.00),0.00))
+		month1,
+		sum(b.good_price) goodPrice,
+		sum(IF(b.freight_type=2,IF(b.pay_type='HUIYUAN',b.snpay-b.good_price,0.00),0.00))
+		huiyuan1,
+		sum(b.snpay) snpay
+		from order_info b
+		WHERE
+		b.send_order_time between #{nowTime} and concat(#{nowTime},' 23:59:59') 
+		AND
+		b.status=3
+		group by
+		b.send_courier_no )
+		c
+		right join
+		courier
+		f
+		on f.courier_no=c.sendCourierNo)
+		g
+		JOIN
+		(select
+		f.courier_no takeCourierNo,
+		IF(ISNULL(d.takeCount),0,d.takeCount) takeCount,
+		IF(ISNULL(d.cash2),0.00,d.cash2) cash2,
+		IF(ISNULL(d.month2),0.00,d.month2) month2,
+		IF(ISNULL(d.huiyuan2),0.00,d.huiyuan2) huiyuan2,
+		IF(ISNULL(d.tnpay),0.00,d.tnpay) tnpay,
+		IF(ISNULL(d.cash2),0.00,d.cash2) sumCash2
+		from
+		(
+		select
+		a.take_courier_no
+		takeCourierNo,
+		count(a.id) takeCount,
+		sum(IF(a.freight_type=1,IF(a.pay_type='CASH',a.tnpay,0.00),0.00))
+		cash2,
+		sum(IF(a.freight_type=1,IF(a.pay_type='MONTH',a.tnpay,0.00),0.00))
+		month2,
+		sum(IF(a.freight_type=1,IF(a.pay_type='HUIYUAN',a.tnpay,0.00),0.00))
+		huiyuan2,
+		sum(a.tnpay) tnpay
+		from
+		order_info a
+		WHERE
+		 a.take_order_time  between #{nowTime} and concat(#{nowTime},' 23:59:59') 
+		AND
+		a.status=3
+		group by
+		a.take_courier_no
+		) d
+		RIGHT JOIN
+		courier f
+		ON
+		f.courier_no=d.takeCourierNo) h
+		ON g.sendCourierNo=h.takeCourierNo
+		) m
+		,courier l, substation k where m.courierNo = l.courier_no AND
+		l.substation_no =k.substation_no 
+	</select>
+
+	<insert id="save" parameterType="java.util.Map"
+		useGeneratedKeys="true" keyColumn="id">
+		insert into
+		courier_day_static(
+		substation_no,
+		substation_name,
+		courier_no,
+		courier_name,
+		rev_count,
+		send_count,
+		fcount,
+		mcount,
+		ccount,
+		hcount,
+		acount,
+		cash_count,
+		static_date,
+		create_time
+		)VALUES(
+		#{substationNo},
+		#{substationName},
+		#{courierNo},
+		#{realName},
+		#{takeCount},
+		#{sendCount},
+		#{cash},
+		#{month},
+		#{goodPrice},
+		#{huiyuan},
+		#{ssnpay},
+		#{sumCash},
+		#{staticDate},
+		#{createTime}
+		)
+	</insert>
+<delete id="delete">
+		delete from courier_day_static where substr(static_date,1,10) = #{nowTime}
+
+</delete>
+</mapper>

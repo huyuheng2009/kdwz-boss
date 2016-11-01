@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="AppProduct">  
+
+    <resultMap type="AppProduct" id="AppProduct">
+		<id property="id" column="id" jdbcType="INTEGER"/> 
+		<result property="appCode"  column="app_code" />
+		<result property="appName"  column="app_name" />
+		<result property="status"  column="status" />
+	   <result property="bname"  column="bname" />
+	</resultMap>
+
+	<select id="list" resultMap="AppProduct">
+		select * from app_product
+		<where>
+	    1=1
+	      <if test="appCode != null and appCode !=''"> and app_code=#{appCode}</if>
+	      <if test="appName != null and appName !=''"> and app_name=#{appName}</if>
+	       <if test="status != null and status !=''"> and status=#{status}</if>
+			order by id desc
+		</where>
+	</select>
+	
+	 <select id="getById" resultMap="AppProduct" parameterType="java.lang.Integer">  
+        select * from app_product
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+     <select id="getByAppCode" resultMap="AppProduct" parameterType="java.lang.Integer">  
+        select * from app_product
+        <where>
+			app_code= #{appCode}
+		</where>
+    </select>
+
+    <insert id="insert" parameterType="AppProduct" useGeneratedKeys="true" keyColumn="id">
+    	insert into app_product(app_code,app_name,status,bname) values (#{appCode},#{appName},#{status},#{bname})
+    </insert>
+    
+     	<update id="status" parameterType="AppProduct"  useGeneratedKeys="true" keyColumn="id">
+		update app_product set status=#{status}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+    
+    	<update id="update" parameterType="AppProduct"  useGeneratedKeys="true" keyColumn="id">
+		update app_product set app_code=app_code
+		 <if test="appName != null and appName !=''">,app_name=#{appName}</if>
+	       <if test="status != null and status !=''">,status=#{status}</if>
+	        <if test="bname != null and bname !=''">,bname=#{bname}</if>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	<delete id="delById" parameterType="Integer">
+		delete from app_product
+		<where>
+			id=#{id}
+		</where>
+	</delete>
+  <select id="getByCode" resultMap="AppProduct">  
+        select * from app_product
+        <where>
+			app_code= #{appCode}
+		</where>
+   </select>   
+   
+</mapper>

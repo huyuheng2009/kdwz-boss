@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="DisUserBalance">  
+	<resultMap type="DisUserBalance" id="DisUserBalance">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="uid"  column="uid" />
+		<result property="balance"  column="balance" />
+		<result property="lastUpdateTime"  column="last_update_time" />
+	</resultMap>
+
+    <select id="getById" resultMap="DisUserBalance" parameterType="java.lang.Integer">  
+        select * from dis_user_balance
+        <where>
+			id= #{id}
+		</where>
+    </select>
+  
+      <select id="getByUid" resultMap="DisUserBalance" parameterType="java.lang.Integer">  
+        select * from dis_user_balance
+        <where>
+			uid= #{uid}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="DisUserBalance"  useGeneratedKeys="true" keyColumn="id">
+    	insert into dis_user_balance(uid,balance,last_update_time) values (#{uid},#{balance},#{lastUpdateTime})
+    </insert>
+    
+    <update id="update" parameterType="DisUserBalance"  useGeneratedKeys="true" keyColumn="id">
+    	update dis_user_balance set balance=balance+#{balance},last_update_time=#{lastUpdateTime}
+    	<where>
+    		uid=#{uid}
+    	</where>
+    </update>
+    
+       <update id="sub" parameterType="DisUserBalance"  useGeneratedKeys="true" keyColumn="id">
+    	update dis_user_balance set balance=balance-#{balance},last_update_time=#{lastUpdateTime}
+    	<where>
+    		uid=#{uid}
+    	</where>
+    </update>
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from dis_user_balance where id=#{id}
+    </delete>
+    
+</mapper>

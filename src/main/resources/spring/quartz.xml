@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"
+	default-lazy-init="false">
+
+	<description>quartz Configuration</description>
+
+	<!-- 配置执行定时任务的类和方法 -->
+		<!--快递员每日收派件统计 -->
+	<bean id="courierDayStaticReport" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<bean class="com.yogapay.boss.service.AutoService"></bean>
+		</property>
+		<property name="targetMethod">
+			<value>courierDayStatic</value>
+		</property>
+	</bean>
+	<!-- 配置触发器 -->
+	<!--快递员每日收派件统计 -->
+	<bean id="courierDayStaticReportTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="courierDayStaticReport" /> <!-- 触发器触发的 执行定时任务的bean -->
+		</property>
+		<property name="cronExpression">
+			<!-- 定时任务执行的间隔 -->
+			<value>0 0 23 * * ?</value><!--     每天的23点30触发   -->
+			  <!--     <value > 0 55 23 12 31 ? * </value >     每年12月31号的23点55分触发  --> 
+		</property>
+	</bean>	
+	
+	
+	<!-- 配置执行定时任务的类和方法 -->
+		<!--月结用户月报 -->
+	<bean id="monthUserStaticReport" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<bean class="com.yogapay.boss.service.AutoService"></bean>
+		</property>
+		<property name="targetMethod">
+			<value>monthSettleMonthReport</value>
+		</property>
+	</bean>
+	
+	
+	<!-- 配置触发器 -->
+	<!--月结客户明细汇总表定时时任务-->
+	<bean id="monthUserStaticReportTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="monthUserStaticReport" /> <!-- 触发器触发的 执行定时任务的bean -->
+		</property>
+		<property name="cronExpression">
+			<!-- 定时任务执行的间隔 -->
+			<value>0 30 22 L * ? </value><!--     每个月最后一天的23点30触发   --> 
+		</property>
+	</bean>	
+	
+
+
+
+	
+	
+		<!-- 代收用户月报 -->
+	<bean id="codMonthReport" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<bean class="com.yogapay.boss.service.AutoService"></bean>
+		</property>
+		<property name="targetMethod">
+			<value>codMonthReport</value>
+		</property>
+	</bean>
+	<bean id="codMonthReportTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="codMonthReport" /> <!-- 触发器触发的 执行定时任务的bean -->
+		</property>
+		<property name="cronExpression">
+			<!-- 定时任务执行的间隔 -->
+		<!-- 	<value>0 */5 * * * ?</value>  -->
+		<value>0 0 1 1 * ?</value> 
+		</property>
+	</bean>	
+	<!-- ======================== 调度工厂 ======================== -->
+	<bean id="SpringJobSchedulerFactoryBean"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<!--必须，QuartzScheduler 延时启动，应用启动后 QuartzScheduler 再启动 -->
+		<property name="startupDelay" value="10" />
+		<property name="triggers">
+			<list>
+<!-- 			<ref bean="courierDayStaticReportTrigger" /> -->
+			<!-- <ref bean="monthUserStaticReportTrigger" />-->
+			<ref bean="codMonthReportTrigger" />
+			</list>
+		</property>
+		<property name="quartzProperties">
+			<props>
+				<prop key="org.quartz.scheduler.skipUpdateCheck">true</prop>
+			</props>
+		</property>
+	</bean>
+</beans>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SystemPunish">  
+	
+	<resultMap type="SystemPunish" id="SystemPunish">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="punishText"  column="punish_text"  jdbcType="VARCHAR"/>
+			<result property="ruleText"  column="rule_text"  jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from system_punish
+        <where>
+			1=1
+		</where>
+		order by id desc
+    </select>
+    
+    <insert id="insert" parameterType="SystemPunish"  useGeneratedKeys="true" keyColumn="id">
+    	insert into system_punish(punish_text,rule_text) values (#{punishText},#{ruleText})
+    </insert>
+    
+    <update id="update" parameterType="SystemPunish"  useGeneratedKeys="true" keyColumn="id">
+    	update system_punish set punish_text=#{punishText},rule_text=#{ruleText}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+        <select id="getById" resultMap="SystemPunish" parameterType="java.lang.Integer">  
+        select * from system_punish
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from system_punish where id=#{id}
+    </delete>
+
+</mapper>

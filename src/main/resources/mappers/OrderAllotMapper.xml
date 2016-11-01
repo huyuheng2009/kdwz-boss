@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderAllot">
+
+
+	<select id="getOrderList" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select
+		id,managerInfo,registerTime,substationNo,substationName,beginOrder,endOrder,
+		number,userdCount,residueCount,unitCost,cost,registerName,note,status,IF(userdCount>0,'N','Y')
+		ISDelete from order_manager o
+		where 1 = 1
+		<if test="beginTime!=null and beginTime !=''">
+			AND o.registerTime >=#{beginTime}
+		</if>
+		<if test="endTime!=null and endTime !=''">
+			AND #{endTime} >=o.registerTime
+		</if>
+		<if test="orderNo!=null and orderNo!=''">
+			AND ( ${orderNo} between o.beginOrder and o.endOrder)
+		</if>
+		<if test="substationNo!=null and substationNo!=''">
+			AND #{substationNo}=substationNo
+
+		</if>
+		<if test="courierNo!=null and courierNo!=''">
+			AND #{courierNo}= registerName
+		</if>
+
+	</select>
+
+
+	<select id="checkOrderPage" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select * from order_manager o where
+		(${beginOrder} between o.beginOrder and o.endOrder)
+		or
+		(${endOrder} between o.beginOrder and o.endOrder)
+	</select>
+
+	<insert id="saveOrderPage" parameterType="java.util.HashMap">
+		insert into order_manager(
+		managerInfo,
+		registerTime,
+		substationNo,
+		substationName,
+		beginOrder,
+		endOrder,
+		number,
+		userdCount,
+		residueCount,
+		unitCost,
+		cost,
+		registerName,
+		note,
+		status
+		)values(
+		#{managerInfo},
+		#{registerTime},
+		#{substationNo},
+		#{substationName},
+		#{beginOrder},
+		#{endOrder},
+		#{number},
+		'0',
+		#{number},
+		#{unitCost},
+		#{cost},
+		#{registerName},
+		#{orderNote},
+		#{status}
+		)
+	</insert>
+
+	<select id="getAllotDetailList" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select * from order_manager_detail
+		where manager_id = #{id}
+		<if test="beginTime!=null and beginTime!=''">
+			AND SUBSTR(registerTime,1,10) >=#{beginTime}
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			AND #{endTime}>=SUBSTR(registerTime,1,10)
+		</if>
+		<if test="courierNo!=null and courierNo!=''">
+			AND #{courierNo}= courierNo
+		</if>
+		<if test="substationNo!=null and substationNo!=''">
+			AND #{substationNo}= substationNo
+		</if>
+		<if test="orderNo!=null and orderNo!=''">
+			AND #{orderNo}= orderNo
+		</if>
+	</select>
+	<update id="stopAllotOrder" parameterType="java.lang.String">
+		update order_manager set `status` = 'N'
+		where id =#{id}
+	</update>
+	<update id="startAllotOrder" parameterType="java.lang.String">
+		update order_manager set `status` = 'Y'
+		where id =#{id}
+	</update>
+
+	<delete id="deleteOrder" parameterType="java.lang.String">
+	delete from order_manager  where id = #{id}
+	</delete>
+
+
+
+
+
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MatterType">  
+	<resultMap type="MatterType" id="MatterType">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="lgcNo"  column="lgc_no"  jdbcType="VARCHAR"/>
+		<result property="typeName"  column="type_name" />
+	</resultMap>
+
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from matter_type
+        <where>
+			1=1
+		<if test="lgcNo!=null and lgcNo!=''">
+			and lgc_no in (0,${lgcNo})
+		</if>
+		<if test="lgcNo==null or lgcNo==''">
+			and 1=2
+		</if>
+		</where>
+		order by id desc
+    </select>
+    
+    <select id="getById" resultMap="MatterType" parameterType="java.lang.Integer">  
+        select * from matter_type
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+       <select id="getByName" resultMap="MatterType">  
+        select * from matter_type
+        <where>
+			lgc_no= #{lgcNo} and type_name=#{name}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="MatterType"  useGeneratedKeys="true" keyProperty="id"  keyColumn="id">
+    	insert into matter_type(lgc_no,type_name) values (#{lgcNo},#{typeName})
+    </insert>
+ 
+
+    <delete id="delById" parameterType="Integer">
+    	delete from matter_type where id=#{id}
+    </delete>
+    
+</mapper>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Salary">
+	<select id="maxId" resultType="java.lang.String">
+		select max(id) id from cost_name
+	</select>
+	<select id="getAddMap" parameterType="java.util.Map" resultType="java.util.Map">
+		select * from cost_name o where o.cn_name=#{cnName} and o.cost_io
+		=#{costIo}
+	</select>
+	<insert id="insertAdd1" parameterType="java.util.Map">
+		insert into
+		cost_name(name,cn_name,cost_io)values(#{id},#{cnName},#{costIo})
+	</insert>
+	<select id="checkId" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select * from cost_name o where o.id=#{value}
+	</select>
+	<delete id="deleteById" parameterType="java.lang.String">
+		delete from cost_name
+		where id =#{value}
+	</delete>
+	<update id="updateSalaryInfo" parameterType="java.util.Map">
+		update cost_name set
+		cn_name=#{message}
+		where id =#{id}
+	</update>
+	<select id="getccList" parameterType="java.util.Map" resultType="java.util.Map">
+
+		select * from (
+		select a.*,
+		IFNULL(b.take_tcf,0) takeTcf,
+		IFNULL(b.take_tcw,0) takeTcw,
+		IFNULL(b.take_tcc,0) takeTcc,
+		IFNULL(b.send_tcf,0)sendTcf,
+		IFNULL(b.send_tcw,0) sendTcw,
+		IFNULL(b.send_tcc,0) sendTcc,
+		IFNULL(b.for_tcf,0) forTcf,
+		IFNULL(b.for_tcw,0) forTcw,
+		IFNULL(b.for_tcc,0) forTcc,
+		IFNULL(b.create_time,0) createTime
+		from
+		(select s.substation_name substationName,s.substation_no
+		substationNo,c.inner_no innerNo,c.real_name
+		realName,c.courier_no
+		courierNo,
+		c.phone from courier c left join
+		substation s
+		on
+		c.substation_no = s.substation_no where c.`status` = '1' ) a left join
+		courier_tc b
+		on a.courierNo = b.courier_no
+		) d where 1=1
+		<if test="substationNo!=null and substationNo!=''">
+			and d.substationNo =#{substationNo}
+		</if>
+		<if test="courierNo!=null and courierNo!=''">
+			and d.realName =#{courierNo}
+		</if>
+		<if test="orderBy==null or orderBy==''">order by d.createTime desc </if>
+		<if test="orderBy!=null and orderBy==1">order by d.innerNo desc </if>
+		<if test="orderBy!=null and orderBy==2">order by d.innerNo asc </if>
+		<if test="orderBy!=null and orderBy==3">order by d.substationName desc </if>
+		<if test="orderBy!=null and orderBy==4">order by d.substationName asc </if>
+
+	</select>
+	<select id="getCourierInfo" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select a.*,
+		IFNULL(b.take_tcf,0) takeTcf,
+		IFNULL(b.take_tcw,0) takeTcw,
+		IFNULL(b.take_tcc,0) takeTcc,
+		IFNULL(b.send_tcf,0)sendTcf,
+		IFNULL(b.send_tcw,0) sendTcw,
+		IFNULL(b.send_tcc,0) sendTcc,
+		IFNULL(b.for_tcf,0) forTcf,
+		IFNULL(b.for_tcw,0) forTcw,
+		IFNULL(b.for_tcc,0) forTcc
+		from
+		(select s.substation_name
+		substationName,c.inner_no innerNo,c.real_name
+		realName,c.courier_no
+		courierNo,
+		c.phone from courier c left join
+		substation s
+		on
+		c.substation_no = s.substation_no where c.`status` = '1' and
+		c.courier_no =#{value}) a left join
+		courier_tc b
+		on a.courierNo =
+		b.courier_no
+		order by b.create_time desc
+
+	</select>
+	<select id="checkCourierNo" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select * from courier_tc where courier_no =#{value}
+	</select>
+	<insert id="insertCourierTc" parameterType="java.util.Map">
+		insert into
+		courier_tc(courier_no,take_tcf,take_tcw,take_tcc,send_tcf,send_tcw,send_tcc,for_tcf,for_tcw,for_tcc,operator,create_time)
+		values(#{courierNo},#{takeTcf},#{takeTcw},#{takeTcc},#{sendTcf},#{sendTcw},#{sendTcc},#{forTcf},#{forTcw},#{forTcc},#{operator},now())
+	</insert>
+	<update id="updateCourierTc" parameterType="java.util.Map">
+		update courier_tc
+		set take_tcf = #{takeTcf},
+		take_tcw=#{takeTcw},
+		take_tcc=#{takeTcc},
+		send_tcf=#{sendTcf},
+		send_tcw=#{sendTcw},
+		send_tcc=#{sendTcc},
+		for_tcf=#{forTcf},
+		for_tcw=#{forTcw},
+		for_tcc=#{forTcc},
+		operator=#{operator},
+		create_time= now()
+		where courier_no = #{courierNo}
+
+	</update>
+	<insert id="insertTcRecord" parameterType="java.util.Map">
+		insert into
+		courier_tc_record(courier_no,take_tcf,take_tcw,take_tcc,send_tcf,send_tcw,send_tcc,for_tcf,for_tcw,for_tcc,operator,create_time)
+		values(#{courierNo},#{takeTcf},#{takeTcw},#{takeTcc},#{sendTcf},#{sendTcw},#{sendTcc},#{forTcf},#{forTcw},#{forTcc},#{operator},now())
+
+	</insert>
+	<select id="getCourierInfoRecord" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select * from (
+		select b.*,c.inner_no innerNo,c.real_name realName,c.substation_no
+		substationNo ,s.substation_name substationName,c.phone
+		from courier_tc_record b
+		left join courier c on b.courier_no = c.courier_no
+		left join substation s on c.substation_no = s.substation_no ) d where 1=1
+		<if test="substationNo!=null and substationNo!=''">
+			and d.substationNo =#{substationNo}
+		</if>
+		<if test="courierNo!=null and courierNo!=''">
+			and d.realName =#{courierNo}
+		</if>
+		<if test="orderBy==null or orderBy==''">order by d.create_time desc </if>
+		<if test="orderBy!=null and orderBy==1">order by d.innerNo desc </if>
+		<if test="orderBy!=null and orderBy==2">order by d.innerNo asc </if>
+		<if test="orderBy!=null and orderBy==3">order by d.substationName desc </if>
+		<if test="orderBy!=null and orderBy==4">order by d.substationName asc </if>
+
+
+	</select>
+</mapper>

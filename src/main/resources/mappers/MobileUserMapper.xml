@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MobileUser">
+
+	<select id="list" resultType="java.util.HashMap">
+		select u.id,u.user_no,u.user_name,u.real_name,u.id_card,u.phone,
+		u.jifen,u.head_image,u.regist_time,u.`status`,u.queue_name
+		from user u where 1=1
+		<if test="userNo != null and userNo !=''"> and u.user_no=#{userNo}</if>
+		<if test="phone != null and phone !=''"> and u.phone=#{phone}</if>
+		<if test="createTimeBegin != null and createTimeBegin !=''"> and u.regist_time&gt;=#{createTimeBegin}</if>
+		<if test="createTimeEnd != null and createTimeEnd !=''"> and u.regist_time&lt;=#{createTimeEnd}</if>
+		<if test="status != null and status !=''"> and u.`status`=#{status}</if>
+		order by u.id desc
+	</select>
+
+	<update id="updateUser" parameterType="com.yogapay.boss.domain.User">
+		update user set user_no=user_no
+		<if test="userName != null and userName !=''">,user_name=#{userName}</if>
+		<if test="passWord != null and passWord !=''">,pass_word=#{passWord}</if>
+		<if test="realName != null and realName !=''">,real_name=#{realName}</if>
+		<if test="idCard != null and idCard !=''">,id_card=#{idCard}</if>
+		<if test="phone != null and phone !=''">,phone=#{phone}</if>
+		<if test="headImage != null and headImage !=''">,head_image=#{headImage}</if>
+		where id=#{id}
+	</update>
+
+	<update id="status" parameterType="com.yogapay.boss.domain.User">
+		update user set status=#{status} where id=#{id}
+	</update>
+
+	<select id="muserList" resultType="java.util.HashMap">
+		select * from month_settle_user where 1=1
+		<if test="monthSettleNo != null and monthSettleNo !=''"> and month_settle_no=#{monthSettleNo}</if>
+		<if test="monthName != null and monthName !=''"> and month_sname=#{monthName}</if>
+		<if test="substationNo != null and substationNo != ''"> and (substation_no in (0,${substationNo}) or LENGTH(IFNULL(substation_no,''))=0) </if>
+		<!--  <if test="substationNo == null or substationNo 
+			== ''"> and 1=2 </if> -->
+		<if test="createTimeBegin != null and createTimeBegin !=''"> and create_time&gt;=#{createTimeBegin}</if>
+		<if test="createTimeEnd != null and createTimeEnd !=''"> and create_time&lt;=#{createTimeEnd}</if>
+		<if test="hts != null and hts eq 'UU'"> and (ht_date_end&gt;=curdate() or ht_date_end is null)</if>
+		<if test="hts != null and hts eq 'EE'"> and ht_date_end&lt;curdate()</if>
+		<!-- <if test="substationNo != null and substationNo !=''"> and substation_no 
+			in (${substationNo}) </if> <if test="substationNo == null or substationNo 
+			==''"> and 1=2 </if> -->
+		order by id desc
+	</select>
+
+
+	<select id="getMuserById" resultType="java.util.HashMap"
+		parameterType="java.lang.Integer">
+		select * from month_settle_user
+		<where>
+			id= #{id}
+		</where>
+	</select>
+
+	<select id="getMuserByNo" resultType="java.util.HashMap">
+		select * from month_settle_user
+		<where>
+			month_settle_no= #{monthSettleNo}
+		</where>
+	</select>
+
+	<select id="getMuserByMonthNo" resultType="java.util.HashMap">
+		select * from month_settle_user
+		<where>
+			month_no= #{monthNo}
+		</where>
+	</select>
+
+	<insert id="saveMuser" parameterType="Muser" useGeneratedKeys="true"
+		keyColumn="id">
+		insert into
+		month_settle_user(user_no,pwd,substation_no,month_no,month_settle_no,month_name,contact_name,contact_phone,biz_lic,id_card,settle_type,settle_bank,settle_card_no,settle_date,email,create_time,note,
+		month_sname,contact_addr,settle_phone,courier_no,mark_name,liced,mstype,no_pre,no_fix,ht_date_begin,ht_date_end,file1,file2)
+		values (
+		#{userNo},#{pwd},#{substationNo},#{monthNo},#{monthSettleNo},#{monthName},#{contactName},#{contactPhone},#{bizLic},#{idCard},#{settleType},#{settleBank},#{settleCardNo},#{settleDate},#{email},#{createTime},#{note},
+		#{monthSname},#{contactAddr},#{settlePhone},#{courierNo},#{markName},#{liced},#{mstype},#{noPre},#{noFix},#{htDateBegin},#{htDateEnd},#{file1},#{file2})
+	</insert>
+	<update id="uMuser" parameterType="Muser" useGeneratedKeys="true"
+		keyColumn="id">
+		update month_settle_user set
+		month_settle_no=#{monthSettleNo},month_name=#{monthName},contact_name=#{contactName},contact_phone=#{contactPhone},biz_lic=#{bizLic},id_card=#{idCard},settle_type=#{settleType},
+		settle_bank=#{settleBank},settle_card_no=#{settleCardNo},settle_date=#{settleDate},email=#{email},substation_no=#{substationNo},note=#{note},ht_date_begin=#{htDateBegin},ht_date_end=#{htDateEnd},
+		month_sname=#{monthSname},contact_addr=#{contactAddr},settle_phone=#{settlePhone},courier_no=#{courierNo},mark_name=#{markName},liced=#{liced},mstype=#{mstype}
+		<if test="file1 != null and file1 !=''">,file1=#{file1}</if>
+		<if test="file2 != null and file2 !=''">,file2=#{file2}</if>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+
+	<update id="resetMuser" parameterType="Muser" useGeneratedKeys="true"
+		keyColumn="id">
+		update month_settle_user set pwd=#{pwd}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+
+	<delete id="delMuserById" parameterType="Integer">
+		delete from month_settle_user where id=#{id}
+	</delete>
+
+	<!-- <insert id="insertUser" parameterType="User" useGeneratedKeys="true" 
+		keyColumn="id"> insert into t_user(name, age) values(#{name}, #{age}) </insert> 
+		<update id="updateUser" parameterType="User"> update t_user set name=#{name}, 
+		age=#{age} where id=#{id} </update> <select id="findById" parameterType="int" 
+		resultType="User"> select * from t_user where id=#{id} </select> <delete 
+		id="deleteUser" parameterType="int"> delete from t_user where id=#{id} </delete> -->
+	<select id="getMonthList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select a.*
+		from
+		(
+		(select
+		b.email,
+		b.month_settle_no monthSettleNo ,
+		b.month_sname contactName,
+		a.lgc_order_no lgcOrderNo,
+		a.take_order_time takeOrderTime,
+		a.send_name sendName,
+		a.item_weight itemWeight,
+		concat(a.rev_area,a.rev_addr) revArea,
+		a.send_order_time completeTime,
+		a.sign_type revName,
+		c.real_name realName1,
+		d.real_name realName2,
+		b.mstype ,
+		e.discount,
+		if(a.freight_type=1,a.freight+a.vpay,0) takeMoney,
+		if(a.freight_type=2,a.freight+a.vpay,0) sendMoney,
+		if(isnull(a.freight+a.vpay),0.00,a.freight+a.vpay) mpay,
+		round(((100-e.discount)*a.freight/100),2)   remainderMoney,
+		round((e.discount*a.freight/100+a.vpay),2 ) discountMoney,
+		a.month_note
+		monthNote,
+		a.is_email isEmail
+		from
+		order_info a
+		right join
+		month_settle_user b
+		on a.month_settle_no = b.month_settle_no
+		left join
+		month_settle_type e on b.mstype = e.id
+		left join courier c on a.take_courier_no =c.courier_no
+		left join courier d on a.send_courier_no=d.courier_no
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="isEmail=='有邮箱'">
+				and length(b.email) >0
+			</if>
+			<if test="isEmail=='无邮箱'">
+				and length(b.email) =0
+			</if>
+			<if test="1==1">
+				AND a.pay_type = 'MONTH' AND a.status =3 
+          <if test="reportExam != null and reportExam eq 'YY'">a.sign_examine_status = 'PASS' </if>
+				 AND a.freight_type = 2
+
+			</if>
+<!-- 			<if test="beginTime!=null and beginTime!=''"> -->
+<!-- 				AND substr(a.take_order_time,1,10)>=#{beginTime} -->
+<!-- 			</if> -->
+<!-- 			<if test="endTime!=null  and endTime!='' "> -->
+<!-- 				AND #{endTime} >=substr(a.take_order_time,1,10) -->
+<!-- 			</if> -->
+			<if test="sendOrderBeginTime!=null and sendOrderBeginTime!=''">
+				AND a.send_order_time>=#{sendOrderBeginTime}
+			</if>
+			<if test="sendOrderEndTime!=null  and sendOrderEndTime!='' ">
+				AND concat(#{sendOrderEndTime},' 23:59:59') >=a.send_order_time
+			</if>
+			<if test="sendNo!=null  and sendNo!='' ">
+				AND (a.send_courier_no=#{sendNo} or d.inner_no  = #{sendNo}  or d.real_name =  #{sendNo} )
+			</if>
+			<if test="revNo!=null and revNo!='' ">
+				AND  (a.take_courier_no=#{revNo}  or c.inner_no  = #{revNo}  or c.real_name =  #{revNo} )
+			</if>
+			<!-- <if test="beginTime!=null and beginTime!=''"> AND substr(a.complete_time,1,10)>=#{beginTime} 
+				</if> <if test="endTime!=null and endTime!='' "> AND #{endTime} >=substr(a.complete_time,1,10) 
+				</if> -->
+			<if test="monthSettleNo!=null and monthSettleNo!=''">
+				AND b.month_settle_no = #{monthSettleNo}
+			</if>
+			<if test="orderLgc!=null  and orderLgc!=''">
+				AND a.lgc_order_no =#{orderLgc}
+			</if>
+			<if test="substationNo != null and substationNo !=''"> and (b.substation_no in (${substationNo}) or
+				b.substation_no is null)</if>
+		</trim>
+
+		) Union
+
+		(select
+		b.email,
+		b.month_settle_no monthSettleNo ,
+		b.month_sname contactName,
+		a.lgc_order_no lgcOrderNo,
+		a.take_order_time takeOrderTime,
+		a.send_name sendName,
+		a.item_weight itemWeight,
+		concat(a.rev_area,a.rev_addr) revArea,
+		a.send_order_time completeTime,
+		a.sign_type revName,
+		c.real_name realName1,
+		d.real_name realName2,
+		b.mstype ,
+		e.discount,
+		if(a.freight_type=1,a.freight+a.vpay,0) takeMoney,
+		if(a.freight_type=2,a.freight+a.vpay,0) sendMoney,
+		if(isnull(a.freight+a.vpay),0.00,a.freight+a.vpay) mpay,
+		round(((100-e.discount)*a.freight/100),2)   remainderMoney,
+		round((e.discount*a.freight/100+a.vpay),2 ) discountMoney,	
+		a.month_note	monthNote,
+		a.is_email isEmail
+		from
+		order_info a
+		right join
+		month_settle_user b
+		on a.month_settle_no = b.month_settle_no
+		left join
+		month_settle_type e on b.mstype = e.id
+		left join courier c on a.take_courier_no =c.courier_no
+		left join courier d on a.send_courier_no=d.courier_no
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="isEmail=='有邮箱'">
+				and length(b.email) >0
+			</if>
+			<if test="isEmail=='无邮箱'">
+				and length(b.email) =0
+			</if>
+			<if test="1==1">
+				AND a.pay_type = 'MONTH' AND a.status not in (1,9) 
+          <if test="reportExam != null and reportExam eq 'YY'">a.examine_status = 'PASS' </if>
+				 AND a.freight_type = 1
+			</if>
+			<if test="beginTime!=null and beginTime!=''">
+				AND a.take_order_time>=#{beginTime}
+			</if>
+			<if test="endTime!=null  and endTime!='' ">
+				AND concat(#{endTime},' 23:59:59') >=a.take_order_time
+			</if>
+<!-- 			<if test="sendOrderBeginTime!=null and sendOrderBeginTime!=''"> -->
+<!-- 				AND substr(a.send_order_time,1,10)>=#{sendOrderBeginTime} -->
+<!-- 			</if> -->
+<!-- 			<if test="sendOrderEndTime!=null  and sendOrderEndTime!='' "> -->
+<!-- 				AND #{sendOrderEndTime} >=substr(a.send_order_time,1,10) -->
+<!-- 			</if> -->
+			<if test="sendNo!=null  and sendNo!='' ">
+				AND (a.send_courier_no=#{sendNo} or d.inner_no  = #{sendNo}  or d.real_name =  #{sendNo} )
+			</if>
+			<if test="revNo!=null and revNo!='' ">
+				AND (a.take_courier_no=#{revNo}  or c.inner_no  = #{revNo}  or c.real_name =  #{revNo} )
+			</if>
+			<!-- <if test="beginTime!=null and beginTime!=''"> AND substr(a.complete_time,1,10)>=#{beginTime} 
+				</if> <if test="endTime!=null and endTime!='' "> AND #{endTime} >=substr(a.complete_time,1,10) 
+				</if> -->
+			<if test="monthSettleNo!=null and monthSettleNo!=''">
+				AND b.month_settle_no = #{monthSettleNo}
+			</if>
+			<if test="orderLgc!=null  and orderLgc!=''">
+				AND a.lgc_order_no =#{orderLgc}
+			</if>
+			<if test="substationNo != null and substationNo !=''"> and (b.substation_no in (${substationNo}) or
+				b.substation_no is null)</if>
+		</trim>
+		)
+		) a
+
+	</select>
+<select id="getMonthListForTake" resultType="java.util.Map"	parameterType="java.util.Map">
+	select
+		b.email,
+		b.month_settle_no monthSettleNo ,
+		b.month_sname contactName,
+		a.lgc_order_no lgcOrderNo,
+		date_format(a.take_order_time,'%Y-%m-%d') takeOrderTime,
+		a.send_name sendName,
+		a.item_weight itemWeight,
+		s.substation_name revArea,
+		date_format(a.send_order_time,'%Y-%m-%d') completeTime,
+		a.sign_type revName,
+		c.real_name realName1,
+		d.real_name realName2,
+		b.mstype ,
+		e.discount,
+		if(a.freight_type=1,a.freight+a.vpay,0) takeMoney,
+		if(a.freight_type=2,a.freight+a.vpay,0) sendMoney,
+		if(isnull(a.freight+a.vpay),0.00,a.freight+a.vpay) mpay,
+		round(((100-e.discount)*a.freight/100),2)   remainderMoney,
+		round((e.discount*a.freight/100+a.vpay),2 ) discountMoney,	
+		a.month_note	monthNote,
+		a.is_email isEmail,
+		a.take_plane take_plane,
+		a.send_plane send_plane 
+		from
+		order_info a
+		right join	month_settle_user b 	on a.month_settle_no = b.month_settle_no
+		left join 	month_settle_type e on b.mstype = e.id
+		left join courier c on a.take_courier_no =c.courier_no
+		left join courier d on a.send_courier_no=d.courier_no
+		left join substation s on s.substation_no = a.send_substation_no
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="1==1">
+				AND a.pay_type = 'MONTH' AND a.status not in (1,9) 
+				 <if test="reportExam != null and reportExam eq 'YY'">
+                          and a.examine_status ='PASS' 
+                 </if>  and a.zid!=1			
+			</if>
+			<if test="beginTime!=null and beginTime!=''">
+				AND a.take_order_time>=#{beginTime}
+			</if>
+			<if test="endTime!=null  and endTime!='' ">
+				AND concat(#{endTime},' 23:59:59') >=a.take_order_time
+			</if>
+<!-- 			<if test="sendOrderBeginTime!=null and sendOrderBeginTime!=''"> -->
+<!-- 				AND substr(a.send_order_time,1,10)>=#{sendOrderBeginTime} -->
+<!-- 			</if> -->
+<!-- 			<if test="sendOrderEndTime!=null  and sendOrderEndTime!='' "> -->
+<!-- 				AND #{sendOrderEndTime} >=substr(a.send_order_time,1,10) -->
+<!-- 			</if> -->
+			<if test="sendNo!=null  and sendNo!='' ">
+				AND (a.send_courier_no=#{sendNo} or d.inner_no  = #{sendNo}  or d.real_name =  #{sendNo} )
+			</if>
+			<if test="revNo!=null and revNo!='' ">
+				AND (a.take_courier_no=#{revNo}  or c.inner_no  = #{revNo}  or c.real_name =  #{revNo} )
+			</if>
+			<!-- <if test="beginTime!=null and beginTime!=''"> AND substr(a.complete_time,1,10)>=#{beginTime} 
+				</if> <if test="endTime!=null and endTime!='' "> AND #{endTime} >=substr(a.complete_time,1,10) 
+				</if> -->
+			<if test="monthSettleNo!=null and monthSettleNo!=''">
+				AND b.month_settle_no = #{monthSettleNo}
+			</if>
+			<if test="orderLgc!=null  and orderLgc!=''">
+				AND a.lgc_order_no =#{orderLgc}
+			</if>
+			<if test="substationNo != null and substationNo !=''"> and (b.substation_no in (${substationNo}) or
+				b.substation_no is null)</if>
+		</trim>
+	</select>
+	<select id="getMonthListForSend" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		b.email,
+		b.month_settle_no monthSettleNo ,
+		b.month_sname contactName,
+		a.lgc_order_no lgcOrderNo,
+		date_format(a.take_order_time,'%Y-%m-%d') takeOrderTime,
+		a.send_name sendName,
+		a.item_weight itemWeight,
+		s.substation_name revArea,
+		date_format(a.send_order_time,'%Y-%m-%d') completeTime,
+		a.sign_type revName,
+		c.real_name realName1,
+		d.real_name realName2,
+		b.mstype ,
+		e.discount,
+		if(a.freight_type=1,a.freight+a.vpay,0) takeMoney,
+		if(a.freight_type=2,a.freight+a.vpay,0) sendMoney,
+		if(isnull(a.freight+a.vpay),0.00,a.freight+a.vpay) mpay,
+		round(((100-e.discount)*a.freight/100),2)   remainderMoney,
+		round((e.discount*a.freight/100+a.vpay),2 ) discountMoney,
+		a.month_note
+		monthNote,
+		a.is_email isEmail,
+		a.take_plane take_plane,
+		a.send_plane send_plane 
+		from
+		order_info a
+		right join
+		month_settle_user b
+		on a.month_settle_no = b.month_settle_no
+		left join
+		month_settle_type e on b.mstype = e.id
+		left join courier c on a.take_courier_no =c.courier_no
+		left join courier d on a.send_courier_no=d.courier_no
+		left join substation s on s.substation_no = a.send_substation_no
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="1==1">
+				AND a.pay_type = 'MONTH' AND a.status =3
+				<if test="reportExam != null and reportExam eq 'YY'">
+                          and a.sign_examine_status ='PASS' 
+                 </if>  AND a.zid!=1			 
+			</if>
+<!-- 			<if test="beginTime!=null and beginTime!=''"> -->
+<!-- 				AND substr(a.take_order_time,1,10)>=#{beginTime} -->
+<!-- 			</if> -->
+<!-- 			<if test="endTime!=null  and endTime!='' "> -->
+<!-- 				AND #{endTime} >=substr(a.take_order_time,1,10) -->
+<!-- 			</if> -->
+			<if test="sendOrderBeginTime!=null and sendOrderBeginTime!=''">
+				AND a.send_order_time>#{sendOrderBeginTime}
+			</if>
+			<if test="sendOrderEndTime!=null  and sendOrderEndTime!='' ">
+				AND concat(#{sendOrderEndTime},' 23:59:59') >=a.send_order_time
+			</if>
+			<if test="sendNo!=null  and sendNo!='' ">
+				AND (a.send_courier_no=#{sendNo} or d.inner_no  = #{sendNo}  or d.real_name =  #{sendNo} )
+			</if>
+			<if test="revNo!=null and revNo!='' ">
+				AND  (a.take_courier_no=#{revNo}  or c.inner_no  = #{revNo}  or c.real_name =  #{revNo} )
+			</if>
+			<!-- <if test="beginTime!=null and beginTime!=''"> AND substr(a.complete_time,1,10)>=#{beginTime} 
+				</if> <if test="endTime!=null and endTime!='' "> AND #{endTime} >=substr(a.complete_time,1,10) 
+				</if> -->
+			<if test="monthSettleNo!=null and monthSettleNo!=''">
+				AND b.month_settle_no = #{monthSettleNo}
+			</if>
+			<if test="orderLgc!=null  and orderLgc!=''">
+				AND a.lgc_order_no =#{orderLgc}
+			</if>
+			<if test="substationNo != null and substationNo !=''"> and (b.substation_no in (${substationNo}) or
+				b.substation_no is null)</if>
+		</trim>
+	
+		</select>
+	<select id="getMonthUserList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		month_settle_no,month_name,month_sname
+		from
+		month_settle_user
+	</select>
+
+	<select id="getCourierList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		courier_no,real_name,inner_no
+		from courier
+	</select>
+	<select id="getCourierListBySubStation" resultType="java.util.Map"
+		parameterType="java.lang.String">
+		select
+		courier_no,real_name,inner_no
+		from courier c where c.substation_no in (${value})
+	</select>
+</mapper>  

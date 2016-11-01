@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="RequireList">  
+	
+    <select id="getByTid" resultType="java.util.HashMap" >  
+        select * from require_list
+        <where>
+			tid= #{id}
+			 <if test="viewType!=null and viewType!=''">and view_type=#{viewType}</if>
+		</where>
+    </select>
+    
+      <select id="getByCode" resultType="java.util.HashMap"  >  
+        select r.* from require_list r left join require_type t on r.tid=t.id 
+        <where>
+			t.code= #{code}
+			 <if test="viewType!=null and viewType!=''">and r.view_type=#{viewType}</if>
+		</where>
+    </select>
+    
+    <update id="update" parameterType="java.util.HashMap" >
+    	update require_list set required=#{required}
+    	<where>
+    	  1=1 
+    	  <if test="ids!=null and ids!=''">and id in (${ids})</if>
+    	  <if test="tid!=null and tid!=''">and tid=#{tid}</if>
+    	  <if test="viewType!=null and viewType!=''">and view_type=#{viewType}</if>
+    	  <if test="name!=null and name!=''">and name=#{name}</if>
+    	</where>
+    </update>
+    
+
+</mapper>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="BossAuth">  
+      
+     <resultMap type="com.yogapay.boss.domain.BossAuth" id="BossAuth">
+	<id property="id" column="id" />
+	<result property="parentId" column="parent_id" />
+	<result property="authCode" column="auth_code" />
+	<result property="category" column="category" />
+	<result property="authName" column="auth_name" />
+	<result property="remark" column="remark" />
+	<result property="createTime" column="create_time" />  
+		<result property="clogin" column="clogin" />  
+		<result property="creator" column="creator" />  
+    </resultMap> 
+      
+      <select id="getAuthListByUserId" parameterType="long" resultMap="BossAuth">  
+        <![CDATA[ 
+         select * from boss_auth where id in (select auth_id from boss_auth_group where group_id in(select group_id from boss_user_group where user_id=#{id})) and status=1
+        ]]>   
+    </select>  
+    
+     <select id="getSuAuthListByUserId"  resultMap="BossAuth">  
+       select * from boss_auth where id in  (${idstring})  
+    </select>
+    
+     <select id="getSuIdString" parameterType="long"  resultType="java.util.HashMap">  
+      select group_concat(IF(LENGTH(TRIM(sub_permit))&lt;1,NULL,sub_permit)) AS idstring from boss_auth where id in (select auth_id from boss_auth_group 
+                       where group_id in(select group_id from boss_user_group where user_id=#{id}))
+    </select>
+    
+    
+    <select id="getSuAuthList" parameterType="long"  resultMap="BossAuth">  
+       select t1.*  from boss_auth t1 
+	   left join boss_auth t2 on t1.parent_id=t2.id 
+	     where t2.auth_code='SUDO'
+    </select>
+    
+    
+    <update id="updateSuAuth" parameterType="java.util.HashMap">  
+      update boss_auth set sub_permit=#{ids} where id in (${tid})
+    </update>
+    
+    
+      <select id="getAuthLists"  parameterType="java.util.HashMap" resultMap="BossAuth">  
+        select * from boss_auth where 1=1 
+         <if test="s != null and s !=''"> and status=1</if>
+    </select> 
+      
+      <select id="getAuthList" resultType="java.util.HashMap">  
+        select * from boss_auth where status=1
+    </select>  
+    
+     <select id="getAuthByNameCode"  parameterType="com.yogapay.boss.domain.BossAuth" resultType="java.util.HashMap">  
+        select * from boss_auth where (auth_code=#{authCode} or auth_name=#{authName}) and status=1
+    </select>
+    
+    <select id="getGrouplist" resultType="java.util.HashMap">  
+         select * from boss_group g where 1=1
+          <if test="groupName != null and groupName !=''"> and g.group_name like CONCAT(CONCAT('%', #{groupName}),'%')</if>
+           <if test="id != null and id !=''"> and g.id=#{id}</if>
+           order by g.id desc 
+    </select>  
+    
+   <select id="getAtuchlist" resultType="java.util.HashMap">  
+        SELECT a.*,b1.auth_name as parent_name from boss_auth a left join boss_auth b1 on a.parent_id=b1.id where 1=1
+           <if test="id != null and id !=''"> and a.id=#{id}</if>
+	       <if test="auth_name != null and auth_name !=''"> and a.auth_name like CONCAT(CONCAT('%', #{auth_name}),'%')</if>
+	       <if test="parent_id != null and parent_id !='-1'"> and a.parent_id=#{parent_id}</if>
+	       <if test="auth_code != null and auth_code !=''"> and a.auth_code like CONCAT(CONCAT('%', #{auth_code}),'%')</if>
+            order by a.id desc 
+    </select> 
+    
+    
+     <select id="getUserGroupList" resultType="java.util.HashMap">  
+       SELECT * FROM boss_group u
+    </select>   
+ 
+   <select id="getUserGroupListById" resultType="java.util.HashMap">  
+      select ug.* from boss_group ug,boss_user_group ua where ua.user_id=#{0} and ua.group_id=ug.id
+    </select>   
+    
+    <insert id="saveGroup" parameterType="com.yogapay.boss.domain.BossGroup" useGeneratedKeys="true" keyProperty="id">  
+      insert into boss_group(group_name,group_desc,create_time,clogin,creator) values(#{groupName},#{groupDesc},#{createTime},#{clogin},#{creator})
+    </insert> 
+    
+     <insert id="saveGroupAuth" parameterType="java.util.List">  
+     insert into boss_auth_group(group_id,auth_id) values 
+      <foreach collection="list" item="item" index="index" separator="," >  
+        (#{item.groupId},#{item.authId})  
+      </foreach>  
+    </insert>  
+    
+    <select id="queryUserGroupInfo" resultType="java.util.HashMap">  
+      select a.*  from boss_group a  where a.id=#{0}
+    </select>   
+    
+    <select id="getGroupAuth" resultType="java.util.HashMap">  
+     select a.* from boss_auth a,boss_auth_group g where a.id=g.auth_id and g.group_id=#{0} and a.status=1
+    </select> 
+ 
+    <update id="updateGroup" parameterType="com.yogapay.boss.domain.BossGroup">  
+      update boss_group set group_name=#{groupName},group_desc=#{groupDesc},clogin=#{clogin} where id=#{id}
+    </update>
+    
+    <delete id="delGroupAuth" parameterType="int">  
+       delete from boss_auth_group where group_id=#{id}  
+    </delete> 
+    
+     <select id="checkUserGroupId" resultType="java.util.HashMap">  
+       select * from boss_user_group where group_id=#{0}
+    </select> 
+    
+     <select id="checkUserGroupName" resultType="java.util.HashMap">  
+       select g.id from boss_user_group u left join boss_group g on u.group_id=g.id where u.user_id=#{userId} and g.group_name=#{groupName}
+    </select> 
+    
+    <delete id="delGroup" parameterType="long">  
+      delete from boss_group where id=#{id}  
+    </delete>
+    
+     
+     <select id="getParentAuthListAll" resultType="java.util.HashMap">  
+       SELECT * FROM boss_auth b where parent_id=0 order by b.id desc
+    </select> 
+    
+    <insert id="saveAuth" parameterType="com.yogapay.boss.domain.BossAuth" useGeneratedKeys="true" keyColumn="id">  
+      insert into boss_auth(auth_code,auth_name,remark,parent_id,category,create_time) 
+                     values(#{authCode},#{authName},#{remark},#{parentId},#{category},#{createTime}) 
+    </insert>
+    
+    
+      <select id="findAuthByParentId" parameterType="long" resultMap="BossAuth">  
+          select * from boss_auth where parent_id=#{0}
+    </select>  
+    
+    <delete id="delAuthById" parameterType="long">  
+       delete from boss_auth where id=#{0}  
+    </delete>
+    
+
+<!--  <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyColumn="id">  
+       insert into t_user(name, age) values(#{name}, #{age})  
+    </insert>  
+     
+    <update id="updateUser" parameterType="User">  
+       update t_user set name=#{name}, age=#{age} where id=#{id}  
+    </update>  
+     
+    <select id="findById" parameterType="int" resultType="User">  
+       select * from t_user where id=#{id}  
+    </select>  
+     
+    <delete id="deleteUser" parameterType="int">  
+       delete from t_user where id=#{id}  
+    </delete>  --> 
+      
+</mapper>  

@@ -1,0 +1,20 @@
+﻿
+.download{}
+.download_tit{ height:60px; line-height:60px; padding-left:10px; font-size:16px; color:#333; font-weight:bold;}
+.download_cont{ width:725px; margin:10px auto; text-align:center;}
+.download_er{ overflow:auto; zoom:1; border-bottom:1px solid #d0d9e2; padding:0 100px 40px;}
+.download_li{ float:left;}
+.download_li02{ float:right;}
+.load_img{ width:180px; height:180px;}
+.load_img img{ max-width:100%; max-height:100%;}
+.load_p{ height:30px; line-height:30px; width:180px; background:#28b227; color:#fff; margin:10px 0; font-size:14px;border-radius:5px;-moz-border-radius:5px;}
+.load_p02{ height:30px; line-height:30px; width:180px; background:#287fe0; color:#fff; margin:10px 0; font-size:14px;border-radius:5px;-moz-border-radius:5px;}
+.download_span{ text-align:center; padding:40px 0;}
+.{}
+.{}
+.{}
+.{}
+.{}
+.{}
+
+

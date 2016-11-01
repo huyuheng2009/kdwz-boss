@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 配置mybatis的缓存，延迟加载等等一系列属性 -->
+	<settings>
+		<!-- 全局映射器启用缓存 -->
+		<setting name="cacheEnabled" value="true" />
+		<!-- 查询时，关闭关联对象即时加载以提高性能 -->
+		<setting name="lazyLoadingEnabled" value="true" />
+		<!-- 设置关联对象加载的形态，此处为按需加载字段(加载字段由SQL指 定)，不会加载关联表的所有字段，以提高性能 -->
+		<setting name="aggressiveLazyLoading" value="false" />
+		<!-- 对于未知的SQL查询，允许返回不同的结果集以达到通用的效果 -->
+		<setting name="multipleResultSetsEnabled" value="true" />
+		<!-- 允许使用列标签代替列名 -->
+		<setting name="useColumnLabel" value="true" />
+		<!-- 允许使用自定义的主键值(比如由程序生成的UUID 32位编码作为键值)，数据表的PK生成策略将被覆盖 -->
+		<!-- <setting name="useGeneratedKeys" value="true" /> -->
+		<!-- 给予被嵌套的resultMap以字段-属性的映射支持 -->
+		<setting name="autoMappingBehavior" value="FULL" />
+		<!-- 对于批量更新操作缓存SQL以提高性能 -->
+		<setting name="defaultExecutorType" value="BATCH" />
+		<!-- 数据库超过25000秒仍未响应则超时 -->
+		<setting name="defaultStatementTimeout" value="25000" />
+	</settings>
+	<!-- 全局别名设置，在映射文件中只需写别名，而不必写出整个类路径 -->
+	<typeAliases>
+		<!-- 物流公司 -->
+		<typeAlias alias="Lgc" type="com.yogapay.boss.domain.Lgc" />
+		<!-- 物流分站 -->
+		<typeAlias alias="Substation" type="com.yogapay.boss.domain.Substation" />
+		<!-- 快递员 -->
+		<typeAlias alias="Courier" type="com.yogapay.boss.domain.Courier" />
+		<!-- 区域字典 -->
+		<typeAlias alias="City" type="com.yogapay.boss.domain.City" />
+		<typeAlias alias="AppProduct" type="com.yogapay.boss.domain.AppProduct" />
+		<typeAlias alias="AppVersion" type="com.yogapay.boss.domain.AppVersion" />
+		<typeAlias alias="OrderInfo" type="com.yogapay.boss.domain.OrderInfo" />
+		<typeAlias alias="OrderTrack" type="com.yogapay.boss.domain.OrderTrack" />
+		<typeAlias alias="ProOrder" type="com.yogapay.boss.domain.ProOrder" />
+		<typeAlias alias="ForwardOrder" type="com.yogapay.boss.domain.ForwardOrder" />
+		<typeAlias alias="Muser" type="com.yogapay.boss.domain.MonthSettleUser" />
+		<typeAlias alias="CourierDayStatic" type="com.yogapay.boss.domain.CourierDayStatic" />
+		<typeAlias alias="SubstationDayStatic" type="com.yogapay.boss.domain.SubstationDayStatic" />
+		<typeAlias alias="SubstationAccount" type="com.yogapay.boss.domain.SubstationAccount" />
+		<typeAlias alias="MonthUserStatic" type="com.yogapay.boss.domain.MonthUserStatic" />
+	    <typeAlias alias="LgcAddr" type="com.yogapay.boss.domain.LgcAddr" />
+	    <typeAlias alias="MatterPro" type="com.yogapay.boss.domain.MatterPro" />
+	    <typeAlias alias="MatterType" type="com.yogapay.boss.domain.MatterType" />
+	    <typeAlias alias="MatterWarehouseEnter" type="com.yogapay.boss.domain.MatterWarehouseEnter" />
+	    <typeAlias alias="DisUser" type="com.yogapay.boss.domain.DisUser" />
+	    <typeAlias alias="DiscountType" type="com.yogapay.boss.domain.DiscountType" />
+	<typeAlias alias="DisUserBalance" type="com.yogapay.boss.domain.DisUserBalance" />
+	<typeAlias alias="RechargeHistory" type="com.yogapay.boss.domain.RechargeHistory" />
+	<typeAlias alias="ConsumeHistory" type="com.yogapay.boss.domain.ConsumeHistory" />
+	<typeAlias alias="MDataSource" type="com.yogapay.boss.dataSource.MDataSource" />
+	<typeAlias alias="Cuser" type="com.yogapay.boss.domain.CodSettleUser" />
+	<typeAlias alias="ProOrderReason" type="com.yogapay.boss.domain.ProOrderReason" />
+	<typeAlias alias="ProDealHistory" type="com.yogapay.boss.domain.ProDealHistory" />
+	<typeAlias alias="Menu" type="com.yogapay.boss.domain.Menu" />
+	<typeAlias alias="ItemType" type="com.yogapay.boss.domain.ItemType" />
+	<typeAlias alias="SinputInfo" type="com.yogapay.boss.domain.SinputInfo" />  
+	<typeAlias alias="CodRule" type="com.yogapay.boss.domain.CodRule" />  
+	<typeAlias alias="ValuationRule" type="com.yogapay.boss.domain.ValuationRule" />   
+	<typeAlias alias="MonthSettleType" type="com.yogapay.boss.domain.MonthSettleType" />   
+	<typeAlias alias="CodRateType" type="com.yogapay.boss.domain.CodRateType" />   
+	<typeAlias alias="CodMonthCount" type="com.yogapay.boss.domain.CodMonthCount" />    
+	<typeAlias alias="RequireType" type="com.yogapay.boss.domain.RequireType" />            
+	<typeAlias alias="RequireList" type="com.yogapay.boss.domain.RequireList" />   
+	<typeAlias alias="LgcMode" type="com.yogapay.boss.domain.LgcMode" /> 
+	<typeAlias alias="OrderSubstation" type="com.yogapay.boss.domain.OrderSubstation" />   
+	<typeAlias alias="LgcArea" type="com.yogapay.boss.domain.LgcArea" /> 
+	<typeAlias alias="LgcPayType" type="com.yogapay.boss.domain.LgcPayType" /> 
+	<typeAlias alias="LgcResource" type="com.yogapay.boss.domain.LgcResource" /> 
+	<typeAlias alias="BossSql" type="com.yogapay.boss.domain.BossSql" /> 
+	<typeAlias alias="CodInfo" type="com.yogapay.boss.domain.CodInfo" /> 
+	<typeAlias alias="CourierDaySettle" type="com.yogapay.boss.domain.CourierDaySettle" /> 
+	<typeAlias alias="MonthUserSettle" type="com.yogapay.boss.domain.MonthUserSettle" /> 
+	<typeAlias alias="CourierCost" type="com.yogapay.boss.domain.CourierCost" /> 
+	<typeAlias alias="AgingType" type="com.yogapay.boss.domain.AgingType" />
+	<typeAlias alias="ForCpn" type="com.yogapay.boss.domain.ForCpn" />
+	<typeAlias alias="PushNotice" type="com.yogapay.boss.domain.PushNotice" />
+	<typeAlias alias="CourierSalayPay" type="com.yogapay.boss.domain.CourierSalayPay" />
+	<typeAlias alias="TableFiledSort" type="com.yogapay.boss.domain.TableFiledSort" /> 
+	<typeAlias alias="JudgeDetail" type="com.yogapay.boss.domain.JudgeDetail" />
+	<typeAlias alias="JudgeLabel" type="com.yogapay.boss.domain.JudgeLabel" />
+	<typeAlias alias="JudgeCourierLabel" type="com.yogapay.boss.domain.JudgeCourierLabel" /> 
+	<typeAlias alias="WeightConfig" type="com.yogapay.boss.domain.WeightConfig" /> 
+	<typeAlias alias="AsignOrder" type="com.yogapay.boss.domain.AsignOrder" /> 
+	<typeAlias alias="WarehouseStaff" type="com.yogapay.boss.domain.WarehouseStaff" /> 
+	<typeAlias alias="LgcCustomer" type="com.yogapay.boss.domain.LgcCustomer" /> 
+	<typeAlias alias="SystemPunish" type="com.yogapay.boss.domain.SystemPunish" /> 
+ </typeAliases>
+	<!-- 非注解的sql映射文件配置 -->
+	<!-- <mappers> -->
+	<!-- <mapper resource="mapper/Dept.xml" /> -->
+	<!-- <mapper resource="mapper/Config.xml" /> -->
+	<!-- <mapper resource="mapper/BossOperator.xml" /> -->
+	<!-- <mapper resource="mapper/Pos.xml" /> -->
+	<!-- </mappers> -->
+
+</configuration>

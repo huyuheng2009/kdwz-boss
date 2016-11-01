@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MonthUserCount">  
+
+<select id="list" resultType="java.util.HashMap">  
+     SELECT o.month_settle_no,u.month_name,u.substation_no,u.courier_no,
+count(0) m,
+count(case when DATE_FORMAT(o.create_time,'%m')=1 then o.id end) m1,
+count(case when DATE_FORMAT(o.create_time,'%m')=2 then o.id end) m2,
+count(case when DATE_FORMAT(o.create_time,'%m')=3 then o.id end) m3,
+count(case when DATE_FORMAT(o.create_time,'%m')=4 then o.id end) m4,
+count(case when DATE_FORMAT(o.create_time,'%m')=5 then o.id end) m5,
+count(case when DATE_FORMAT(o.create_time,'%m')=6 then o.id end) m6,
+count(case when DATE_FORMAT(o.create_time,'%m')=7 then o.id end) m7,
+count(case when DATE_FORMAT(o.create_time,'%m')=8 then o.id end) m8,
+count(case when DATE_FORMAT(o.create_time,'%m')=9 then o.id end) m9,
+count(case when DATE_FORMAT(o.create_time,'%m')=10 then o.id end) m10,
+count(case when DATE_FORMAT(o.create_time,'%m')=11 then o.id end) m11,
+count(case when DATE_FORMAT(o.create_time,'%m')=12 then o.id end) m12
+
+FROM order_info o left join month_settle_user u on o.month_settle_no=u.month_settle_no
+ <where> o.deled=0 <if test="reportExam != null and reportExam eq 'YY'"> AND o.examine_status='PASS' </if> AND o.pay_type='MONTH' AND o.`status` IN (2,3,7,8)
+       <if test="substationNo!=null and substationNo!=''"> and (u.substation_no in (${substationNo}) or length(ifnull(u.substation_no,''))&lt;1)</if>
+       <if test="courierNo!=null and courierNo!=''"> and u.courier_no=#{courierNo,jdbcType=VARCHAR}</if>
+        <if test="monthNo!=null and monthNo!=''"> and o.month_settle_no=#{monthNo,jdbcType=VARCHAR}</if>
+	   <if test="cyear != null and cyear !=''"> 
+	   AND o.create_time>=concat(#{cyear},'-01-01') 
+	   and concat(date_format(date_add(concat(#{cyear},'-01-15'),INTERVAL 300 DAY),'%Y'),'-01-01')>o.create_time
+	   </if>
+</where>
+group by o.month_settle_no
+    <if test="limit != null and limit != ''"> limit 0,${limit}</if>     
+</select>
+
+  <select id="mmlist" resultType="java.util.HashMap">  
+select s.inner_no substation_no,s.substation_name,
+count(case when (o.examine_status='PASS' AND o.sub_station_no=s.substation_no and o.create_time&gt;=#{date1} and o.create_time&lt;#{date2}) then 0 end) s1,
+count(case when (o.sign_examine_status='PASS' AND o.send_substation_no=s.substation_no and o.create_time&gt;=#{date1} and o.create_time&lt;#{date2}) then 0 end) r1,
+count(case when (o.examine_status='PASS' AND o.sub_station_no=s.substation_no  and o.create_time&gt;=#{date3} and o.create_time&lt;#{date4}) then 0 end) s2,
+count(case when (o.sign_examine_status='PASS' AND o.send_substation_no=s.substation_no and o.create_time&gt;=#{date3} and o.create_time&lt;#{date4}) then 0 end) r2
+from order_info o  join substation s on (o.sub_station_no=s.substation_no or o.send_substation_no=s.substation_no)
+ <where> o.deled=0 and o.`status` in (2,3,6,7,8) and (o.examine_status='PASS' or o.sign_examine_status='PASS')
+      <if test="sno!=null and sno!=''"> and s.substation_no in 
+             <foreach collection="sno" index="index" item="item" open="(" separator="," close=")">  
+                       #{item}   
+              </foreach>
+      </if>
+      <if test="createTimeBegin != null and createTimeBegin !=''"> and o.create_time&gt;=#{createTimeBegin}</if>
+      <if test="createTimeEnd != null and createTimeEnd !=''"> and o.create_time&lt;#{createTimeEnd}</if>
+</where>
+   group by s.substation_no
+     <if test="limit != null and limit != ''"> limit 0,${limit}</if>    
+</select>  
+    
+    
+   <select id="cmlist" resultType="java.util.HashMap">  
+SELECT c.courier_no,c.real_name,s.inner_no substation_no,s.substation_name,
+count(case when (o.examine_status='PASS' AND o.take_courier_no=c.courier_no and o.create_time&gt;=#{date1} and o.create_time&lt;#{date2}) then 0 end) s1,
+count(case when (o.sign_examine_status='PASS' AND o.send_courier_no=c.courier_no and o.create_time&gt;=#{date1} and o.create_time&lt;#{date2}) then 0 end) r1,
+count(case when (o.examine_status='PASS' AND o.take_courier_no=c.courier_no  and o.create_time&gt;=#{date3} and o.create_time&lt;#{date4}) then 0 end) s2,
+count(case when (o.sign_examine_status='PASS' AND o.send_courier_no=c.courier_no and o.create_time&gt;=#{date3} and o.create_time&lt;#{date4}) then 0 end) r2
+from order_info o JOIN courier c ON (o.take_courier_no=c.courier_no OR o.send_courier_no=c.courier_no) left join substation s on c.substation_no=s.substation_no
+ <where> o.deled=0 and o.`status` in (2,3,6,7,8) and (o.examine_status='PASS' or o.sign_examine_status='PASS')
+      <if test="sno!=null and sno!=''"> and s.substation_no in 
+             <foreach collection="sno" index="index" item="item" open="(" separator="," close=")">  
+                       #{item}   
+              </foreach>
+      </if>
+       <if test="courierNo!=null and courierNo!=''"> and c.courier_no=#{courierNo,jdbcType=VARCHAR}</if>
+      <if test="createTimeBegin != null and createTimeBegin !=''"> and o.create_time&gt;=#{createTimeBegin}</if>
+      <if test="createTimeEnd != null and createTimeEnd !=''"> and o.create_time&lt;#{createTimeEnd}</if>
+</where>
+   GROUP BY c.courier_no 
+     <if test="limit != null and limit != ''"> limit 0,${limit}</if>
+</select>     
+    
+    
+</mapper>

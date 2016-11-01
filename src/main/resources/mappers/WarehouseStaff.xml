@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="WarehouseStaff"> 
+	<insert id="insert">
+		insert into warehouse_staff(user_name,pass_word,real_name,substation_no,id_card,phone,warehouse_no,queue_name,head_image,regist_time,create_operator,inner_no,inner_phone,status) 
+		values(#{userName},#{passWord},#{realName},#{substationNo},#{idCard},#{phone},#{warehouseNo},#{queueName},#{headImage},now(),#{createOperator},#{innerNo},#{innerPhone},#{status})
+	</insert>
+	
+	<select id="select" resultType="java.util.Map">
+	select a.*,b.substation_name  from warehouse_staff a left join substation b on a.substation_no=b.substation_no where 1=1 
+		<if test="userName != null and userName !='' ">
+		and a.user_name=#{userName}
+		</if>
+		<if test="passWord != null and passWord !='' ">
+		and a.pass_word =#{passWord}
+		</if>
+		<if test="substationNo != null and substationNo !='' ">
+		and a.substation_no =#{substationNo}
+		</if>
+		<if test="realName != null and realName !='' ">
+		and a.real_name =#{realName}
+		</if>
+		order by a.`status` desc
+		<if test="limit != null and limit != ''"> limit 0,${limit}</if>
+	</select>
+	
+	<update id="update">
+		update warehouse_staff 
+		<set>
+			<if test="substationNo !=null and substationNo !='' ">
+			 substation_no=#{substationNo},
+			</if>
+			<if test="userName !=null and userName !='' ">
+			 user_name=#{userName},
+			</if>
+			<if test="realName !=null and realName !='' ">
+			 real_name=#{realName},
+			</if>
+			<if test="idCard !=null and idCard !='' ">
+			 id_card=#{idCard},
+			</if>
+			<if test="phone !=null and phone !='' ">
+			 phone=#{phone},
+			</if>
+			<if test="warehouseNo !=null and warehouseNo !='' ">
+			 warehouse_no=#{warehouseNo},
+			</if>
+			<if test="innerNo !=null and innerNo !='' ">
+			 inner_no=#{innerNo},
+			</if>
+			<if test="innerPhone !=null and innerPhone !='' ">
+			 inner_phone=#{innerPhone},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<update id="updateStatus">
+	   update warehouse_staff set status=#{status} where id=#{id}
+	</update>
+	
+	<update id="updatePwd">
+	   update warehouse_staff set  pass_word=#{passWord} where id=#{id}
+	</update>
+	
+	<delete id="deleteById">
+	delete from warehouse_staff where id=#{id}
+	</delete>
+	
+	<select id="selectById" resultType="java.util.Map">
+	   select * from warehouse_staff where id =#{id}
+	</select>
+	
+	<select id="selectMaxWareStaffNo" resultType="java.util.Map">
+		select IFNULL(max(warehouse_no), concat(#{substationNo},'000')) as prno from warehouse_staff where substation_no=#{substationNo}
+	</select>
+</mapper>

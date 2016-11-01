@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Join">
+	<resultMap type="com.yogapay.boss.domain.JoinSubstationAcount"
+		id="JoinSubstationAcount">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="substationNo" column="substation_no"
+			jdbcType="VARCHAR" />
+		<result property="curBalance" column="cur_balance" jdbcType="DECIMAL" />
+		<result property="warningBalance" column="warning_balance"
+			jdbcType="DECIMAL" />
+		<result property="shutBalance" column="shut_balance" jdbcType="DECIMAL" />
+		<result property="startTime" column="start_time" jdbcType="TIMESTAMP" />
+		<result property="createTime" column="create_time" jdbcType="TIMESTAMP" />
+		<result property="status" column="status" jdbcType="CHAR" />
+		<result property="note" column="note" jdbcType="VARCHAR" />
+		<result property="operater" column="operater" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap type="com.yogapay.boss.domain.SubstationAcountBill"
+		id="SubstationAcountBill">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="substationNo" column="substation_no"
+			jdbcType="VARCHAR" />
+		<result property="createTime" column="create_time" jdbcType="TIMESTAMP" />
+		<result property="lgcOrderNo" column="lgc_order_no" jdbcType="VARCHAR" />
+		<result property="sendTime" column="send_time" jdbcType="TIMESTAMP" />
+		<result property="type" column="type" jdbcType="VARCHAR" />
+		<result property="payType" column="pay_type" jdbcType="VARCHAR" />
+		<result property="beforeBalance" column="before_balance"
+			jdbcType="DECIMAL" />
+		<result property="useBalance" column="use_balance" jdbcType="DECIMAL" />
+		<result property="afterBalance" column="after_balance"
+			jdbcType="DECIMAL" />
+		<result property="source" column="source" jdbcType="CHAR" />
+		<result property="note" column="source" jdbcType="VARCHAR" />
+		<result property="operater" column="operater" jdbcType="VARCHAR" />
+	</resultMap>
+
+
+	<select id="joinSubstationList" resultType="java.util.Map">
+		select * from substation where substation_type ='J'
+			<if test="sno !=null and sno!=''">
+			and substation_no in (0,${sno})
+		</if>
+	</select>
+	
+	<select id="joinList" resultType="java.util.Map">
+		select s.*,s2.inner_no,s2.substation_name from join_substation_acount
+		s left join substation s2 on s.substation_no = s2.substation_no
+		where 1=1 
+		<if test="substationNo !=null and substationNo!=''">
+			and s.substation_no = #{substationNo}
+		</if>
+		<if test="sno !=null and sno!=''">
+			and s.substation_no in (0,${sno})
+		</if>
+		<if test="status != null and status !=''">
+			and s.`status` = #{status}
+		</if>
+		<if test="H!=null  and H!='' ">
+			AND s.cur_balance &lt; s.warning_balance
+		</if>
+		<if test="H2!=null  and H!='' ">
+			AND s.cur_balance &lt; s.shut_balance
+		</if>
+	</select>
+	<select id="getNotOpenSubstation" resultType="java.lang.String">
+		select substaionNo
+		from(
+		select s.substation_no substaionNo,IFNULL(j.substation_no,'C') subtation2
+		from substation s left join join_substation_acount j
+		on s.substation_no = j.substation_no
+		where s.substation_type='J' and s.`status`= 1
+		) a where a. subtation2 = 'C'
+	</select>
+	<insert id="batchOpenSubstation" parameterType="java.util.List">
+		insert into
+		join_substation_acount(substation_no,cur_balance,warning_balance,shut_balance,start_time,create_time,status,note,operater)values
+		<foreach collection="list" item="t" separator=",">
+			(#{t.substationNo},0,0,0,now(),now(),'1','',#{t.operater})
+		</foreach>
+	</insert>
+	<update id="updateStatus" parameterType="java.util.Map">
+		update join_substation_acount set `status`=#{status} where id=#{id}
+	</update>
+	<update id="saveEdit" parameterType="java.util.Map">
+		update join_substation_acount set warning_balance =#{warning},
+		shut_balance = #{shut},
+		note = #{note}
+		where id =#{id}
+	</update>
+	<select id="getInfo" resultMap="JoinSubstationAcount"
+		parameterType="java.lang.String">
+		select * from join_substation_acount where id =#{value}
+	</select>
+	<update id="updateTime" parameterType="java.util.Map">
+		update join_substation_acount set start_time=#{startTime} where id =#{id}
+	</update>
+	<select id="getJoinOpenList" resultType="java.util.Map">
+		select
+		j.*,s.substation_name from join_substation_acount j left join
+		substation s on j.substation_no =s.substation_no where j.`status` ='1'
+	</select>
+		<select id="allJoinOpenSubstation" resultType="java.util.Map">
+		select
+		j.*,s.substation_name from join_substation_acount j left join
+		substation s on j.substation_no =s.substation_no 
+		where 1=1 
+		<if test="sno !=null and sno!=''">
+			and j.substation_no in (0,${sno})
+		</if>
+	</select>
+	
+	<select id="checkAcount" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select id from join_substation_acount where
+		substation_no=#{substationNo} and `status`='1'
+	</select>
+	<insert id="insertBill" parameterType="java.util.Map">
+		insert into substation_acount_bill(
+		substation_no,
+		create_time,
+		lgc_order_no,
+		send_time,
+		type,
+		pay_type,
+		before_balance,
+		use_balance,
+		after_balance,
+		source,
+		note,
+		operater
+		)values(
+		#{substationNo},
+		#{nowDate},
+		#{lgcOrderNo},
+		#{sendTime},
+		#{type},
+		#{pay},
+		#{beforeBalance},
+		#{money},
+		#{afterBalance},
+		#{source},
+		#{note},
+		#{operater}
+		)
+	</insert>
+	<select id="selectJoinSubInfo" resultMap="JoinSubstationAcount"
+		parameterType="java.lang.String">
+		select * from join_substation_acount where substation_no = #{value}
+	</select>
+	<select id="getSendTime" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select DATE_FORMAT(take_order_time,'%Y-%m-%d %H:%i:%s') takeTime from
+		order_info where lgc_order_no =#{value}
+	</select>
+	<update id="updateCountBill" parameterType="java.util.Map">
+		update join_substation_acount set cur_balance = cur_balance+${money}
+		<!-- <if test="type == 'S'.toString()">
+			set cur_balance = cur_balance+${money}
+		</if>
+		<if test="type =='Z'.toString()">
+			set cur_balance = cur_balance-${money}
+		</if> -->
+		where substation_no = #{substationNo}
+	</update>
+	<select id="detailList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+	select o.take_order_time,s.substation_no
+		substationNo,DATE_FORMAT(s.create_time,'%Y-%m-%d %H:%i:%s')
+		createTime,DATE_FORMAT(s.send_time,'%Y-%m-%d %H:%i:%s') sendTime,
+		s.lgc_order_no lgcOrderNo,s.`type`,s.`pay_type`
+		payType,s.before_balance beforeBalance,s.use_balance useBalance,
+		s.after_balance afterBalance,s.source,s.note,s.operater,
+		s2.inner_no innerNo,s2.substation_name substationName
+		from substation_acount_bill s left join substation s2 on s.substation_no =
+		s2.substation_no left join order_info o on s.lgc_order_no=o.lgc_order_no
+		where  s2.`status`='1' 
+		<if test="lgcOrderNo1 !=null and lgcOrderNo1!=''">
+			and s.lgc_order_no in (${lgcOrderNo1})
+		</if>
+		<if test="substationNo !=null and substationNo!=''">
+			and s.substation_no = #{substationNo}
+		</if>
+		<if test="sno !=null and sno!=''">
+			and s.substation_no in (0,${sno})
+		</if>
+		<if test="operater !=null and operater!=''">
+			and s.operater like '%${operater}%'
+		</if>
+		<if test="source !=null and source!=''">
+			and s.source =#{source}
+		</if>
+		<if test="type !=null and type!=''">
+			and s.`type` =#{type}
+		</if>
+		<if test="payType !=null and payType!=''">
+			and s.`pay_type` =#{payType}
+		</if>
+		<if test="timeType=='C'.toString()  and beginTime!=null and beginTime!=''">
+			and DATE_FORMAT(s.create_time,'%Y-%m-%d') >=#{beginTime}
+		</if>
+		<if test="timeType=='C'.toString()  and endTime!=null and endTime!=''">
+			and #{endTime}>= DATE_FORMAT(s.create_time,'%Y-%m-%d')
+		</if>
+		<if
+			test="timeType=='S'.toString() and  sendOrderBeginTime!=null and sendOrderBeginTime!=''">
+			and DATE_FORMAT(o.take_order_time,'%Y-%m-%d') >=#{sendOrderBeginTime}
+		</if>
+		<if
+			test="timeType=='S'.toString() and  sendOrderEndTime!=null and sendOrderEndTime!=''">
+			and #{sendOrderEndTime}>= DATE_FORMAT(o.take_order_time,'%Y-%m-%d')
+		</if>
+		order by  s.create_time desc
+	</select>
+<select id="acountList" resultType="java.util.Map" parameterType="java.util.Map">
+	select s1.substation_no substationNo,s2.inner_no innerNo,s2.substation_name substationName,Date_format(s1.create_time,'%Y-%m-%d') createTime,
+sum(if(s1.`type`='S',s1.use_balance,0 )) chongzhi,sum(if(s1.`type`='Z',s1.use_balance,0 )) chongzhang,
+sum(if(s1.`type`='ZZ',s1.use_balance,0 )) zhongzhuan,sum(if(s1.`type`='PJ',s1.use_balance,0 )) paijian from 
+substation_acount_bill s1 left join substation s2 on s1.substation_no  =s2.substation_no 
+where 1=1
+<if test="beginTime!=null and beginTime!=''">
+		and 	Date_format(s1.create_time,'%Y-%m-%d') >=#{beginTime}
+</if>
+<if test="endTime !=null and endTime!=''">
+		and #{endTime}>=	Date_format(s1.create_time,'%Y-%m-%d')
+</if>
+<if test="sno !=null and sno!=''">
+	and s1.substation_no in (0,${sno})
+</if>
+<if test="substationNo!=null and substationNo!=''">
+and	s1.substation_no = #{substationNo}
+</if>
+<if test="operater!=null and operater!=''">
+and	s1.operater like '%${operater}%'
+</if>
+ group by Date_format(s1.create_time,'%Y-%m-%d'),s1.substation_no 
+order by  s1.create_time desc
+</select> 
+<select id="allAcountMap"   resultType="java.util.Map" parameterType="java.util.Map">
+select sum(b.chongzhi) allchongzhi,
+		sum(b.chongzhang) allchongzhang,
+		sum(b.zhongzhuan)  allzhongzhuan,
+		sum(b.paijian) allpaijian
+ from  (
+select s1.substation_no substationNo,s2.inner_no innerNo,s2.substation_name substationName,Date_format(s1.create_time,'%Y-%m-%d') createTime,
+sum(if(s1.`type`='S',s1.use_balance,0 )) chongzhi,sum(if(s1.`type`='Z',s1.use_balance,0 )) chongzhang,
+sum(if(s1.`type`='ZZ',s1.use_balance,0 )) zhongzhuan,sum(if(s1.`type`='PJ',s1.use_balance,0 )) paijian from 
+substation_acount_bill s1 left join substation s2 on s1.substation_no  =s2.substation_no 
+where 1=1
+<if test="beginTime!=null and beginTime!=''">
+		and 	Date_format(s1.create_time,'%Y-%m-%d') >=#{beginTime}
+</if>
+<if test="endTime !=null and endTime!=''">
+		and #{endTime}>=	Date_format(s1.create_time,'%Y-%m-%d')
+</if>
+<if test="substationNo!=null and substationNo!=''">
+and	s1.substation_no = #{substationNo}
+</if>
+<if test="operater!=null and operater!=''">
+and	s1.operater like '%${operater}%'
+</if>
+ group by Date_format(s1.create_time,'%Y-%m-%d') ) b
+</select>
+
+
+	<select id="selectShut"  resultType="java.util.HashMap">
+	 select id,`status` from join_substation_acount where  substation_no=#{sno}
+	 <if test="shut!=null and shut!=''"> and cur_balance>shut_balance </if>
+	</select>
+
+
+</mapper>

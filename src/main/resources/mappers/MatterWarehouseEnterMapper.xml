@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MatterWarehouseEnter">  
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select m.*,p.matter_no,p.matter_name,s.substation_name from matter_warehouse_enter m 
+           left join matter_pro p on m.matter_id=p.id left join substation s on m.substation_no=s.substation_no
+        <where>
+			1=1
+	 <if test="substationNo != null and substationNo != ''"> 
+		  and m.substation_no in (0,${substationNo})
+		</if>
+		<if test="matterId!=null and matterId!=''">
+			and m.matter_id=#{matterId}
+		</if>
+		<if test="matterPrice!=null and matterPrice!=''">
+			and m.matter_price=#{matterPrice}
+		</if>
+		<if test="brokerage!=null and brokerage!=''">
+			and m.brokerage=#{brokerage}
+		</if>
+		
+		<if test="supplier!=null and supplier!=''">
+			and m.supplier=#{supplier}
+		</if>
+		
+		<if test="operator!=null and operator!=''">
+			and m.operator=#{operator}
+		</if>
+		
+		<if test="macount!=null and macount!=''">
+			and m.macount=#{macount}
+		</if>
+		
+		<if test="planeNo!=null and planeNo!=''">
+			and m.bplane_no&lt;#{planeNo} and  m.eplane_no&gt;#{planeNo} 
+		</if>
+		 <if test="createTimeBegin != null and createTimeBegin !=''"> and m.ware_time&gt;=#{createTimeBegin}</if>
+         <if test="createTimeEnd != null and createTimeEnd !=''"> and m.ware_time&lt;#{createTimeEnd}</if>
+		</where>
+		order by m.id desc
+    </select>
+
+    
+    <insert id="insert" parameterType="MatterWarehouseEnter"  useGeneratedKeys="true" keyColumn="id">
+    	insert into matter_warehouse_enter(substation_no,matter_id,bplane_no,eplane_no,matter_price,mcount,macount,brokerage,supplier,ware_time,note,operator) values (
+    		#{substationNo},#{matterId},#{bplaneNo},#{eplaneNo},#{matterPrice},#{mcount},#{macount},#{brokerage},#{supplier},#{wareTime},#{note},#{operator})
+    </insert>
+
+
+    <delete id="delById" parameterType="Integer">
+    	delete from matter_warehouse_enter where id=#{id}
+    </delete>
+    
+</mapper>

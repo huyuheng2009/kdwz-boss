@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="DisUser">  
+	<resultMap type="DisUser" id="DisUser">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="substationNo"  column="substation_no"  jdbcType="VARCHAR"/>
+		<result property="disUserNo" column="dis_user_no"  jdbcType="VARCHAR" />
+		<result property="disType" column="dis_type" />
+		<result property="disUserName" column="dis_user_name"  />
+		<result property="contactName" column="contact_name"  />
+		<result property="contactPhone"  column="contact_phone" />
+		<result property="email"  column="email" />
+		<result property="pwd"  column="pwd" />
+		<result property="operator"  column="operator" />
+		<result property="createTime"  column="create_time" />
+		<result property="status"  column="status" />
+		<result property="note"  column="note" />
+	</resultMap>
+
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select u.*,b.balance,t.name from dis_user u left join dis_user_balance b on u.id=b.uid left join discount_type t on u.dis_type=t.id
+        <where>
+			1=1
+		<if test="substationNo!=null and substationNo!=''">
+			and (u.substation_no in (0,${substationNo}) or LENGTH(IFNULL(u.substation_no,''))&lt;1)
+		</if>
+		<if test="substationNo==null or substationNo==''">
+			and 1=2
+		</if>
+		<if test="disUserNo!=null and disUserNo!=''">
+			and u.dis_user_no=#{disUserNo}
+		</if>
+		<if test="operator!=null and operator!=''">
+			and u.operator like  CONCAT(CONCAT('%', #{operator}),'%')
+		</if>
+		   <if test="createTimeBegin != null and createTimeBegin !=''"> and u.create_time&gt;=#{createTimeBegin}</if>
+           <if test="createTimeEnd != null and createTimeEnd !=''"> and u.create_time&lt;#{createTimeEnd}</if>
+		</where>
+		order by u.id desc
+    </select>
+    
+    <select id="getById" resultMap="DisUser" parameterType="java.lang.Integer">  
+        select * from dis_user
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    
+        <select id="getDetailById" resultType="java.util.HashMap"  parameterType="java.lang.Integer">  
+        select u.*,b.balance,concat(t.name,concat('   ',t.discount_text)) AS disText,s.substation_name,
+        group_concat(n.note,'    ',n.create_time  SEPARATOR  '&lt;/br&gt;') AS gnote
+ from dis_user u left join dis_user_balance b on u.id=b.uid 
+     left join discount_type t on u.dis_type=t.id
+       left join substation s on u.substation_no=s.substation_no
+         left join dis_user_note n on u.id=n.uid
+        <where>
+			u.id= #{id}
+		</where>
+		 group by u.id
+    </select>
+    
+     
+    
+       <select id="getByNo" resultMap="DisUser">  
+        select * from dis_user 
+        <where>
+				dis_user_no= #{disUserNo}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="DisUser"  useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+    	insert into dis_user(substation_no,dis_user_no,dis_type,dis_user_name,contact_name,
+    	                   contact_phone,email,pwd,operator,create_time,note,status) values (
+    		#{substationNo},#{disUserNo},#{disType},#{disUserName},#{contactName},#{contactPhone},#{email},
+    		                  #{pwd},#{operator},#{createTime},#{note},#{status})
+    </insert>
+    
+    <update id="update" parameterType="DisUser"  useGeneratedKeys="true" keyColumn="id">
+    	update dis_user set substation_no=#{substationNo},dis_type=#{disType},dis_user_name=#{disUserName},
+    	contact_name=#{contactName},contact_phone=#{contactPhone},email=#{email},pwd=#{pwd},status=#{status}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+     <update id="updateNote">
+    	update dis_user set note=#{note}
+    	<where>
+    		id=#{uid}
+    	</where>
+    </update>
+    
+     <insert id="addNote">
+    	insert into dis_user_note(uid,note,create_time) values (#{uid},#{note},#{create_time})
+    </insert>
+    
+     <update id="statusUpdate" parameterType="DisUser"  useGeneratedKeys="true" keyColumn="id">
+    	update dis_user set status=#{status}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+      <update id="cpw" parameterType="DisUser"  useGeneratedKeys="true" keyColumn="id">
+    	update dis_user set pwd=#{pwd}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from dis_user where id=#{id}
+    </delete>
+    
+</mapper>

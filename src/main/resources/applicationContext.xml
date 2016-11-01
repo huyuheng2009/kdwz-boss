@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd"
+	default-lazy-init="false">
+	<context:component-scan base-package="com.yogapay.boss.*">
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+ 	<!-- 导入数据库配置 -->
+	<import resource="classpath:spring/db.xml" />
+ 	<!-- 导入安全控制 -->
+	 <import resource="classpath:spring/shiro.xml" /> 
+	<!-- 导入定时任务 -->
+	<!--  <import resource="classpath:spring/quartz.xml" />   --><!--  屏蔽定时任务，定时任务写在kdwz-crond项目 -->
+	
+	<bean name="dict" id="dict" class="com.yogapay.boss.utils.tag.Dict"></bean>
+	<bean name="select" id="select" class="com.yogapay.boss.utils.tag.Select"></bean>
+	<bean name="city" id="city" class="com.yogapay.boss.utils.tag.City"></bean>
+	<bean name="logic" id="logic" class="com.yogapay.boss.utils.tag.Logic"></bean>
+		<bean name="lgc" id="lgc" class="com.yogapay.boss.utils.tag.Lgc"></bean>
+<bean name="initBean" id="initBean" class="com.yogapay.boss.init.InitBean"></bean>	
+<bean name="decoratorPage" id="decoratorPage" class="com.yogapay.boss.init.DecoratorPage"></bean>		
+	<!-- <bean name="agentUser" id="agentUser" class="com.yogapay.boss.utils.tag.AgentUser"></bean>
+	<bean name="logic" id="logic" class="com.yogapay.boss.utils.tag.Logic"></bean>
+	<bean name="genSyncNo" id="genSyncNo" class="com.yogapay.boss.utils.GenSyncNo"></bean>
+	<bean name="select" id="select" class="com.yogapay.boss.utils.tag.Select"></bean>
+	<bean name="memoryCache" id="memoryCache" class="com.yogapay.boss.utils.MemoryCache"></bean>  -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+    
+    <!-- SqlSessionFactory -->
+  <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="dataSource" />
+    <property name="configLocation" value="classpath:mybatis.xml"></property>
+    <property name="mapperLocations" value="classpath*:mappers/*.xml" />
+     <property name="plugins">
+        <list>
+				<bean class="com.yogapay.sql.mybatis.ResultSetMapperInterceptor">
+					<constructor-arg>
+						<bean class="com.yogapay.sql.mapping2.GlobalContext">
+							<property name="defaultEntityPackage" value="com.yogapay.boss.domain" />
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean class="com.github.pagehelper.PageHelper">
+             <property name="properties">
+         <value>
+           dialect=mysql
+           reasonable=true
+           pageSizeZero=true
+         </value>
+       </property>
+     </bean>
+			</list>
+   </property>  
+  </bean>
+  <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">  
+		<constructor-arg index="0" ref="sqlSessionFactory" />  
+		<constructor-arg index="1" value="BATCH" /><!--- 如果想要进行批量操作可加入这个属性 -->  
+</bean> 
+
+  <!-- SqlSessionFactory -->
+  <bean id="managerSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="managerDataSource" />
+    <property name="configLocation" value="classpath:mybatis.xml"></property>
+    <property name="mapperLocations" value="classpath*:mappers/*.xml" />
+     <property name="plugins">
+     <list>
+				<bean class="com.yogapay.sql.mybatis.ResultSetMapperInterceptor">
+					<constructor-arg>
+						<bean class="com.yogapay.sql.mapping2.GlobalContext">
+							<property name="defaultEntityPackage" value="com.yogapay.boss.domain" />
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean class="com.github.pagehelper.PageHelper">
+             <property name="properties">
+         <value>
+           dialect=mysql
+           reasonable=true
+           pageSizeZero=true
+         </value>
+       </property>
+     </bean>
+			</list>
+   </property>  
+  </bean>
+  <bean id="managerSession" class="org.mybatis.spring.SqlSessionTemplate">  
+		<constructor-arg index="0" ref="managerSessionFactory" />  
+		<constructor-arg index="1" value="BATCH" /><!--- 如果想要进行批量操作可加入这个属性 -->  
+</bean> 
+
+  <!-- ScanMapperFiles -->
+  <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="basePackage" value="com.yogapay.boss.dao" />
+    <!-- <property name="sqlSessionFactory" ref="sqlSessionFactory"/>    -->
+  </bean>
+
+
+
+  <!-- ================================事务相关控制=================================================    -->
+  <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">     
+          <property name="dataSource" ref="dataSource"></property>
+    </bean>     
+  
+  <tx:advice id="txAdvice" transaction-manager="transactionManager">
+    <tx:attributes>
+      <tx:method name="delete*" propagation="REQUIRED" read-only="false"
+                            rollback-for="java.lang.Exception" no-rollback-for="java.lang.RuntimeException"/>
+      <tx:method name="insert*" propagation="REQUIRED" read-only="false" 
+                            rollback-for="java.lang.Exception" />
+      <tx:method name="update*" propagation="REQUIRED" read-only="false" 
+                            rollback-for="java.lang.Exception" />
+                            
+      <tx:method name="withTransaction*" propagation="REQUIRED" read-only="false"   isolation="SERIALIZABLE"
+                           rollback-for="java.lang.Exception" no-rollback-for="java.lang.RuntimeException"/>
+      
+      <tx:method name="find*" propagation="SUPPORTS"/>
+      <tx:method name="get*" propagation="SUPPORTS"/>
+      <tx:method name="select*" propagation="SUPPORTS"/>
+    </tx:attributes>
+  </tx:advice>
+  
+  <aop:config>    
+    <aop:pointcut id="pc" expression="execution(public * com.yogapay.boss.service.*.*(..))" /> <!--把事务控制在Service层-->
+    <aop:advisor pointcut-ref="pc" advice-ref="txAdvice" />
+  </aop:config>
+  
+  
+  <!-- 以下为自定义Bean-->
+ <!--  <bean id="empDao" class="com.lixing.scm.test.dao.impl.EmpDaoImpl"
+    autowire="byName" />  
+  <bean id="empService" class="com.lixing.scm.test.service.impl.EmpServiceImpl"    autowire="byName"/>
+
+     -->
+    
+   	<beans profile="development">
+		<bean id="config" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="locations">
+				<array>
+					<value>classpath:config/config.properties</value>
+				</array>
+			</property>
+		</bean>
+	</beans>
+	<beans profile="default">
+		<bean id="config" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="locations">
+				<array>
+					<value>classpath:config/config.properties</value>
+					<value>file:config_pro.properties</value>
+				</array>
+			</property>
+		</bean>
+	</beans>
+    
+</beans>

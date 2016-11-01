@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="WarehouseIoRegister">  
+	
+    
+    <insert id="insert"  parameterType="java.util.Map" useGeneratedKeys="true" keyColumn="id">
+    	insert into warehouse_io_register(manager_no,lgc_order_no,create_time,input_or_output,out_sub_or_courier,out_number_no,`signal`) 
+    	values (#{manager_no},#{lgc_order_no},#{create_time},#{input_or_output},#{out_sub_or_courier},#{out_number_no},#{signal})
+    </insert>
+    
+    
+</mapper>

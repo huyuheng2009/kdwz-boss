@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CodMonthCount">  
+
+	<select id="list" resultType="java.util.HashMap">  
+      select c.*,u.cod_sname,u.courier_no,u.settle_type,u.settle_card_no,u.settle_bank,c1.real_name
+   from cod_month_count c left join cod_settle_user u on c.cod_no=u.cod_no left join courier c1 on u.courier_no=c1.courier_no
+        <where>
+             1=1
+        <if test="settleDate!=null and settleDate!=''"> and c.settle_date=#{settleDate,jdbcType=VARCHAR}</if>
+        <if test="codNo!=null and codNo!=''"> and c.cod_no=#{codNo,jdbcType=VARCHAR}</if>
+          <!-- <if test="courierNo!=null and courierNo!=''"> and u.courier_no=#{courierNo,jdbcType=VARCHAR}</if> -->
+       <if test="courierNo!=null and courierNo!=''"> and c1.real_name like concat('%',#{courierNo},'%')  </if>
+		<if test="createTimeBegin != null and createTimeBegin !=''"> and c.create_time&gt;=#{createTimeBegin}</if>
+         <if test="createTimeEnd != null and createTimeEnd !=''"> and c.create_time&lt; #{createTimeEnd}</if>
+         <if test="substationNo != null and substationNo !=''"> and (u.substation_no in (${substationNo}) or ISNULL(u.substation_no) or LENGTH(u.substation_no)&lt;1)</if>  
+		</where>
+		 <if test="orderBy != null and orderBy ==1"> order by c.cod_no desc</if> 	
+		 <if test="orderBy != null and orderBy ==2"> order by c.cod_no asc</if> 	 
+		 <if test="orderBy != null and orderBy ==3"> order by c.cod_price desc</if> 
+		 <if test="orderBy != null and orderBy ==4"> order by c.cod_price asc</if>
+		 <if test="orderBy != null and orderBy ==5"> order by c.return_price desc</if> 
+		 <if test="orderBy != null and orderBy ==6"> order by c.return_price asc</if> 	 		
+		 <if test="orderBy == null or orderBy == ''"> order by c.id desc</if> 	
+    </select>
+    
+    
+    <insert id="insert" parameterType="CodMonthCount"  useGeneratedKeys="true" keyColumn="id">
+    	insert into cod_month_count(cod_no,settle_date,cod_price,return_price,settled,printed,create_time,discount) values (
+    		             #{codNo},#{settleDate},#{codPrice},#{returnPrice},#{settled},#{printed},#{createTime},#{discount})
+    </insert>
+    
+    
+     <insert id="insertBatch" parameterType="java.util.List">  
+    insert into cod_month_count(cod_no,settle_date,cod_price,return_price,settled,printed,create_time,discount) values
+      <foreach collection="list" item="item" index="index" separator="," >  
+       (#{item.codNo},#{item.settleDate},#{item.codPrice},#{item.returnPrice},#{item.settled},#{item.printed},#{item.createTime},#{item.discount})
+      </foreach>  
+    </insert>  
+    
+    <update id="settleUpdate"  parameterType="Integer">
+    	update cod_month_count set settled='Y',settle_time=now()
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+     <update id="printUpdate"  parameterType="Integer">
+    	update cod_month_count set printed='Y'
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from cod_month_count where id=#{id}
+    </delete>
+    
+    <delete id="delByMonth">
+    	delete from cod_month_count where settle_date=#{settleDate}
+    </delete>
+    
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="BatchOrder">
+   
+    <select id="queryone" parameterType="int" resultType="com.yogapay.boss.domain.BatchOrderAddr">
+        SELECT * FROM orderBatchAddr WHERE id=#{id}
+    </select>  
+    <select id="queryImportone" parameterType="int" resultType="com.yogapay.boss.domain.BatchOrderAddr">
+        SELECT * FROM orderbatchimport WHERE id=#{id}
+    </select> 
+    <select id="queryAddr" parameterType="map" resultType="com.yogapay.boss.domain.BatchOrderAddr">
+        select * FROM orderBatchAddr  WHERE userName=#{userName}
+		<if test="ids not in {null,''}"> and id in (${ids})</if>
+		<if test="commonName not in {null,''}"> and (revName like concat('%',#{commonName},'%') or revPhone like concat('%',#{commonName},'%') or revArea like concat('%',#{commonName},'%') or revAddr like concat('%',#{commonName},'%')) </if>
+		order by id
+    </select>  
+	<select id="queryAddrImport" parameterType="map" resultType="com.yogapay.boss.domain.BatchOrderAddr">
+        select * FROM orderbatchimport  WHERE userName=#{userName}
+		<if test="ids not in {null,''}"> and id in (${ids})</if>
+		<if test="commonName not in {null,''}"> and (revName like concat('%',#{commonName},'%') or revPhone like concat('%',#{commonName},'%') or revArea like concat('%',#{commonName},'%') or revAddr like concat('%',#{commonName},'%')) </if>
+		order by id
+    </select>
+	<select id="queryExitsByNum" parameterType="map" resultType="com.yogapay.boss.domain.BatchOrderAddr">
+        select * FROM orderBatchAddr WHERE id !=#{id} and lgcOrderNo=#{lgcOrderNo} and userName=#{userName}		
+    </select> 
+	<insert id="addOrderAddr" parameterType="com.yogapay.boss.domain.BatchOrderAddr">
+		insert into orderBatchAddr(revName,revAddr,revPhone,revArea,itemName,itemStatus,freightType,payType,goodValuation,orderNote,userName,itemWeight,lgcOrderNo,freight)
+		values(#{revName},#{revAddr},#{revPhone},#{revArea},#{itemName},#{itemStatus},#{freightType},#{payType},#{goodValuation},#{orderNote},#{userName},#{itemWeight},#{lgcOrderNo},#{freight})
+	</insert>
+	<insert id="addOrderImportAddr" parameterType="com.yogapay.boss.domain.BatchOrderAddr">
+		insert into orderbatchimport(revName,revAddr,revPhone,revArea,itemName,itemStatus,freightType,payType,goodValuation,orderNote,userName,itemWeight,lgcOrderNo,freight,sendName,sendArea,sendAddr,sendPhone,sendTime,sendCourier,sendSubstation,revCourier,revSubstation)
+		values(#{revName},#{revAddr},#{revPhone},#{revArea},#{itemName},#{itemStatus},#{freightType},#{payType},#{goodValuation},#{orderNote},#{userName},#{itemWeight},#{lgcOrderNo},#{freight},#{sendName},#{sendArea},#{sendAddr},#{sendPhone},#{sendTime},#{sendCourier},#{sendSubstation},#{revCourier},#{revSubstation})
+	</insert>
+	<insert id="addOrderMuchAddr" parameterType="map">
+		insert into orderBatchAddr(revName,revAddr,revPhone,revArea,userName) values		
+		<foreach item="t" collection="list" separator=",">(#{t.name},#{t.addr},#{t.phone},#{t.area},#{userName})</foreach>
+	</insert>
+	<insert id="addOrderMuchAddrImport" parameterType="map">
+		insert into orderBatchAddr(revName,revAddr,revArea,revPhone,userName,itemStatus,freightType,payType,goodValuation,orderNote,itemWeight,lgcOrderNo,freight) values		
+		<foreach item="t" collection="list" separator=",">(#{t.revName},#{t.revAddr},#{t.revArea},#{t.revPhone},#{userName},#{t.itemStatus},#{t.freightType},#{t.payType},#{t.goodValuation},#{t.orderNote},#{t.itemWeight},#{t.lgcOrderNo},#{t.freight})</foreach>
+	</insert>
+	<insert id="addOrderImport" parameterType="map">
+		insert into orderbatchimport(revName,revAddr,revArea,revPhone,userName,itemStatus,freightType,payType,goodValuation,orderNote,itemWeight,lgcOrderNo,freight,sendName,sendArea,sendAddr,sendPhone,sendTime,sendCourier,sendSubstation,revCourier,revSubstation) values		
+		<foreach item="t" collection="list" separator=",">(#{t.revName},#{t.revAddr},#{t.revArea},#{t.revPhone},#{userName},#{t.itemStatus},#{t.freightType},#{t.payType},#{t.goodValuation},#{t.orderNote},#{t.itemWeight},#{t.lgcOrderNo},#{t.freight},#{t.sendName},#{t.sendArea},#{t.sendAddr},#{t.sendPhone},#{t.sendTime},#{t.sendCourier},#{t.sendSubstation},#{t.revCourier},#{t.revSubstation})</foreach>
+	</insert>
+	<update id="updateOrderAddr" parameterType="com.yogapay.boss.domain.BatchOrderAddr">
+		update orderBatchAddr set revName=#{revName},revAddr=#{revAddr},revPhone=#{revPhone},revArea=#{revArea},itemName=#{itemName},itemStatus=#{itemStatus},itemWeight=#{itemWeight}
+		,freightType=#{freightType},payType=#{payType},goodValuation=#{goodValuation},orderNote=#{orderNote},lgcOrderNo=#{lgcOrderNo},freight=#{freight} where id = #{id}
+	</update>
+	<update id="updateOrderAddrImport" parameterType="com.yogapay.boss.domain.BatchOrderAddr">
+		update orderbatchimport set revName=#{revName},revAddr=#{revAddr},revPhone=#{revPhone},revArea=#{revArea},itemName=#{itemName},itemStatus=#{itemStatus},itemWeight=#{itemWeight}
+		,freightType=#{freightType},payType=#{payType},goodValuation=#{goodValuation},orderNote=#{orderNote},lgcOrderNo=#{lgcOrderNo},freight=#{freight},sendName=#{sendName},sendArea=#{sendArea}
+		,sendAddr=#{sendAddr},sendPhone=#{sendPhone},sendTime=#{sendTime},sendCourier=#{sendCourier},sendSubstation=#{sendSubstation},revCourier=#{revCourier},revSubstation=#{revSubstation} where id = #{id}
+	</update>
+	<delete id="del" parameterType="map">
+		delete from orderBatchAddr where userName=#{userName}
+	</delete>
+	
+	<delete id="delImport" parameterType="map">
+		delete from orderbatchimport where userName=#{userName}
+	</delete>
+	
+	<delete id="delAll">
+		delete from orderBatchAddr 
+	</delete>
+	
+	<delete id="delOrderAddrById" parameterType="map">
+		delete from orderBatchAddr where id in (${ids})		
+	</delete>
+	
+	<delete id="delOrderAddrImportById" parameterType="map">
+		delete from orderbatchimport where id in (${ids})		
+	</delete>
+	
+</mapper>

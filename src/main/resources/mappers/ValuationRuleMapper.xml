@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ValuationRule">  
+	
+	<select id="list" resultType="java.util.HashMap">  
+        select * from valuation_rule
+        <where>
+			1=1
+		<if test="name!=null and name!=''">and name like  CONCAT(CONCAT('%', #{name}),'%')</if>
+		</where>
+		order by id desc
+    </select>
+    
+    <select id="getById" resultType="java.util.HashMap" parameterType="java.lang.Integer">  
+        select * from valuation_rule
+        <where>
+			id= #{id}
+		</where>
+    </select>
+    
+    <insert id="insert" parameterType="ValuationRule"  useGeneratedKeys="true" keyColumn="id">
+    	insert into valuation_rule(lgc_no,name,rate_type,rate,latter,top,minv,maxv,note,status) values (
+    		#{lgcNo},#{name},#{rateType},#{rate},#{latter},#{top},#{minv},#{maxv},#{note},#{status})
+    </insert>
+    
+    <update id="update" parameterType="ValuationRule"  useGeneratedKeys="true" keyColumn="id">
+    	update valuation_rule set name=#{name},minv=#{minv},maxv=#{maxv},rate=#{rate},note=#{note}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+    <delete id="delById" parameterType="Integer">
+    	delete from valuation_rule where id=#{id}
+    </delete>
+    
+    
+    <update id="status" parameterType="ValuationRule" >
+    	update valuation_rule set status=#{status}
+    	<where>
+    		id=#{id}
+    	</where>
+    </update>
+    
+       <update id="closeAll">
+    	update valuation_rule set status=0
+       </update>
+    
+    
+</mapper>
